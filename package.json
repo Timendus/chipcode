@@ -1,0 +1,31 @@
+{
+  "name": "chipcode",
+  "version": "0.1.0",
+  "description": "A collection of tools to write CHIP-8 code",
+  "files": [
+    "/octopus.js"
+  ],
+  "bin": {
+    "octopus": "./octopus.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Timendus/chipcode"
+  },
+  "keywords": [
+    "octo",
+    "chip-8",
+    "chip8",
+    "assembler",
+    "assembly",
+    "chipcode",
+    "preprocessor",
+    "macro"
+  ],
+  "author": "Timendus",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/Timendus/chipcode/issues"
+  },
+  "homepage": "https://github.com/Timendus/chipcode"
+}
