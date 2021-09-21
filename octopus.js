@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 
 /**
- * This program does pre-processing on text-based input files. It allows you to
- * include other files (using the #include <filename> syntax) and make code
- * inclusion decisions (using the #if <option> / #else / #end syntax). It is
- * intended for use with Octo-flavoured CHIP-8 assembly code, but it can of
- * course be used with any text file.
+ * This tool does pre-processing on text-based input files. It is intended for
+ * use with Octo-flavoured CHIP-8 assembly code, but it can of course be used
+ * with any text file.
+ *
+ * Features:
+ *    * Include other files (`#include <filename>`)
+ *    * Make code inclusion decisions (`#if <option>` / `#else` / `#end`)
+ *    * Mark blocks as code or data, and get them re-ordered (`#code` / `#data`)
  *
  * Usage:
  *     ./octopus.js <input file> <ouput file> <option 1> <option 2> ...
