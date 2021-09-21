@@ -6,7 +6,8 @@
     "/octopus.js"
   ],
   "bin": {
-    "octopus": "./octopus.js"
+    "octopus": "./octopus.js",
+    "chc": "./compiler/chc.js"
   },
   "repository": {
     "type": "git",
@@ -20,7 +21,8 @@
     "assembly",
     "chipcode",
     "preprocessor",
-    "macro"
+    "macro",
+    "compiler"
   ],
   "author": "Timendus",
   "license": "GPLv3",
