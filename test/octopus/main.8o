@@ -1,3 +1,18 @@
+:const TRUE 1  # Don't trip over comments!
+:const FALSE 0 # Don't trip over comments!
+
+:if SCHIP # Don't trip over comments!
+  :const USE_SCROLL TRUE
+  :const AUTO-INCREMENT 0
+:else # Don't trip over comments!
+  :const USE_SCROLL FALSE
+  :const AUTO-INCREMENT 1
+:end # Don't trip over comments!
+
+:if SCHIP
+  :dump-options # Don't trip over comments!
+:end
+
 : main
   i := pointer
   load v2
@@ -6,11 +21,15 @@
   # The value of i now depends on the interpreter running the binary. On Super
   # CHIP it still points to `pointer`, whereas in most other interpreters it
   # will point to `pointer` plus three. Let's fix that with a conditional:
-  #if SCHIP
+  :unless AUTO-INCREMENT
     vF := 3
     i += vF
-  #end
+  :end
   save v2
+
+  :if SCHIP
+    # Do something here
+  :end
 
   # ...
 
@@ -20,22 +39,22 @@
 # that way. Using Octopus, we can mark a section as data, and it will
 # automatically be moved down:
 
-#data
+:segment data
 : table
   0x00 0x01
   0x02 0x03
-#code
+:segment code
 
 # If your project grows, you don't want to keep everything in a single file
 # anymore. Octopus allows you to recursively include files:
 
-#include "included.8o"
+:include "included.8o"
 
 # Maybe, depending on some variable, you want to load a different version of a
 # file. That's possible too:
 
-#if SCHIP
-  #include "included-schip.8o"
-#else
-  #include "included-vip.8o"
-#end
+:if SCHIP
+  :include "included-schip.8o" # Don't trip over comments!
+:else
+  :include "included-vip.8o"
+:end
