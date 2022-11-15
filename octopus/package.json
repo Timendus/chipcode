@@ -1,0 +1,27 @@
+{
+  "name": "@timendus/octopus",
+  "version": "0.2.0",
+  "description": "Proprocessing for Octo-flavoured CHIP-8 source files (and other text files)",
+  "bin": {
+    "octopus": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Timendus/chipcode/"
+  },
+  "keywords": [
+    "octo",
+    "chip-8",
+    "chip8",
+    "assembler",
+    "assembly",
+    "preprocessor",
+    "macro"
+  ],
+  "author": "Timendus",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/Timendus/chipcode/issues"
+  },
+  "homepage": "https://github.com/Timendus/chipcode/octopus"
+}
