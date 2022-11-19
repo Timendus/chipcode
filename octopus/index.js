@@ -9,10 +9,10 @@
  *    * Include other files (`:include <filename>`)
  *    * Make code inclusion decisions based on options (`:if <option>` / `:unless <option>` / `:else` / `:end`)
  *    * Set and reset options (`:const SOME_OPTION 1` and `:const SOME_OPTION 0`)
- *    * Mark blocks as code or data, and get them re-ordered (`:code` / `:data`)
+ *    * Mark blocks as code or data, and get them re-ordered (`:segment code` / `:segment data`)
  *
  * Usage:
- *     ./octopus.js <input file> <ouput file> <option 1> <option 2> ...
+ *     npx octopus <input file> <ouput file> <option 1> <option 2> ...
  */
 
 const fs      = require('fs');
@@ -79,7 +79,7 @@ function conditionals(line, outputting, lineNr) {
   // Values 0 and "false" are "disable option"
   // Other values are "enable option"
   if ( (matches = match(line, `:const${whitespace}${capture}${whitespace}${capture}`)) ) {
-    if ( matches[2] == '0' || matches[2].toLowerCase() == 'false' ) {
+    if ( matches[2] == '0' || matches[2].toLowerCase() == '0x0' ) { // TODO: better zero detection
       const index = options.indexOf(matches[1]);
       if ( index > -1 )
         options.splice(index, 1);
