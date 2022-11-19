@@ -1,7 +1,7 @@
 {
   "name": "@chipcode/octopus",
   "version": "0.2.0",
-  "description": "Proprocessing for Octo-flavoured CHIP-8 source files (and other text files)",
+  "description": "Preprocessing for Octo-flavoured CHIP-8 source files (and other text files)",
   "bin": {
     "octopus": "./index.js"
   },

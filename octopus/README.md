@@ -23,13 +23,11 @@ Cosmac VIP and a SUPERCHIP version of your project:
 
 ```json
 {
-  ...
   "scripts": {
     "build": "npm run build-vip && npm run build-schip",
     "build-vip": "octopus ./src/index.8o ./bin/project-vip.8o VIP",
     "build-schip": "octopus ./src/index.8o ./bin/project-schip.8o SCHIP"
   }
-  ...
 }
 ```
 
