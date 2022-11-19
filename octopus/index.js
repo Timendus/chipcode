@@ -102,8 +102,8 @@ function conditionals(line, outputting, lineNr) {
 // Including other source files with :include
 
 function includes(line, mode, filepath) {
-  if ( match(line, ':code') ) mode[0] = 'code';
-  if ( match(line, ':data') ) mode[0] = 'data';
+  if ( match(line, `:segment${whitespace}code`) ) mode[0] = 'code';
+  if ( match(line, `:segment${whitespace}data`) ) mode[0] = 'data';
   
   let matches;
   if ( matches = match(line, `:include${whitespace}["'](.*)["']`) ) {
