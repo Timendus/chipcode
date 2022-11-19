@@ -1,12 +1,9 @@
-:const TRUE 1  # Don't trip over comments!
-:const FALSE 0 # Don't trip over comments!
-
 :if SCHIP # Don't trip over comments!
-  :const USE_SCROLL TRUE
+  :const USE_SCROLL 1   # Don't trip over comments!
   :const AUTO-INCREMENT 0
 :else # Don't trip over comments!
-  :const USE_SCROLL FALSE
-  :const AUTO-INCREMENT 1
+  :const USE_SCROLL 0
+  :const AUTO-INCREMENT 1   # Don't trip over comments!
 :end # Don't trip over comments!
 
 :if SCHIP
