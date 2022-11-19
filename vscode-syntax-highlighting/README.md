@@ -8,7 +8,9 @@ the additional instructions in
 
 ## Installing
 
-The easiest way to install this plugin is to download [the VSIX file](./dist/octopus-syntax-highlighting-0.0.1.vsix) and install it in your IDE:
+The easiest way to install this plugin is to download [the VSIX
+file](https://github.com/Timendus/chipcode/raw/main/vscode-syntax-highlighting/dist/octopus-syntax-highlighting-0.0.1.vsix)
+and install it in your IDE:
 
   * Go to the extensions tab on the left
   * Click on the three dots at the top right of the extensions panel
