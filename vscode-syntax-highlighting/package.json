@@ -1,0 +1,29 @@
+{
+  "name": "octopus-syntax-highlighting",
+  "displayName": "Octopus",
+  "description": "Syntax highlighting for the Octo (*.8o) programming language, used to write CHIP-8 programs. Also supports the additional Octopus instructions.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.73.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "octo",
+      "aliases": ["Octo", "octo", "octopus"],
+      "extensions": [".8o"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "octo",
+      "scopeName": "source.octo",
+      "path": "./syntaxes/octo.tmLanguage"
+    }]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Timendus/chipcode/vscode-syntax-highlighting"
+  }
+}
