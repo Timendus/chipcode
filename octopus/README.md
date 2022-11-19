@@ -84,7 +84,7 @@ Here is a more complicated example, also showing the use of `:else` and
   return
 ```
 
-### Set and reset options in code
+### Set, reset and dump options
 
 As described, options can be either set (true) or unset (false). You can set
 options by providing them to the Octopus invocation on the command line, or in
@@ -103,6 +103,26 @@ from the perspective of Octopus. Any other value will be considered set (true).
   :if USE_SCROLLING
     scroll-down 8
   :end
+```
+
+When you're playing with options, and you run into issues, you can use the
+`:dump-options` command to instruct Octopus to output all those options that are
+set at that point in the program.
+
+```octo
+  :const OPTION_1 1
+  :const OPTION_2 0
+  :dump-options
+
+  :const OPTION_2 1
+  :dump-options
+```
+
+This will output:
+
+```
+Options on line 3: [ 'OPTION_1' ]
+Options on line 6: [ 'OPTION_1', 'OPTION_2' ]
 ```
 
 ### Include other files
