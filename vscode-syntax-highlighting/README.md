@@ -28,6 +28,11 @@ Initial release of this plugin. Expect issues 😉
 Change `:data` and `:code` to `:segment data` and `:segment code`, like they
 should be. Add `:dump-options` to the list.
 
+### 0.0.3
+
+Add support for `:monitor`, `:assert`, `:byte`, `:macro`, `:calc`,
+`:stringmode`, `:pointer`, `:call` and `pitch`
+
 ## Acknowledgements
 
 This package is an adapted subset of [Cody Hoover's

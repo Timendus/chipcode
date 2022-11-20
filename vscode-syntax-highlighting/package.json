@@ -2,7 +2,7 @@
   "name": "octopus-syntax-highlighting",
   "displayName": "Octopus",
   "description": "Syntax highlighting for the Octo (*.8o) programming language, used to write CHIP-8 programs. Also supports the additional Octopus instructions.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.73.0"
   },
