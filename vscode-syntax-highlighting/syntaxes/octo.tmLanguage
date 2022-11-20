@@ -92,25 +92,25 @@
 		</dict>
 		<dict>
 			<key>comment</key>
-			<string>Breakpoint command</string>
+			<string>Debugging commands</string>
 			<key>match</key>
-			<string>(?&lt;=^|\s)(?:\:breakpoint)(?=$|\s)</string>
+			<string>(?&lt;=^|\s)(?:\:breakpoint|\:monitor|\:assert)(?=$|\s)</string>
 			<key>name</key>
 			<string>support.function.octo</string>
 		</dict>
 		<dict>
 			<key>comment</key>
-			<string>Deprecated commands</string>
+			<string>Macro commands</string>
 			<key>match</key>
-			<string>(?&lt;=^|\s)(\:proto)(?=$|\s)</string>
+			<string>(?&lt;=^|\s)(?:\:byte|\:macro|\:calc|\:stringmode|\:pointer)(?=$|\s)</string>
 			<key>name</key>
-			<string>invalid.deprecated.octo</string>
+			<string>support.function.octo</string>
 		</dict>
 		<dict>
 			<key>comment</key>
 			<string>Statement keywords (standard)</string>
 			<key>match</key>
-			<string>(?&lt;=^|\s)(?:clear|bcd|save|load|sprite|hex|random|delay|key|-key|buzzer|native)(?=$|\s)</string>
+			<string>(?&lt;=^|\s)(?:clear|bcd|save|load|sprite|hex|random|delay|key|-key|buzzer|native|\:call)(?=$|\s)</string>
 			<key>name</key>
 			<string>keyword.other.octo</string>
 		</dict>
@@ -126,7 +126,7 @@
 			<key>comment</key>
 			<string>Statement keywords (XO-Chip)</string>
 			<key>match</key>
-			<string>(?&lt;=^|\s)(?:long|plane|audio|scroll-up)(?=$|\s)</string>
+			<string>(?&lt;=^|\s)(?:long|plane|audio|scroll-up|pitch)(?=$|\s)</string>
 			<key>name</key>
 			<string>keyword.other.octo</string>
 		</dict>
