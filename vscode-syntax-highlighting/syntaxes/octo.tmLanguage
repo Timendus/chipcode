@@ -78,7 +78,7 @@
 			<key>comment</key>
 			<string>Octopus preprocessor statements</string>
 			<key>match</key>
-			<string>(?&lt;=^|\s)(?:\:data|\:code|\:include)(?=$|\s)</string>
+			<string>(?&lt;=^|\s)(?:\:segment\s+data|\:segment\s+code|\:include|\:dump-options)(?=$|\s)</string>
 			<key>name</key>
 			<string>storage.type.octo</string>
 		</dict>
