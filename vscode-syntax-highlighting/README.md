@@ -9,7 +9,7 @@ the additional instructions in
 ## Installing
 
 The easiest way to install this plugin is to download [the VSIX
-file](https://github.com/Timendus/chipcode/raw/main/vscode-syntax-highlighting/dist/octopus-syntax-highlighting-0.0.1.vsix)
+file](https://github.com/Timendus/chipcode/raw/main/vscode-syntax-highlighting/dist/octopus-syntax-highlighting.vsix)
 and install it in your IDE:
 
   * Go to the extensions tab on the left
@@ -22,6 +22,11 @@ and install it in your IDE:
 ### 0.0.1
 
 Initial release of this plugin. Expect issues 😉
+
+### 0.0.2
+
+Change `:data` and `:code` to `:segment data` and `:segment code`, like they
+should be. Add `:dump-options` to the list.
 
 ## Acknowledgements
 
