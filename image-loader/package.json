@@ -1,0 +1,34 @@
+{
+  "name": "@chipcode/image-loader",
+  "version": "0.1.0",
+  "description": "Either a stand alone tool or a plugin to Octopus to load image files",
+  "bin": {
+    "image-loader": "./cmd.js"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "jimp": "^0.16.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Timendus/chipcode/"
+  },
+  "keywords": [
+    "octo",
+    "chip-8",
+    "chip8",
+    "assembler",
+    "assembly",
+    "preprocessor",
+    "image",
+    "pictures",
+    "sprites",
+    "conversion"
+  ],
+  "author": "Timendus",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/Timendus/chipcode/issues"
+  },
+  "homepage": "https://github.com/Timendus/chipcode/image-loader"
+}
