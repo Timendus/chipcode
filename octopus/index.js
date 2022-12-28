@@ -131,7 +131,16 @@ function includes(line, mode, filepath) {
 // Including image files directly
 
 function loadImages(line, filepath) {
-  const matches = match(line, `:include${whitespace}["'](.*(${imageLoader.allowedExtensions.join('|')}))["'](${whitespace})?(.*)?`);
+  const extensions = imageLoader ? imageLoader.allowedExtensions : [
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.bmp',
+    '.tiff',
+    '.gif'
+  ];
+
+  const matches = match(line, `:include${whitespace}["'](.*(${extensions.join('|')}))["'](${whitespace})?(.*)?`);
 
   if ( !matches )
     return line;
