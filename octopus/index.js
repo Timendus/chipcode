@@ -27,13 +27,25 @@ if ( !input || !output ) {
   process.exit();
 }
 
+// Can we `include` image files directly?
+let imageLoader = false;
+try {
+  imageLoader = require("@chipcode/image-loader");
+  if ( imageLoader.version != '0.2' )
+    imageLoader = false;
+} catch(e) {}
+
 // Define some regular expressions to make our matchers easier to read
 const capture = '([\\w\\-]+)';
 const whitespace = '\\s+';
 
 // Kick off the Octopussification!
-const result = reorder(octopussify(loadFile(input), path.dirname(input)));
-fs.writeFileSync(output, result);
+try {
+  const result = reorder(octopussify(loadFile(input), path.dirname(input)));
+  fs.writeFileSync(output, result);
+} catch(e) {  
+  console.error('Could not Octopussify:', e);
+}
 
 
 // Main function doing the heavy lifting
@@ -44,6 +56,7 @@ function octopussify(file, filepath) {
   return ":segment code\n" +
     file.split('\n')
         .filter((line, i) => conditionals(line, outputting, i + 1))
+        .map(line => loadImages(line, filepath))
         .map(line => includes(line, mode, filepath))
         .join('\n');
 }
@@ -105,14 +118,33 @@ function includes(line, mode, filepath) {
   if ( match(line, `:segment${whitespace}code`) ) mode[0] = 'code';
   if ( match(line, `:segment${whitespace}data`) ) mode[0] = 'data';
   
-  let matches;
-  if ( matches = match(line, `:include${whitespace}["'](.*)["']`) ) {
-    const fileToInclude = filepath + path.sep + matches[1];
-    return octopussify(loadFile(fileToInclude), path.dirname(fileToInclude)) +
-      (mode[0] == 'code' ? '\n:segment code' : '\n:segment data');
-  } else {
+  let matches = match(line, `:include${whitespace}["'](.*\.8o)["']`);
+
+  if ( !matches )
     return line;
-  }
+    
+  const fileToInclude = filepath + path.sep + matches[1];
+  return octopussify(loadFile(fileToInclude), path.dirname(fileToInclude)) +
+    (mode[0] == 'code' ? '\n:segment code' : '\n:segment data');
+}
+
+// Including image files directly
+
+function loadImages(line, filepath) {
+  const matches = match(line, `:include${whitespace}["'](.*(${imageLoader.allowedExtensions.join('|')}))["'](${whitespace})?(.*)?`);
+
+  if ( !matches )
+    return line;
+
+  const fileToInclude = filepath + path.sep + matches[1];
+  const modifier = matches[4];
+
+  // Check if we have image loading plugin installed in the first place
+  if ( !imageLoader )
+    throw `Attempt to include image "${matches[1]}" failed.\nInstall package '@chipcode/image-loader' to be able to include image files directly`;
+
+  // Import the image
+  return imageLoader.load(fileToInclude, modifier);
 }
 
 // Reordering :code and :data
