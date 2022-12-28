@@ -1,13 +1,14 @@
 {
   "name": "@chipcode/image-loader",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Either a stand alone tool or a plugin to Octopus to load image files",
   "bin": {
     "image-loader": "./cmd.js"
   },
   "main": "index.js",
   "dependencies": {
-    "jimp": "^0.16.2"
+    "jimp": "^0.16.2",
+    "mime-types": "^2.1.35"
   },
   "repository": {
     "type": "git",
