@@ -5,6 +5,7 @@ const imageLoader = require('./index');
 // Nano test framework
 
 require('colors');
+let success = true;
 function describe(msg, func) {
   console.log(`\n${msg}`);
   func((msg, func) => {
@@ -23,8 +24,10 @@ function describe(msg, func) {
     });
     if ( valid )
       console.info(`  ✔ ${msg}`.green);
-    else
+    else {
       console.error(`  ❌ ${msg}`.red);
+      success = false;
+    }
   });
 }
 
@@ -123,3 +126,5 @@ describe('Splitting into sprites', it => {
   });
 
 });
+
+process.exit(success ? 0 : 1);
