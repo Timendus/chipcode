@@ -5,6 +5,9 @@
   "bin": {
     "image-loader": "./cmd.js"
   },
+  "scripts": {
+    "test": "node ./test.js"
+  },
   "main": "index.js",
   "dependencies": {
     "jimp": "^0.16.2",
@@ -31,5 +34,8 @@
   "bugs": {
     "url": "https://github.com/Timendus/chipcode/issues"
   },
-  "homepage": "https://github.com/Timendus/chipcode/image-loader"
+  "homepage": "https://github.com/Timendus/chipcode/image-loader",
+  "devDependencies": {
+    "colors": "^1.4.0"
+  }
 }

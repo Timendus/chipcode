@@ -4,6 +4,7 @@ const imageLoader = require('./index');
 
 // Nano test framework
 
+require('colors');
 function describe(msg, func) {
   console.log(`\n${msg}`);
   func((msg, func) => {
@@ -21,9 +22,9 @@ function describe(msg, func) {
       }
     });
     if ( valid )
-      console.info(`  ✔ ${msg}`);
+      console.info(`  ✔ ${msg}`.green);
     else
-      console.error(`  ❌ ${msg}`);
+      console.error(`  ❌ ${msg}`.red);
   });
 }
 
