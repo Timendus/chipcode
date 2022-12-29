@@ -5,6 +5,9 @@
   "bin": {
     "octopus": "./index.js"
   },
+  "scripts": {
+    "test": "node ./tests/regression-tests.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Timendus/chipcode/"
@@ -23,5 +26,9 @@
   "bugs": {
     "url": "https://github.com/Timendus/chipcode/issues"
   },
-  "homepage": "https://github.com/Timendus/chipcode/octopus"
+  "homepage": "https://github.com/Timendus/chipcode/octopus",
+  "devDependencies": {
+    "colors": "^1.4.0",
+    "diff": "^5.1.0"
+  }
 }

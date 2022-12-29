@@ -1,0 +1,171 @@
+# Christmas greetings from Timendus!
+# A little program that draws Christmas trees using Sierpinski triangles
+# December 2022
+
+:alias pointX1 v4
+:alias pointY1 v5
+:alias pointX2 v6
+:alias pointY2 v7
+:alias pointX3 v8
+:alias pointY3 v9
+
+:macro show X address {
+  v0 := X
+  i := address
+  sprite v0 v1 6
+}
+
+: main
+	# Draw "Merry Christmas"
+	v1 := 26
+	show  0 merry-xmas-1
+	show  8 merry-xmas-2
+	show 16 merry-xmas-3
+	show 24 merry-xmas-4
+	show 32 merry-xmas-5
+	show 40 merry-xmas-6
+	show 48 merry-xmas-7
+	show 56 merry-xmas-8
+
+	# Draw tree stems
+	i := stem
+	v0 := 28
+	v1 := 10
+	sprite v0 v1 15
+	v0 := 10
+	v1 := 6
+	sprite v0 v1 15
+	v0 := 48
+	v1 := 7
+	sprite v0 v1 15
+	
+	# Pick starting points for the chaos games
+	pointX1 := 32
+	pointY1 := 0
+	pointX2 := 14
+	pointY2 := 0
+	pointX3 := 52
+	pointY3 := 0
+	
+	loop
+		#### Tree 1 ####
+
+		# Pick a random vertex of the triangle
+		i := triangle1
+		pick-vertex
+		
+		# Move the current point to the average between it and the chosen vertex
+		v2 := pointX1
+		average
+		pointX1 := v0
+		v0 := v1
+		v2 := pointY1
+		average
+		pointY1 := v0
+		
+		# Draw the new point
+		i := point
+		sprite pointX1 pointY1 1
+		if vF != 0 then sprite pointX1 pointY1 1
+		
+		#### Tree 2 ####
+
+		# Pick a random vertex of the triangle
+		i := triangle2
+		pick-vertex
+		
+		# Move the current point to the average between it and the chosen vertex
+		v2 := pointX2
+		average
+		pointX2 := v0
+		v0 := v1
+		v2 := pointY2
+		average
+		pointY2 := v0
+		
+		# Draw the new point
+		i := point
+		sprite pointX2 pointY2 1
+		if vF != 0 then sprite pointX2 pointY2 1
+		
+		#### Tree 3 ####
+
+		# Pick a random vertex of the triangle
+		i := triangle3
+		pick-vertex
+		
+		# Move the current point to the average between it and the chosen vertex
+		v2 := pointX3
+		average
+		pointX3 := v0
+		v0 := v1
+		v2 := pointY3
+		average
+		pointY3 := v0
+		
+		# Draw the new point
+		i := point
+		sprite pointX3 pointY3 1
+		if vF != 0 then sprite pointX3 pointY3 1
+	again
+	
+# Add a random value of 0, 2 or 4 to i and load v0, v1
+: pick-vertex
+	v2 := 6
+	loop
+		v2 := random 0b00000110
+		if v2 == 6 then
+	again
+	i += v2
+	load v1
+	return
+	
+# Given v0 and v2, return the average in v0
+: average
+	if v0 > v2 begin
+		vF := v0
+		v0 := v2
+		v2 := vF
+	end
+	v2 -= v0
+	v2 >>= v2
+	v0 += v2
+	return
+
+: triangle1
+	32 0
+	24 21
+	40 21
+
+: triangle2
+	14 0
+	7  17
+	21 17
+
+: triangle3
+	52 0
+	45 18
+	59 18
+
+: point
+	0b10000000
+
+: stem
+	0x08 0x08 0x08 0x18 0x98 0x78 0x1B 0x1C 0x1C 0x18 0x18 0x18 0x18 0x3C 0x7E
+
+: merry-xmas-1
+	0xd0 0xa9 0xaa 0x8b 0x8a 0x89
+: merry-xmas-2
+	0x00 0x95 0x59 0xd1 0x11 0xd1
+: merry-xmas-3
+	0x00 0x52 0x92 0x0e 0x02 0x1c
+: merry-xmas-4
+	0x1d 0x21 0x21 0x21 0x21 0x1d
+: merry-xmas-5
+	0x00 0x0a 0xcc 0x28 0x28 0x28
+: merry-xmas-6
+	0x82 0x1a 0xa3 0x92 0x8a 0xb1
+: merry-xmas-7
+	0x00 0x34 0x2a 0x2a 0x22 0xa2
+: merry-xmas-8
+	0x00 0x73 0x94 0x92 0x91 0x76

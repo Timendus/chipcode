@@ -1,0 +1,43 @@
+  :const USE_SCROLL 0
+  :const AUTO-INCREMENT 1   # Don't trip over comments!
+
+
+: main
+  i := pointer
+  load v2
+  # Manipulate v0 - v2 here, or whatever
+
+  # The value of i now depends on the interpreter running the binary. On Super
+  # CHIP it still points to `pointer`, whereas in most other interpreters it
+  # will point to `pointer` plus three. Let's fix that with a conditional:
+  save v2
+
+
+  # ...
+
+# When writing programs for XO-CHIP, you want your data to end up at the end of
+# memory and your code at the beginning. Because only the first 3.5K of memory
+# is executable. But we don't always want our source files to be structured in
+# that way. Using Octopus, we can mark a section as data, and it will
+# automatically be moved down:
+
+
+# If your project grows, you don't want to keep everything in a single file
+# anymore. Octopus allows you to recursively include files:
+
+: included-stuff
+  return
+
+
+# Maybe, depending on some variable, you want to load a different version of a
+# file. That's possible too:
+
+: included-vip-stuff
+  return
+
+: table
+  0x00 0x01
+  0x02 0x03
+
+: some-data-here
+  0 1 2 3 4 5 6
