@@ -118,7 +118,7 @@ function includes(line, mode, filepath) {
   if ( match(line, `:segment${whitespace}code`) ) mode[0] = 'code';
   if ( match(line, `:segment${whitespace}data`) ) mode[0] = 'data';
   
-  let matches = match(line, `:include${whitespace}["'](.*\.8o)["']`);
+  let matches = match(line, `:include${whitespace}["'](.*)["']`);
 
   if ( !matches )
     return line;
