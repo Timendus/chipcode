@@ -9,6 +9,15 @@ re-order your source to put the executable stuff first.
   * [Octopus on NPM](https://www.npmjs.com/package/@chipcode/octopus)
   * [Octopus on Github](./octopus)
 
+## Image loader
+
+Conversion of images into sprite data with labels and bytes, in a format that is
+compatible with Octo. This tool can be used on the command line or as a plugin
+to [Octopus](https://www.npmjs.com/package/@chipcode/octopus).
+
+  * [Image loader on NPM](https://www.npmjs.com/package/@chipcode/image-loader)
+  * [Image loader on Github](./image-loader)
+
 ## Syntax highlighting for VSCode
 
 Syntax highlighting for Visual Studio Code and VSCodium for the

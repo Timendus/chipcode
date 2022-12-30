@@ -134,6 +134,12 @@ you to include another file into the current source file.
   :include "images/bitmaps.8o"
 ```
 
+#### Including image files
+
+If you wish to directly include an image file like a PNG file or a JPEG file as
+one or more sprites, you can do so through the
+[image-loader](https://www.npmjs.com/package/@chipcode/image-loader) plugin.
+
 ### Automatic re-ordering of code
 
 When writing XO-CHIP code, you need to keep the code that executes in the first
