@@ -16,8 +16,9 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [16.x, 18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        dir: ['octopus', 'image-loader']
 
     steps:
     - uses: actions/checkout@v3
@@ -27,9 +28,5 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         cache-dependency-path: '**/package-lock.json'
-    - run: cd octopus
-    - run: npm ci
-    - run: npm test
-    - run: cd ../image-loader
     - run: npm ci
     - run: npm test
