@@ -7,11 +7,10 @@
   "devDependencies": {
     "@chipcode/image-loader": "^0.2.2",
     "@chipcode/octopus": "^0.3.2",
-    "octo-assembler": "^0.1.4"
+    "@chipcode/octo-assembler": "^0.2.0"
   },
   "files": [
-    "/dist/*",
-    "/pictures/*"
+    "/dist/*"
   ],
   "repository": {
     "type": "git",
