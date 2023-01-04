@@ -6,7 +6,7 @@
   },
   "devDependencies": {
     "@chipcode/image-loader": "^0.2.2",
-    "@chipcode/octopus": "^0.3.2",
+    "@chipcode/octopus": "^0.3.4",
     "@chipcode/octo-assembler": "^0.2.0"
   },
   "files": [
