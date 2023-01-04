@@ -41,7 +41,7 @@ const whitespace = '\\s+';
 
 // Kick off the Octopussification!
 try {
-  const result = reorder(octopussify(loadFile(input), path.dirname(input)));
+  const result = reorder(octopussify(loadFile(input, path.dirname(input)), path.dirname(input)));
   fs.writeFileSync(output, result);
 } catch(e) {  
   console.error('Could not Octopussify:', e);
@@ -123,8 +123,9 @@ function includes(line, mode, filepath) {
   if ( !matches )
     return line;
     
-  const fileToInclude = filepath + path.sep + matches[1];
-  return octopussify(loadFile(fileToInclude), path.dirname(fileToInclude)) +
+  const fileToInclude = matches[1];
+  const newFilePath = path.dirname(filepath + path.sep + fileToInclude);
+  return octopussify(loadFile(fileToInclude, filepath), newFilePath) +
     (mode[0] == 'code' ? '\n:segment code' : '\n:segment data');
 }
 
@@ -150,7 +151,7 @@ function loadImages(line, filepath) {
 
   // Check if we have image loading plugin installed in the first place
   if ( !imageLoader )
-    throw `Attempt to include image "${matches[1]}" failed.\nInstall package '@chipcode/image-loader' to be able to include image files directly`;
+  return `# Error: Attempt to include image '${matches[1]}' failed.\n# Install package '@chipcode/image-loader' to be able to include image files directly\n:assert "Can't include image files directly without @chipcode/image-loader" { 0 }`;
 
   // Import the image
   return imageLoader.load(fileToInclude, modifier);
@@ -183,8 +184,19 @@ function selectLines(onlyCode = true) {
 
 // Helpers
 
-function loadFile(filename) {
-  return fs.readFileSync(filename).toString();
+function loadFile(filename, filepath) {
+  // If file is part of the current project, include it
+  const localFile = filepath + path.sep + filename;
+  if ( fs.existsSync(localFile) )
+    return fs.readFileSync(localFile).toString();
+
+  // Otherwise, see if we're including from a dependency
+  try {
+    filename = require.resolve(filename);
+    return fs.readFileSync(filename).toString();
+  } catch(e) {
+    return `# Error: Requested file '${filename}' not found\n:assert "Requested file '${filename}' not found" { 0 }`;
+  }
 }
 
 function match(line, command) {
