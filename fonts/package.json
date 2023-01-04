@@ -5,7 +5,7 @@
         "build": "./build.sh"
     },
     "devDependencies": {
-        "@chipcode/image-loader": "^0.2.1",
+        "@chipcode/image-loader": "^0.2.2",
         "@chipcode/octopus": "^0.3.2",
         "octo-assembler": "^0.1.4"
     },
