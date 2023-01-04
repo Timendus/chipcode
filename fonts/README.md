@@ -53,7 +53,6 @@ characters. The rest of the name refers to the characteristics of the font:
 | 5-pix-narrow |     428
 | 5-pix-wide |     428
 | 6-pix |     499
-| LICENSE |     499
 
 Since you can load multiple fonts if you wish, you can make it as wild as you
 see fit. But as you can see the total binary size mostly depends on the

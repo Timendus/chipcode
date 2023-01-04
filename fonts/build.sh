@@ -13,7 +13,7 @@ cp ./src/font-header.8o ./src/font-library.8o ./dist/
 echo "Building font files..."
 mkdir -p ./dist/fonts
 cp ./fonts/LICENSE ./dist/fonts/
-for FONT in ./src/fonts/*
+for FONT in ./src/fonts/*.8o
 do
   FILE=`basename "$FONT"`
   npx octopus ${FONT} ./dist/fonts/${FILE} >> build.log 2>> build.log
@@ -41,7 +41,7 @@ npx octo ./demos/demo-vip.8o ./demos/demo-vip.ch8 >> build.log 2>> build.log
 echo "Calculating file sizes..."
 
 printf '' > font-sizes.md
-for FILE in ./dist/fonts/*
+for FILE in ./dist/fonts/*.8o
 do
   echo "  * $FILE"
   echo ": main" > temp.8o
