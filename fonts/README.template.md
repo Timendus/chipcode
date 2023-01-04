@@ -4,10 +4,11 @@ This is the long-missing CHIP-8 text rendering library you've been wishing
 existed already so you didn't have to write it! 😄
 
 !["CHIPCODE's font rendering really is the bomb!" -- Joseph
-Weisbecker](./pictures/demo-vip.png)
+Weisbecker](https://raw.githubusercontent.com/Timendus/chipcode/HEAD/fonts/pictures/demo-vip.png)
 
 !["I really should have included text rendering with custom fonts in the CHIP-8
-instruction set from the start!" -- Joseph Weisbecker](./pictures/demo.png)
+instruction set from the start!" -- Joseph
+Weisbecker](https://raw.githubusercontent.com/Timendus/chipcode/HEAD/fonts/pictures/demo.png)
 
 _Not real quotes from Joseph Weisbecker, obviously ;)_
 
@@ -84,27 +85,33 @@ page](https://www.npmjs.com/package/@chipcode/fonts) will suffice).
 
 ### `3-pix`
 
-![3-pix font](./pictures/3-pix.png)
+![3-pix
+font](https://raw.githubusercontent.com/Timendus/chipcode/HEAD/fonts/pictures/3-pix.png)
 
 ### `4-pix-low`
 
-![4-pix-low font](./pictures/4-pix-low.png)
+![4-pix-low
+font](https://raw.githubusercontent.com/Timendus/chipcode/HEAD/fonts/pictures/4-pix-low.png)
 
 ### `4-pix-high`
 
-![4-pix-high font](./pictures/4-pix-high.png)
+![4-pix-high
+font](https://raw.githubusercontent.com/Timendus/chipcode/HEAD/fonts/pictures/4-pix-high.png)
 
 ### `5-pix-narrow`
 
-![5-pix-narrow font](./pictures/5-pix-narrow.png)
+![5-pix-narrow
+font](https://raw.githubusercontent.com/Timendus/chipcode/HEAD/fonts/pictures/5-pix-narrow.png)
 
 ### `5-pix-wide`
 
-![5-pix-wide font](./pictures/5-pix-wide.png)
+![5-pix-wide
+font](https://raw.githubusercontent.com/Timendus/chipcode/HEAD/fonts/pictures/5-pix-wide.png)
 
 ### `6-pix`
 
-![6-pix font](./pictures/6-pix.png)
+![6-pix
+font](https://raw.githubusercontent.com/Timendus/chipcode/HEAD/fonts/pictures/6-pix.png)
 
 ## Example code
 
@@ -302,7 +309,8 @@ Having to hand-code each character gets pretty tedious pretty quickly though.
 The easiest way to build up this data structure is by editing an actual image.
 This is the image format I use for my fonts:
 
-![The image format I use for defining my fonts](./pictures/font.png)
+![The image format I use for defining my
+fonts](https://raw.githubusercontent.com/Timendus/chipcode/HEAD/fonts/pictures/font.png)
 
 The scattered dots in the first and seventh line are the character widths in
 binary. The last empty character represents the space. See the
