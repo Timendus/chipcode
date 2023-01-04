@@ -3,6 +3,9 @@
 This is the long-missing CHIP-8 text rendering library you've been wishing
 existed already so you didn't have to write it! 😄
 
+!["CHIPCODE's font rendering really is the bomb!" -- Joseph
+Weisbecker](./pictures/demo-vip.png)
+
 !["I really should have included text rendering with custom fonts in the CHIP-8
 instruction set from the start!" -- Joseph Weisbecker](./pictures/demo.png)
 
@@ -23,12 +26,12 @@ there are a couple of flavours:
 
 | Library | Binary size |
 |---------|----------------|
-| Super-CHIP with word wrapping |     320
-| Super-CHIP without word wrapping |     180
-| VIP with word wrapping |     320
-| VIP without word wrapping |     176
-| XO-CHIP with word wrapping |     322
-| XO-CHIP without word wrapping |     178
+| SUPERCHIP WRAP |     320
+| SUPERCHIP NOWRAP |     180
+| VIP WRAP |     320
+| VIP NOWRAP |     176
+| XOCHIP WRAP |     322
+| XOCHIP NOWRAP |     178
 
 (See below for which one to choose)
 
@@ -171,14 +174,13 @@ npm install --save-dev @chipcode/octopus @chipcode/fonts
 And then include the necessary files in your project like so:
 
 ```python
-:include "node_modules/@chipcode/fonts/dist/VIP/font-header.8o"
-:include "node_modules/@chipcode/fonts/dist/VIP/font-library.8o"
+:include "node_modules/@chipcode/fonts/dist/font-header.8o"
+:include "node_modules/@chipcode/fonts/dist/font-library.8o"
 :include "node_modules/@chipcode/fonts/dist/fonts/4-pix-low.8o"
 ```
 
-If you look at the [`dist`](./dist) directory, you will see that you can also
-include versions for Super-CHIP and XO-CHIP, either with or without word
-wrapping.
+If you look at the [`dist/fonts`](./dist/fonts) directory, you will see which
+files you can include for the fonts.
 
 Then you can build your project by invoking:
 
@@ -201,41 +203,9 @@ corresponding to which font file you have loaded:
   * `font-5-pix-wide`
   * `font-6-pix`
 
-Or it can be a pointer to your own font definition. Font definitions follow this basic structure:
+Or it can be a pointer to [your own font definition](#modifying-fonts-or-making-your-own).
 
-```python
-: my-font
-  4 # Global character height of this font in pixels
-
-  5 # Character width of this specific character in pixels, including any margins
-  0b01100000  # Bitmap data for character "A"
-  0b10010000
-  0b11110000
-  0b10010000
-
-  4 # Character width of this specific character in pixels, including any margins
-  0b10000000  # Bitmap data for character "B"
-  0b10000000
-  0b11100000
-  0b11100000
-```
-
-The easiest way to build up the character part of this data structure is by
-using the [image-loader](../image-loader) plugin to Octopus. See the
-[`fonts`](./fonts) directory for the image format I use. You can import such
-images like so:
-
-```python
-: my-font
-  4 # Global character height of this font in pixels
-  :include "my-font.png" 8x5
-```
-
-Code example to use this newly created font:
-
-```octo
-  setFont my-font
-```
+Make sure you use `setFont` before you try to draw any text!
 
 ### `drawText <pointer-to-string> minX minY maxX maxY`
 
@@ -268,14 +238,65 @@ The `str` macro tells Octo how to encode the string that follows. `str-end` tell
   str "World!" str-end
 ```
 
-Please be aware that you can only use characters that are actually in the
-[fonts](#available-fonts) shown above.
+Please be aware that you can only use characters that are actually present in
+the [fonts](#available-fonts) shown above.
 
 ### `drawTextWrapped <pointer-to-string> minX minY maxX maxY`
 
-`drawTextWrapped` works exactly the same as `drawText`, except that `drawText` can wrap on any character when it hits `maxX` whereas `drawTextWrapped` will only wrap on word boundaries. Unless the space between `minX` and `maxX` is too small for the word to fit in.
+`drawTextWrapped` is the word-wrapping version of `drawText`. It works exactly
+the same, except that `drawText` can wrap on any character when it hits `maxX`
+whereas `drawTextWrapped` will only wrap on word boundaries. Unless the space
+between `minX` and `maxX` is too small for the word to fit in.
 
 ```python
   # Draw a long string from the top left corner
   drawTextWrapped long-string 0 0 64 32
+```
+
+## Modifying fonts or making your own
+
+It's fairly easy to modify the supplied fonts or to use the font library with
+your own font. You can load any valid font definition with `setFont`:
+
+```octo
+  setFont my-font
+```
+
+Font definitions follow this basic structure:
+
+```python
+: my-font
+  4 # Global character height of this font in pixels
+
+  5 # Character width of this specific character in pixels, including any margins
+  0b01100000  # Bitmap data for character "A"
+  0b10010000
+  0b11110000
+  0b10010000
+
+  4 # Character width of this specific character in pixels, including any margins
+  0b10000000  # Bitmap data for character "B"
+  0b10000000
+  0b11100000
+  0b11100000
+```
+
+Having to hand-code each character gets pretty tedious pretty quickly though.
+The easiest way to build up this data structure is by editing an actual image.
+This is the image format I use for my fonts:
+
+![The image format I use for defining my fonts](./pictures/font.png)
+
+The scattered dots in the first and seventh line are the character widths in
+binary. The last empty character represents the space. See the
+[`fonts`](./fonts) directory for the images for all included fonts, which can
+also be a great starting-point for your own adaptations.
+
+You can import the font image using the [image-loader](../image-loader) plugin
+to Octopus. Like so:
+
+```python
+: my-font
+  4 # Global character height of this font in pixels
+  :include "my-font.png" 8x5 no-labels
 ```
