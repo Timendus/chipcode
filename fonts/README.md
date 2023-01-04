@@ -126,14 +126,15 @@ font](https://raw.githubusercontent.com/Timendus/chipcode/HEAD/fonts/pictures/6-
 
 ## Example code
 
-This program (which uses
-[Octopus](https://github.com/Timendus/chipcode/tree/main/octopus) syntax for
-brevity) generates the screenshot at the top of this README file:
+This program generates the screenshot at the top of this README file:
 
 ```python
+# Tell the library that we're assembling this program for XO-CHIP
+:const XOCHIP 1
+
 # Include the font-header first, it contains the constants and macros needed to
 # define and draw your strings
-:include "font-header.8o"
+:include "@chipcode/fonts/dist/font-header.8o"
 
 : main
   hires
@@ -153,17 +154,24 @@ brevity) generates the screenshot at the top of this README file:
   str "-- Joseph Weisbecker" str-end
 
 # Include the font library anywhere you like
-:include "font-library.8o"
+:include "@chipcode/fonts/dist/font-library.8o"
 
 # Include the font data for the font(s) you want to use at the end if you use
 # XO-CHIP (in the non-executable space). Or anywhere you like otherwise.
-:include "fonts/5-pix-wide.8o"
-:include "fonts/4-pix-low.8o"
+:include "@chipcode/fonts/dist/fonts/5-pix-wide.8o"
+:include "@chipcode/fonts/dist/fonts/4-pix-low.8o"
 ```
 
 ## Installing
 
-To install these fonts, you need to add three parts to your source file:
+Install [Octopus](https://github.com/Timendus/chipcode/tree/main/octopus) and
+this library through NPM:
+
+```bash
+npm install --save-dev @chipcode/octopus @chipcode/fonts
+```
+
+And then include the necessary files in your project:
 
   1. A header file containing the constants and macros needed to define and draw
      your strings. Add this above where you want to use text drawing;
@@ -171,28 +179,9 @@ To install these fonts, you need to add three parts to your source file:
      it can be called / jumped to;
   3. One or more fonts.
 
-See the code example above.
-
-I'm still figuring out a good way to make this even nicer and more painless. For
-now, you can install
-[Octopus](https://github.com/Timendus/chipcode/tree/main/octopus) and the fonts
-through NPM:
-
-```bash
-npm install --save-dev @chipcode/octopus @chipcode/fonts
-```
-
-And then include the necessary files in your project like so:
-
-```python
-:include "node_modules/@chipcode/fonts/dist/font-header.8o"
-:include "node_modules/@chipcode/fonts/dist/font-library.8o"
-:include "node_modules/@chipcode/fonts/dist/fonts/4-pix-low.8o"
-```
-
-If you look at the
+See the code example above. If you look at the
 [`dist/fonts`](https://github.com/Timendus/chipcode/tree/main/fonts/dist/fonts)
-directory, you will see which files you can include for the fonts.
+directory, you will see which files you can include for the different fonts.
 
 Then you can build your project by invoking:
 
@@ -208,11 +197,13 @@ as command line parameters or as constants in your Octo source.
   * `XOCHIP` - build for XO-CHIP
   * `FONTLIB-NOWRAP` - leave out word wrapping functionality
 
-So the below methods identically build a Super-CHIP version of the library:
+The below methods build an identical Super-CHIP version of the library:
 
 ```bash
 npx octopus your-project.8o your-project-built.8o SUPERCHIP
 ```
+
+or
 
 ```python
 # In your Octo source:
