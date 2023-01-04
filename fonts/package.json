@@ -1,12 +1,12 @@
 {
   "name": "@chipcode/fonts",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "scripts": {
     "build": "./build.sh"
   },
   "devDependencies": {
     "@chipcode/image-loader": "^0.2.2",
-    "@chipcode/octopus": "^0.3.4",
+    "@chipcode/octopus": "^0.3.5",
     "@chipcode/octo-assembler": "^0.2.0"
   },
   "files": [
