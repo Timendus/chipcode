@@ -1,6 +1,6 @@
 {
   "name": "@chipcode/octopus",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Preprocessing for Octo-flavoured CHIP-8 source files (and other text files)",
   "bin": {
     "octopus": "./index.js"
@@ -12,6 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/Timendus/chipcode/"
   },
+  "files": [],
   "keywords": [
     "octo",
     "chip-8",
