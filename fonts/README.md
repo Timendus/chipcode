@@ -9,6 +9,8 @@ Weisbecker](./pictures/demo-vip.png)
 !["I really should have included text rendering with custom fonts in the CHIP-8
 instruction set from the start!" -- Joseph Weisbecker](./pictures/demo.png)
 
+_Not real quotes from Joseph Weisbecker, obviously ;)_
+
 Featuring:
   * Six different fonts in different text sizes, ranging from insanely small to
     really quite big
