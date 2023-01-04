@@ -1,0 +1,38 @@
+{
+  "name": "@chipcode/octo-assembler",
+  "version": "0.2.0",
+  "description": "A packaged version of the Octo assembler",
+  "scripts": {
+    "update": "rm -rf ./octo && git clone --depth 1 --branch gh-pages --single-branch https://github.com/JohnEarnest/Octo octo"
+  },
+  "files": [
+    "/octo/octo",
+    "/octo/js/compiler.js",
+    "/octo/js/decompiler.js",
+    "/octo/js/sharing.js",
+    "/octo/js/emulator.js",
+    "/octo/js/shared.js",
+    "/octo/js/input.js",
+    "/octo/standalone.html"
+  ],
+  "bin": {
+    "octo": "./octo/octo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Timendus/octo-assembler"
+  },
+  "keywords": [
+    "octo",
+    "chip-8",
+    "chip8",
+    "assembler",
+    "assembly"
+  ],
+  "author": "John Earnest, packaged for NPM by Timendus",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JohnEarnest/Octo/issues"
+  },
+  "homepage": "https://github.com/JohnEarnest/Octo#command-line-mode"
+}
