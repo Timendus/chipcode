@@ -9,6 +9,7 @@
 :const fontlib-soft-newline 0xFD
 :const fontlib-space 71
 
+:unless FONTLIB-NOWRAP
 
 # Inputs:
 #   * v0 - v1  ->  0xANNN where NNN is pointer to string (or 0xNNNN for XO-CHIP)
@@ -83,6 +84,9 @@
   end
 
   # `index` now points to the previous space, replace with soft-newline
+  :unless SUPERCHIP
+    fontlib-get-text-pointer
+  :end
   v0 := fontlib-soft-newline
   save v0
 
@@ -118,11 +122,15 @@
   # If we encounter an existing soft-newline, revert it back to a space
   if v0 == fontlib-soft-newline begin
     index -= 1
+    :unless SUPERCHIP
+      fontlib-get-text-pointer
+    :end
     v0 := fontlib-space
     save v0
   end
   jump fontlib-unwrap-text-loop
 
+:end # FONTLIB-NOWRAP
 
 
 # Inputs:
@@ -135,11 +143,16 @@
   vF := 1
   v1 += vF
   v0 += vF
+  :unless XOCHIP
     vF := 0xA0
     v0 |= vF
+  :end
   # Store font address in the appropriate places
   i := fontlib-get-font-pointer-smc
   save v1
+  :if XOCHIP
+    0xF0 0x00
+  :end
 : fontlib-set-font-smc
   0x00 0x00
   load v0
@@ -155,8 +168,10 @@
   v1 := v0
   v0 := 0
   v0 -= v1
+  :unless FONTLIB-NOWRAP
     i := fontlib-fontheight-1
     save v0
+  :end
   i := fontlib-fontheight-2
   save v0
 
@@ -211,8 +226,10 @@
   end
   fontlib-get-font-pointer  # i now points to font
   load v0  # Get font width in pixels
+  :if SUPERCHIP
     vF := 1
     i += vF
+  :end
   temp := Xpos
   temp += v0
   if temp > maxX begin
@@ -240,6 +257,9 @@
 
 # Get pointer to current character in `i`
 : fontlib-get-text-pointer
+  :if XOCHIP
+    0xF0 0x00
+  :end
 : fontlib-get-text-pointer-smc
   0x00 0x00
   i += index
@@ -247,6 +267,9 @@
 
 # v0 is requested character
 : fontlib-get-font-pointer
+  :if XOCHIP
+    0xF0 0x00
+  :end
 : fontlib-get-font-pointer-smc
   0x00 0x00
   i += v0

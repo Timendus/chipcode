@@ -8,12 +8,20 @@
 }
 
 :macro setFont label {
+  :if XOCHIP
+    :unpack long label
+  :else
     :unpack 0xA label
+  :end
   fontlib-set-font
 }
 
 :macro drawText label X Y maxX maxY {
+  :if XOCHIP
+    :unpack long label
+  :else
     :unpack 0xA label
+  :end
   v2 := X
   v3 := Y
   v4 := maxX
@@ -21,8 +29,13 @@
   fontlib-draw-text
 }
 
+:unless FONTLIB-NOWRAP
 :macro drawTextWrapped label X Y maxX maxY {
+  :if XOCHIP
+    :unpack long label
+  :else
     :unpack 0xA label
+  :end
   v2 := X
   v3 := Y
   v4 := maxX
@@ -31,3 +44,4 @@
   v3 := Y
   fontlib-draw-text-leave-pointer
 }
+:end
