@@ -1,5 +1,15 @@
 # CHIPCODE — Tools for writing CHIP-8 code
 
+## Octo assembler
+
+Just a very thin wrapper around [John Earnest](https://github.com/JohnEarnest)'s
+excellent [Octo](https://github.com/JohnEarnest/Octo)-flavoured CHIP-8 assembler
+and disassembler. Just because it bugged me not to be able to depend on it
+through NPM.
+
+  * [Octo assembler on NPM](https://www.npmjs.com/package/@chipcode/octo-assembler)
+  * [Octo assembler on Github](./octo-assembler)
+
 ## Octopus
 
 Preprocessing for Octo-flavoured CHIP-8 source files. This command line tool can
