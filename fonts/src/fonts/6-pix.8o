@@ -2,4 +2,4 @@
 
 : font-6-pix
   6
-  :include "../../fonts/6-pix.png" 8x7
+  :include "../../fonts/6-pix.png" 8x7 no-labels

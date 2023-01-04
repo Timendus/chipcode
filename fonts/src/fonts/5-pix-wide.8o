@@ -2,4 +2,4 @@
 
 : font-5-pix-wide
   5
-  :include "../../fonts/5-pix-wide.png" 8x6
+  :include "../../fonts/5-pix-wide.png" 8x6 no-labels
