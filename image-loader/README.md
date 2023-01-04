@@ -1,4 +1,4 @@
-# Chipcode image loader
+# CHIPCODE image loader
 
 This tool can be used on the command line or as a plugin to
 [Octopus](https://www.npmjs.com/package/@chipcode/octopus). It allows you to
