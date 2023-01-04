@@ -43,7 +43,7 @@
   drawTextWrapped quote 14 10 114 64
 
   setFont font-4-pix-low
-  drawTextWrapped signature 40 47 118 64
+  drawText signature 40 47 118 64
 
   loop again
 
@@ -317,7 +317,7 @@
 
 
 # Include the font data for the font(s) you want to use at the end if you use
-# XO-CHIP. Or anywhere you like otherwise.
+# XO-CHIP (in the non-executable space). Or anywhere you like otherwise.
 
 : font-5-pix-wide
   5

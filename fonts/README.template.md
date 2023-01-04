@@ -40,6 +40,24 @@ see fit. But as you can see the total binary size mostly depends on the
 character height of the chosen font and on if your project needs word wrapping
 or not.
 
+## Speed
+
+The second question is usually: how many CPU cycles will this cost me?
+
+Drawing text is not a fast thing to do. Looking up each character in a string,
+finding the right font data for that character and drawing it to the screen
+takes quite a bit of time. If you're running in the tens of cycles per frame you
+will definitely see the text build up character by character.
+
+Word wrapping is also quite slow. And what's worse is that while the library is
+calculating where the text should wrap there will be absolutely no feedback.
+Which may result in looking at a blank screen for a couple of seconds (at low
+cycles per frame).
+
+So either don't use word wrapping and accept that text will take some time to
+build up (which can be a fun effect of its own) or run this library at at least
+a couple hundred cycles per frame. You have been warned 😉
+
 ## Available fonts
 
 All fonts included with this library have been hand-drawn by me. Any resemblance
@@ -97,7 +115,7 @@ screenshot at the top of this README file:
   drawTextWrapped quote 14 10 114 64
 
   setFont font-4-pix-low
-  drawTextWrapped signature 40 47 118 64
+  drawText signature 40 47 118 64
 
   loop again
 
@@ -110,7 +128,7 @@ screenshot at the top of this README file:
 :include "font-library.8o"
 
 # Include the font data for the font(s) you want to use at the end if you use
-# XO-CHIP. Or anywhere you like otherwise.
+# XO-CHIP (in the non-executable space). Or anywhere you like otherwise.
 :include "fonts/5-pix-wide.8o"
 :include "fonts/4-pix-low.8o"
 ```
@@ -227,14 +245,14 @@ If you're not interested in wrapping or overflowing, just set `maxX` to `64` or
 
 Strings are defined like this:
 
-```bash
+```python
 : my-string
   str "Hello CHIP-8!" str-end
 ```
 
 The `str` macro tells Octo how to encode the string that follows. `str-end` tells the font library where the string ends. You can also use `str-newline` to insert new lines:
 
-```bash
+```python
 : my-broken-string
   str "Hello" str-newline
   str "World!" str-end
