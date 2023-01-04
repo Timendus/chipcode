@@ -2,20 +2,7 @@
     "name": "@chipcode/fonts",
     "version": "0.1.0",
     "scripts": {
-        "build": "npm run build-vip && npm run build-superchip && npm run build-xochip && npm run build-all-fonts && npm run build-demo && npm run build-test && npm run build-readme",
-        "build-vip": "export PLATFORM='VIP' DIR='VIP' && npm run build-header && npm run build-library",
-        "build-superchip": "export PLATFORM='SUPERCHIP' DIR='Super-CHIP' && npm run build-header && npm run build-library",
-        "build-xochip": "export PLATFORM='XOCHIP' DIR='XO-CHIP' && npm run build-header && npm run build-library",
-        "build-header": "mkdir -p ./dist/${DIR} && octopus ./src/font-header.8o ./dist/${DIR}/font-header.8o $PLATFORM && octopus ./src/font-header.8o ./dist/${DIR}/font-header-nowrap.8o $PLATFORM FONTLIB-NOWRAP",
-        "build-library": "mkdir -p ./dist/${DIR} && octopus ./src/font-library.8o ./dist/${DIR}/font-library.8o $PLATFORM && octopus ./src/font-library.8o ./dist/${DIR}/font-library-nowrap.8o $PLATFORM FONTLIB-NOWRAP",
-        "build-all-fonts": "for SIZE in 3-pix 4-pix-low 4-pix-high 5-pix-narrow 5-pix-wide 6-pix; do export SIZE=\"$SIZE\" && npm run build-font; done",
-        "build-font": "mkdir -p ./dist/fonts && octopus ./src/fonts/${SIZE}.8o ./dist/fonts/${SIZE}.8o",
-        "build-test": "octopus ./src/index.8o ./dist/test.8o XOCHIP && octo --options octo-config.json dist/test.8o html/test.html",
-        "build-demo": "octopus ./src/demo.8o ./dist/demo.8o XOCHIP && octo --options octo-config.json dist/demo.8o html/demo.html",
-        "calculate-all-sizes": "printf '' > font-sizes.md && printf '' > library-sizes.md && for FILE in ./dist/fonts/* ; do export FILE=\"$FILE\" && npm run calculate-font-size; done && for PLATFORM in Super-CHIP VIP XO-CHIP; do export PLATFORM=\"$PLATFORM\"; npm run calculate-library-size; done",
-        "calculate-library-size": "echo $PLATFORM && echo ': main\n' > temp.8o && cat ./dist/${PLATFORM}/font-header.8o >> temp.8o && cat ./dist/${PLATFORM}/font-library.8o >> temp.8o && octo temp.8o temp.ch8 && printf \"| $PLATFORM with word wrapping |\" >> library-sizes.md && wc -c < \"temp.ch8\" >> library-sizes.md && echo ': main\n' > temp.8o && cat ./dist/${PLATFORM}/font-header-nowrap.8o >> temp.8o && cat ./dist/${PLATFORM}/font-library-nowrap.8o >> temp.8o && octo temp.8o temp.ch8 && printf \"| $PLATFORM without word wrapping |\" >> library-sizes.md && wc -c < \"temp.ch8\" >> library-sizes.md && rm temp.8o temp.ch8",
-        "calculate-font-size": "echo $FILE && echo ': main\n' > temp.8o && cat $FILE >> temp.8o && octo temp.8o temp.ch8 && FONT=`basename $FILE .8o` && printf \"| $FONT |\" >> font-sizes.md && wc -c < \"temp.ch8\" >> font-sizes.md && rm temp.8o temp.ch8",
-        "build-readme": "npm run calculate-all-sizes && sed -e '/<library-sizes-table>/ {' -e 'r library-sizes.md' -e 'd' -e '}' -e '/<font-sizes-table>/ {' -e 'r font-sizes.md' -e 'd' -e '}' README.template.md > ./README.md && rm font-sizes.md library-sizes.md"
+        "build": "./build.sh"
     },
     "devDependencies": {
         "@chipcode/image-loader": "^0.2.1",
@@ -23,14 +10,6 @@
         "octo-assembler": "^0.1.4"
     },
     "files": [
-        "/dist/fonts/*",
-        "/dist/Super-CHIP/*",
-        "/dist/VIP/*",
-        "/dist/XO-CHIP/*",
-        "/fonts/*",
-        "/src/fonts/*",
-        "/src/font-header.8o",
-        "/src/font-library.8o",
-        "/src/demo.8o"
+        "/dist/*"
     ]
 }
