@@ -1,15 +1,40 @@
 {
-    "name": "@chipcode/fonts",
-    "version": "0.1.0",
-    "scripts": {
-        "build": "./build.sh"
-    },
-    "devDependencies": {
-        "@chipcode/image-loader": "^0.2.2",
-        "@chipcode/octopus": "^0.3.2",
-        "octo-assembler": "^0.1.4"
-    },
-    "files": [
-        "/dist/*"
-    ]
+  "name": "@chipcode/fonts",
+  "version": "0.1.1",
+  "scripts": {
+    "build": "./build.sh"
+  },
+  "devDependencies": {
+    "@chipcode/image-loader": "^0.2.2",
+    "@chipcode/octopus": "^0.3.2",
+    "octo-assembler": "^0.1.4"
+  },
+  "files": [
+    "/dist/*",
+    "/pictures/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Timendus/chipcode/"
+  },
+  "keywords": [
+    "octo",
+    "chip-8",
+    "chip8",
+    "assembler",
+    "assembly",
+    "text",
+    "fonts",
+    "font",
+    "rendering",
+    "image",
+    "pictures",
+    "sprites"
+  ],
+  "author": "Timendus",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/Timendus/chipcode/issues"
+  },
+  "homepage": "https://github.com/Timendus/chipcode/fonts",
 }

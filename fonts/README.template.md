@@ -21,18 +21,21 @@ Featuring:
 ## Binary sizes
 
 Since this is CHIP-8, the first question to ask is: how many bytes will this
-cost me? There are two parts to this that take up space: the library, of which
-there are a couple of flavours:
+cost me?
+
+The first thing we need that takes up space is the library, of which there are a
+couple of flavours. Using
+[Octopus](https://github.com/Timendus/chipcode/tree/main/octopus) options you
+can build it for regular CHIP-8 (VIP), for Super-CHIP or for XO-CHIP. Also, you
+can choose to include word wrapping functionality, or leave that out.
 
 | Library | Binary size |
 |---------|----------------|
 <library-sizes-table>
 
-(See below for which one to choose)
-
-And an actual font, of which we also have a couple to choose from. The number of
-pixels in the font name refer to the height of the displayed characters. The
-rest of the name refers to the characteristics of the font:
+Next you need an actual font, of which we also have a couple to choose from. The
+number of pixels in the font name refer to the height of the displayed
+characters. The rest of the name refers to the characteristics of the font:
 
 | Font | Binary size |
 |------|----------------|
@@ -73,7 +76,8 @@ License](http://creativecommons.org/licenses/by-nc/4.0/).
 
 This basically means that you may use them for anything you like, as long as
 your work does not have a commercial purpose, and as long as you give credit (a
-link back to the [project Github](.) or [NPM
+link back to the [project
+Github](https://github.com/Timendus/chipcode/tree/main/fonts) or [NPM
 page](https://www.npmjs.com/package/@chipcode/fonts) will suffice).
 
 ### `3-pix`
@@ -102,8 +106,9 @@ page](https://www.npmjs.com/package/@chipcode/fonts) will suffice).
 
 ## Example code
 
-This program (which uses [Octopus](../octopus) syntax for brevity) generates the
-screenshot at the top of this README file:
+This program (which uses
+[Octopus](https://github.com/Timendus/chipcode/tree/main/octopus) syntax for
+brevity) generates the screenshot at the top of this README file:
 
 ```python
 # Include the font-header first, it contains the constants and macros needed to
@@ -148,14 +153,10 @@ To install these fonts, you need to add three parts to your source file:
 
 See the code example above.
 
-You can manually copy and paste the contents of the pre-built files in
-[`dist`](./dist) into your own Octo source files, or follow the guide below for
-a more elegant solution.
-
-### Installing as a dependency
-
-I'm still figuring out a nice way to make this nice and painless. For now, you
-could install [Octopus](../octopus) and the fonts:
+I'm still figuring out a good way to make this even nicer and more painless. For
+now, you can install
+[Octopus](https://github.com/Timendus/chipcode/tree/main/octopus) and the fonts
+through NPM:
 
 ```bash
 npm install --save-dev @chipcode/octopus @chipcode/fonts
@@ -169,13 +170,36 @@ And then include the necessary files in your project like so:
 :include "node_modules/@chipcode/fonts/dist/fonts/4-pix-low.8o"
 ```
 
-If you look at the [`dist/fonts`](./dist/fonts) directory, you will see which
-files you can include for the fonts.
+If you look at the
+[`dist/fonts`](https://github.com/Timendus/chipcode/tree/main/fonts/dist/fonts)
+directory, you will see which files you can include for the fonts.
 
 Then you can build your project by invoking:
 
 ```bash
 npx octopus your-project.8o your-project-built.8o
+```
+
+The library listens to a couple of Octopus options. You can either provide these
+as command line parameters or as constants in your Octo source.
+
+  * `VIP` - build for original CHIP-8
+  * `SUPERCHIP` - build for Super-CHIP
+  * `XOCHIP` - build for XO-CHIP
+  * `FONTLIB-NOWRAP` - leave out word wrapping functionality
+
+So the below methods identically build a Super-CHIP version of the library:
+
+```bash
+npx octopus your-project.8o your-project-built.8o SUPERCHIP
+```
+
+```python
+# In your Octo source:
+:const SUPERCHIP 1
+# Then:
+:include "font-header.8o"
+# Et cetera...
 ```
 
 ## Programming API
@@ -193,7 +217,8 @@ corresponding to which font file you have loaded:
   * `font-5-pix-wide`
   * `font-6-pix`
 
-Or it can be a pointer to [your own font definition](#modifying-fonts-or-making-your-own).
+Or it can be a pointer to [your own font
+definition](#modifying-fonts-or-making-your-own).
 
 Make sure you use `setFont` before you try to draw any text!
 
@@ -279,11 +304,13 @@ This is the image format I use for my fonts:
 
 The scattered dots in the first and seventh line are the character widths in
 binary. The last empty character represents the space. See the
-[`fonts`](./fonts) directory for the images for all included fonts, which can
-also be a great starting-point for your own adaptations.
+[`fonts`](https://github.com/Timendus/chipcode/tree/main/fonts/fonts) directory
+for the images for all included fonts, which can also be a great starting-point
+for your own adaptations.
 
-You can import the font image using the [image-loader](../image-loader) plugin
-to Octopus. Like so:
+You can import the font image using the
+[image-loader](https://github.com/Timendus/chipcode/tree/main/image-loader)
+plugin to Octopus. Like so:
 
 ```python
 : my-font

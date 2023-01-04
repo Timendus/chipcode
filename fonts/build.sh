@@ -12,6 +12,7 @@ cp ./src/font-header.8o ./src/font-library.8o ./dist/
 
 echo "Building font files..."
 mkdir -p ./dist/fonts
+cp ./fonts/LICENSE ./dist/fonts/
 for FONT in ./src/fonts/*
 do
   FILE=`basename "$FONT"`
