@@ -26,3 +26,11 @@ supports the additional instructions in
 [Octopus](https://www.npmjs.com/package/@chipcode/octopus).
 
   * [Installation instructions](./vscode-syntax-highlighting#readme)
+
+## CHIPCODE Fonts (text rendering)
+
+The long-missing CHIP-8 text rendering library you've been wishing existed
+already so you didn't have to write it! 😄
+
+  * [CHIPCODE fonts on NPM](https://www.npmjs.com/package/@chipcode/fonts)
+  * [CHIPCODE fonts on Github](./fonts)
