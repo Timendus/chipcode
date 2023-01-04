@@ -41,7 +41,7 @@ const whitespace = '\\s+';
 
 // Kick off the Octopussification!
 try {
-  const result = reorder(octopussify(loadFile(input, path.dirname(input)), path.dirname(input)));
+  const result = reorder(octopussify(loadFile(path.basename(input), path.dirname(input)), path.dirname(input)));
   fs.writeFileSync(output, result);
 } catch(e) {  
   console.error('Could not Octopussify:', e);
