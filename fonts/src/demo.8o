@@ -1,0 +1,28 @@
+# Include the font-header first, it contains the constants and macros needed to
+# define and draw your strings
+:include "font-header.8o"
+
+: main
+  hires
+  clear
+
+  setFont font-5-pix-wide
+  drawTextWrapped quote 14 10 114 64
+
+  setFont font-4-pix-low
+  drawTextWrapped signature 40 47 118 64
+
+  loop again
+
+: quote
+  str "I really should have included text rendering with custom fonts in the CHIP-8 instruction set from the start!" str-end
+: signature
+  str "-- Joseph Weisbecker" str-end
+
+# Include the font library anywhere you like
+:include "font-library.8o"
+
+# Include the font data for the font(s) you want to use at the end if you use
+# XO-CHIP. Or anywhere you like otherwise.
+:include "fonts/5-pix-wide.8o"
+:include "fonts/4-pix-low.8o"

@@ -1,0 +1,33 @@
+:const fontlib-str-end 0xFF
+:const fontlib-str-newline 0xFE
+:macro str-end { :byte fontlib-str-end }
+:macro str-newline { :byte fontlib-str-newline }
+
+:stringmode str "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz,./:&'-!? " {
+  :byte VALUE
+}
+
+:macro setFont label {
+    :unpack long label
+  fontlib-set-font
+}
+
+:macro drawText label X Y maxX maxY {
+    :unpack long label
+  v2 := X
+  v3 := Y
+  v4 := maxX
+  v5 := maxY
+  fontlib-draw-text
+}
+
+:macro drawTextWrapped label X Y maxX maxY {
+    :unpack long label
+  v2 := X
+  v3 := Y
+  v4 := maxX
+  v5 := maxY
+  fontlib-wrap-text
+  v3 := Y
+  fontlib-draw-text-leave-pointer
+}

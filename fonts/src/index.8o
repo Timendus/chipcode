@@ -1,0 +1,178 @@
+:include "font-header.8o"
+
+:alias marginX v9
+:alias marginY vA
+:alias wrap vB
+:alias showGrid vC
+:alias selectedtext vD
+:alias selectedFont vE
+
+: main
+  hires
+  marginX := 8
+  marginY := 7
+  wrap := 1
+  showGrid := 0
+  selectedtext := 0
+  selectedFont := 4
+
+  loop
+    plane 3
+    clear
+
+    # Draw the background grid
+    if showGrid == 1 begin
+      plane 2
+      i := grid
+      v0 := 0
+      v1 := 0
+      v2 := 32
+      loop
+        sprite v0 v1 0
+        i += v2
+        v0 += 16
+        if v0 == 128 begin
+          v0 := 0
+          v1 += 16
+        end
+        if v1 != 64 then
+      again
+    end
+
+    # Draw the containing box
+    plane 1
+    v0 := marginX
+    v0 -= 2
+    v1 := marginY
+    v1 -= 2
+    v2 := 65
+    v2 -= marginY
+    v3 := 129
+    v3 -= marginX
+    i := pixel
+    loop
+      sprite v0 v1 1
+      sprite v0 v2 1
+      v0 += 1
+      if v0 <= v3 then
+    again
+    v0 := marginX
+    v0 -= 2
+    loop
+      sprite v0 v1 1
+      sprite v3 v1 1
+      v1 += 1
+      if v1 <= v2 then
+    again
+
+    # Select the right font
+    i := fonts
+    i += selectedFont
+    i += selectedFont
+    load v1
+    fontlib-set-font
+
+    # Load the right string
+    i := strings
+    i += selectedtext
+    i += selectedtext
+    load v1
+    :unless XOCHIP
+      vF := 0xA0
+      v0 |= vF
+    :end
+
+    # Load the right coordinates
+    v2 := marginX
+    v3 := marginY
+    v4 := 127
+    v4 -= marginX
+    v5 := 63
+    v5 -= marginY
+
+    # Draw wrapped or non-wrapped
+    if wrap == 1 begin
+      fontlib-wrap-text
+      v3 := marginY
+      fontlib-draw-text-leave-pointer
+    else
+      fontlib-unwrap-text
+      fontlib-draw-text-leave-pointer
+    end
+
+    # Allow the user to change parameters
+    v0 := key
+    if v0 == 5 then marginY -= 1
+    if v0 == 8 then marginY += 1
+    if v0 == 7 then marginX -= 1
+    if v0 == 9 then marginX += 1
+    if v0 == 6 then selectedtext += 1
+    vF := 3
+    selectedtext &= vF
+    if selectedFont != 0 begin
+      if v0 == 2 then selectedFont -= 1
+    end
+    if selectedFont != 5 begin
+      if v0 == 3 then selectedFont += 1
+    end
+    if v0 == 4 begin
+      vF := 1
+      wrap ^= vF
+    end
+    if v0 == 1 begin
+      vF := 1
+      showGrid ^= vF
+    end
+  again
+
+: strings
+  :pointer test-string-1
+  :pointer test-string-2
+  :pointer test-string-3
+  :pointer test-string-4
+
+: test-string-1
+  str "the quick brown fox jumped over the lazy dog" str-newline
+  str "THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG" str-newline
+  str "0123456789" str-newline
+  str ",./:&'-!?" str-end
+
+: test-string-2
+  str "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec nisi a mi interdum placerat. Vivamus sed"
+  str "tincidunt risus. Fusce egestas et lectus at pretium. Donec dictum blandit libero." str-end
+
+: test-string-3
+  str "CHIP-8 is an interpreted programming language, "
+  str "developed by Joseph Weisbecker made on his 1802 "
+  str "Microprocessor. It was initially used on the "
+  str "COSMAC VIP and Telmac 1800 8-bit microcomputers "
+  str "in the mid-1970's." str-end
+
+: test-string-4
+  str "Hope you like it!" str-newline str-newline
+  str "      -- Timendus" str-end
+
+:include "font-library.8o"
+
+:segment data
+
+: pixel
+  0b10000000
+
+: grid
+  :include "grid.png" 16x16
+
+: fonts
+  :pointer font-3-pix
+  :pointer font-4-pix-low
+  :pointer font-4-pix-high
+  :pointer font-5-pix-narrow
+  :pointer font-5-pix-wide
+  :pointer font-6-pix
+
+:include "fonts/3-pix.8o"
+:include "fonts/4-pix-low.8o"
+:include "fonts/4-pix-high.8o"
+:include "fonts/5-pix-narrow.8o"
+:include "fonts/5-pix-wide.8o"
+:include "fonts/6-pix.8o"
