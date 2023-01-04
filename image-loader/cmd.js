@@ -15,13 +15,7 @@ const usageString = `
 Usage:
   picturething <input file> <modifiers>
 
-Where modifiers can be any of the following:
-  * A sprite resolution
-  * The word 'debug' to see what the tool is doing
-
-Sprite resolution is any of the following:
-  * ${imageLoader.allowedSizes.join('\n  * ')}
-`;
+See README.md for valid modifiers`;
 
 try {
   console.log(imageLoader.load(input, modifiers));

@@ -65,6 +65,13 @@ describe('Modifier parsing', it => {
     assertEqual(imageLoader.parseModifiers('8x4',   16,  8), { width: 8, height: 4 });
   });
 
+  it('understands when (not) to output labels', ({ assertEqual }) => {
+    assertEqual(imageLoader.parseModifiers('', 8, 8), { labels: true });
+    assertEqual(imageLoader.parseModifiers('8x8', 8, 8), { labels: true });
+    assertEqual(imageLoader.parseModifiers('labels', 8, 8), { labels: true });
+    assertEqual(imageLoader.parseModifiers('no-labels', 8, 8), { labels: false });
+  });
+
 });
 
 describe('Splitting into sprites', it => {

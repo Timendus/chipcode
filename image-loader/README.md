@@ -56,11 +56,13 @@ generated, which relate to the X and Y position of the sprite within the image:
 
 So in this example, `clock-2-0` is the top-rightmost 8x8 sprite.
 
+If you don't want the image loader to generate these labels, provide the
+[`no-labels` modifier](#no-labels).
+
 ## Modifiers
 
 Modifiers are keywords that you provide to the image loader in any order, that
-influence how it converts your image. Currently it knows only two types: a
-`debug` flag or the target sprite resolution.
+influence how it converts your image.
 
 ### Sprite resolution
 
@@ -85,6 +87,13 @@ cut the image into sprites of the requested dimensions:
   * `8x14`
   * `8x15`
   * `16x16`
+
+### No labels
+
+Provide the modifier `no-labels` to suppress the sprite labels in the output.
+For example if you don't need the labels because you are dynamically calculating
+the offsets into the image, they just clutter up your code. And while they don't
+do any harm, they do unnecessarily make your source files longer.
 
 ### Debug
 

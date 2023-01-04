@@ -84,7 +84,7 @@ function load(input, modifiers, debug=false) {
     sprites.forEach(sprite => console.info(render(sprite.data, modifiers.width)));
   }
 
-  return sprites.map(sprite => `${sprite.label}\n${formatForOcto(sprite.data)}`)
+  return sprites.map(sprite => `${modifiers.labels ? `${sprite.label}\n` : ''}${formatForOcto(sprite.data)}`)
                 .join('');;
 }
 
@@ -123,6 +123,7 @@ function parseModifiers(modifiers, imageWidth, imageHeight) {
   return {
     width,
     height,
+    labels: !modifiers || !modifiers.match(/no\-labels/i),
     debug: modifiers && modifiers.match(/debug/i)
   };
 }
