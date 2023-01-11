@@ -134,13 +134,13 @@ function splitIntoSprites(image, inputWidth, inputHeight, spriteWidth, spriteHei
   for ( let y = 0; y < inputHeight; y += spriteHeight ) {
     for ( let x = 0; x < inputWidth / 8; x += spriteWidth / 8 ) {
       const index = y * inputWidth / 8 + x;
-        const sprite = [];
-        for ( let rows = 0; rows < spriteHeight; rows++ ) {
-          for ( let cols = 0; cols < spriteWidth / 8; cols++ ) {
-            const value = image[index + rows * inputWidth / 8 + cols];
-            sprite.push(value == undefined ? 0 : value);
-          }
+      const sprite = [];
+      for ( let rows = 0; rows < spriteHeight; rows++ ) {
+        for ( let cols = 0; cols < spriteWidth / 8; cols++ ) {
+          const value = image[index + rows * inputWidth / 8 + cols];
+          sprite.push(value == undefined ? 0 : value);
         }
+      }
       sprites.push({
         label: `: ${name}-${x}-${y / spriteHeight}`,
         data: sprite
