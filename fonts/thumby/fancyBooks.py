@@ -16,13 +16,18 @@ import thumby
 thumby.display.setFPS(0)
 
 fonts = {
-  "BigBoy": '/Games/FancyBooks/5-pix-wide.bin'
+  "threesquare": '/Games/FancyBooks/3-pix.bin',
+  "Splendid": '/Games/FancyBooks/4-pix-low.bin',
+  "Black sheep": '/Games/FancyBooks/4-pix-high.bin',
+  "Limited narrow": '/Games/FancyBooks/5-pix-narrow.bin',
+  "BigBoy": '/Games/FancyBooks/5-pix-wide.bin',
+  "Truthful": '/Games/FancyBooks/6-pix.bin'
 }
 
 books = {
-  "fox": "the quick brown fox jumped over the lazy dog\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG\n0123456789\n,./:&'-!?",
+  "fox": "the quick brown fox jumped over the lazy dog\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG\n0123456789\n!\"#$%&'()*+,-./:; <=>?@[\]^_`{|}~",
   "lorem": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec nisi a mi interdum placerat. Vivamus sed tincidunt risus. Fusce egestas et lectus at pretium. Donec dictum blandit libero.",
-  "wikipedia": "CHIP-8 is an interpreted programming language, developed by Joseph Weisbecker made on his 1802 Microprocessor. It was initially used on the COSMAC VIP and Telmac 1800 8-bit microcomputers in the mid-1970's."
+  "wikipedia": "The Thumby is a small keychain sized programmable game console produced by TinyCircuits of Akron, Ohio[3][4] and funded by a Kickstarter campaign.[5][6][7] The console measures 1.2 by 0.7 by 0.3 inches (30.5 mm * 17.8 mm * 7.6 mm)."
 }
 
 offsets = {

@@ -1,7 +1,6 @@
 # Note: characters can't be larger than 8 x 8 pixels
 
 # TODO:
-#  * Check to see if xMax and yMax are correct now
 #  * Stability issues (on wide words..?)
 
 from thumbyGraphics import display
