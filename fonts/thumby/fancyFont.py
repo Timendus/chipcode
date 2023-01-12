@@ -55,19 +55,19 @@ class FancyFont:
   # Draw a string within the square defined by (xPos, yPos) and (xMax, yMax), in
   # the given color with word wrapping
   @micropython.native
-  def drawTextWrapped(self, string:ptr8, xPos:int, yPos:int, color:int = 1, xMax:int = display.width, yMax:int = display.height):
-    wrappedString = self._wrapText(string, xPos, yPos, xMax, yMax)
-    self._drawText(wrappedString, xPos, yPos, color, xMax, yMax)
+  def drawTextWrapped(self, string, xPos:int, yPos:int, color:int = 1, xMax:int = display.width, yMax:int = display.height):
+    wrappedString = self._wrapText(string, len(string), xPos, yPos, xMax, yMax)
+    return self._drawText(wrappedString, len(wrappedString), xPos, yPos, color, xMax, yMax)
 
   # Draw a string within the square defined by (xPos, yPos) and (xMax, yMax), in
   # the given color. This wrapper function is here because viper functions can't
   # have a variable number of arguments
   @micropython.native
-  def drawText(self, string:ptr8, xPos:int, yPos:int, color:int = 1, xMax:int = display.width, yMax:int = display.height):
-    self._drawText(string, xPos, yPos, color, xMax, yMax)
+  def drawText(self, string, xPos:int, yPos:int, color:int = 1, xMax:int = display.width, yMax:int = display.height):
+    return self._drawText(string, len(string), xPos, yPos, color, xMax, yMax)
 
   @micropython.viper
-  def _drawText(self, string:ptr8, xStart:int, yPos:int, color:int, xMax:int, yMax:int):
+  def _drawText(self, string:ptr8, strLen:int, xStart:int, yPos:int, color:int, xMax:int, yMax:int):
     # Define variables up front so we have a stable memory profile in the loop
     stringIndex:int     = 0
     characterOffset:int = 0
@@ -78,7 +78,10 @@ class FancyFont:
     fontByte:int        = 0
     blitWidth:int       = 0
     heightMask:int      = 0
+    newX:int            = 0
     xPos:int            = xStart
+    bottom:int          = xPos
+    right:int           = yPos
 
     # Look up and cast all variables up front so we're faster in the loop
     displayBuffer:ptr8       = ptr8(display.display.buffer)
@@ -94,7 +97,7 @@ class FancyFont:
     if characterWidth == VARIABLE_WIDTH:
       characterIndices  = self.characterIndices
 
-    while string[stringIndex] != 0:
+    while stringIndex < strLen:
 
       # Fetch character from string
       character = string[stringIndex]
@@ -140,14 +143,20 @@ class FancyFont:
 
       # Can we draw the full character height?
       heightMask = 0xFF
+      bottom = yPos + characterHeight - 1
       if yPos + characterHeight > yMax:
         heightMask >>= (8 - (yMax - yPos))   # Nope; just the top part
+        bottom = yMax - 1
 
       # Can we draw the full character width?
-      if xPos + currentWidth > xMax:
+      newX:int = xPos + currentWidth
+      if newX >= xMax:
         blitWidth = xMax - xPos     # Nope; just the left part
+        right = xMax - 1
       else:
         blitWidth = currentWidth
+        if newX > right:
+          right = newX - 1
 
       # Blit the character bitmap to the display buffer in the right place
       vertOffset = yPos & 7 # y % 8
@@ -165,8 +174,11 @@ class FancyFont:
 
       xPos += currentWidth + characterMarginWidth
 
+    # Return the actual dimensions of the rendered text
+    return bytearray([right, bottom])
+
   @micropython.viper
-  def _wrapText(self, string, xStart:int, yPos:int, xMax:int, yMax:int):
+  def _wrapText(self, string, strLen:int, xStart:int, yPos:int, xMax:int, yMax:int):
     # Define variables up front so we have a stable memory profile in the loop
     stringIndex:int     = 0
     character:int       = 0
@@ -190,7 +202,7 @@ class FancyFont:
     outputPtr:ptr8 = ptr8(output)
     stringPtr:ptr8 = ptr8(string)
 
-    while stringPtr[stringIndex] != 0:
+    while stringIndex < strLen:
 
       # Fetch character from string
       character = stringPtr[stringIndex]
@@ -235,7 +247,7 @@ class FancyFont:
         while stringIndex > 0 and stringPtr[stringIndex] != SPACE:
           stringIndex -= 1
         # Did we go all the way back to the previous break, or can we add a NEWLINE?
-        if stringIndex == 0 or stringPtr[stringIndex] == NEWLINE:
+        if stringIndex == 0 or outputPtr[stringIndex] == NEWLINE:
             stringIndex = problemIndex
         else:
             outputPtr[stringIndex] = NEWLINE
