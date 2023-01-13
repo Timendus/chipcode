@@ -20,38 +20,25 @@ SPACE          = const(32)
 
 class FancyFont:
 
-  # Load a fixed width font. Accepts "regular Thumby fonts"
   @micropython.native
-  def setFixedWidthFont(self, fontPath, width:int, height:int, space:int = 1):
-    self.characterWidth = width
-    self.characterHeight = height
-    self.characterMarginWidth = space
-    self.fontFile = open(fontPath)
-    self.characterBuffer = bytearray(8)
-    self.numCharactersInFont = stat(fontPath)[6] // self.characterWidth
-
-  # Load a variable width font. Accepts fonts in "FancyFont format"
-  @micropython.native
-  def setVariableWidthFont(self, fontPath):
-    self.characterWidth = VARIABLE_WIDTH
-    self.characterMarginWidth = 0
-    self.fontFile = open(fontPath)
+  def setFont(self, fontPath, width:int = None, height:int = None, space:int = 1):
+    self.fontFile = open(fontPath, 'rb')
     self.characterBuffer = bytearray(9)
-    self.fontFile.readinto(self.characterBuffer)
-    self.characterHeight = self.characterBuffer[0]
-    self.numCharactersInFont = self.characterBuffer[1]
-    self._collectCharacterIndices()
 
-  # Read through the file and cache the starting indices for all the characters
-  @micropython.viper
-  def _collectCharacterIndices(self):
-    self.characterIndices = []
-    currentIndex:int = 2
-    for i in range(int(self.numCharactersInFont)):
-      self.characterIndices.append(currentIndex)
-      self.fontFile.seek(currentIndex)
+    if width == None and height == None:
+      # Assume variable width FancyFont file format
+      self.characterWidth = VARIABLE_WIDTH
+      self.characterMarginWidth = 0
       self.fontFile.readinto(self.characterBuffer)
-      currentIndex += int(self.characterBuffer[0]) + 1
+      self.characterHeight = self.characterBuffer[0]
+      self.numCharactersInFont = self.characterBuffer[1]
+      self._collectCharacterIndices()
+    else:
+      # Assume fixed width TinyCircuits font file format
+      self.characterWidth = width
+      self.characterHeight = height
+      self.characterMarginWidth = space
+      self.numCharactersInFont = stat(fontPath)[6] // self.characterWidth
 
   # Draw a string within the square defined by (xPos, yPos) and (xMax, yMax), in
   # the given color with word wrapping
@@ -66,6 +53,17 @@ class FancyFont:
   @micropython.native
   def drawText(self, string, xPos:int, yPos:int, color:int = 1, xMax:int = display.width, yMax:int = display.height):
     return self._drawText(string, len(string), xPos, yPos, color, xMax, yMax)
+
+  # Read through the file and cache the starting indices for all the characters
+  @micropython.viper
+  def _collectCharacterIndices(self):
+    self.characterIndices = []
+    currentIndex:int = 2
+    for i in range(int(self.numCharactersInFont)):
+      self.characterIndices.append(currentIndex)
+      self.fontFile.seek(currentIndex)
+      self.fontFile.readinto(self.characterBuffer)
+      currentIndex += int(self.characterBuffer[0]) + 1
 
   @micropython.viper
   def _drawText(self, string:ptr8, strLen:int, xStart:int, yPos:int, color:int, xMax:int, yMax:int):
