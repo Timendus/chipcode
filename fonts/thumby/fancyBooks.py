@@ -15,50 +15,114 @@ from time import sleep_ms
 import thumby
 thumby.display.setFPS(0)
 
-fonts = {
-  "threesquare": '/Games/FancyBooks/3-pix.bin',
-  "Splendid": '/Games/FancyBooks/4-pix-low.bin',
-  "Black sheep": '/Games/FancyBooks/4-pix-high.bin',
-  "Limited narrow": '/Games/FancyBooks/5-pix-narrow.bin',
-  "BigBoy": '/Games/FancyBooks/5-pix-wide.bin',
-  "Truthful": '/Games/FancyBooks/6-pix.bin'
-}
+AUTO = None
 
-books = {
-  "fox": "the quick brown fox jumped over the lazy dog\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG\n0123456789\n!\"#$%&'()*+,-./:; <=>?@[\]^_`{|}~",
-  "lorem": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec nisi a mi interdum placerat. Vivamus sed tincidunt risus. Fusce egestas et lectus at pretium. Donec dictum blandit libero.",
-  "wikipedia": "The Thumby is a small keychain sized programmable game console produced by TinyCircuits of Akron, Ohio[3][4] and funded by a Kickstarter campaign.[5][6][7] The console measures 1.2 by 0.7 by 0.3 inches (30.5 mm * 17.8 mm * 7.6 mm)."
-}
+fonts = [
+  {
+    'file': '/Games/FancyBooks/3-pix.bin',
+    'name': 'threesquare',
+    'width': AUTO,
+    'height': AUTO
+  },
+  {
+    'file': '/Games/FancyBooks/4-pix-low.bin',
+    'name': 'Splendid',
+    'width': AUTO,
+    'height': AUTO
+  },
+  {
+    'file': '/Games/FancyBooks/4-pix-high.bin',
+    'name': 'Black sheep',
+    'width': AUTO,
+    'height': AUTO
+  },
+  {
+    'file': '/Games/FancyBooks/5-pix-narrow.bin',
+    'name': 'Limited narrow',
+    'width': AUTO,
+    'height': AUTO
+  },
+  {
+    'file': '/lib/font3x5.bin',
+    'name': 'TC small font 3x5',
+    'width': 3,
+    'height': 5
+  },
+  {
+    'file': '/Games/FancyBooks/5-pix-wide.bin',
+    'name': 'BigBoy',
+    'width': AUTO,
+    'height': AUTO
+  },
+  {
+    'file': '/Games/FancyBooks/6-pix.bin',
+    'name': 'Truthful',
+    'width': AUTO,
+    'height': AUTO
+  },
+  {
+    'file': '/lib/font5x7.bin',
+    'name': 'TC medium font 5x7',
+    'width': 5,
+    'height': 7
+  },
+  {
+    'file': '/lib/font8x8.bin',
+    'name': 'TC large font 8x8',
+    'width': 8,
+    'height': 8
+  }
+]
 
-offsets = {
-  "fox": 0,
-  "lorem": 0,
-  "wikipedia": 0
-}
+books = [
+  {
+    'name': 'fox',
+    'content': "the quick brown fox jumped over the lazy dog\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG\n0123456789\n!\"#$%&'()*+,-./:; <=>?@[\]^_`{|}~",
+    'offset': 0
+  },
+  {
+    'name': 'lorem',
+    'content': "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec nisi a mi interdum placerat. Vivamus sed tincidunt risus. Fusce egestas et lectus at pretium. Donec dictum blandit libero.",
+    'offset': 0
+  },
+  {
+    'name': 'wikipedia',
+    'content': "The Thumby is a small keychain sized programmable game console produced by TinyCircuits of Akron, Ohio[3][4] and funded by a Kickstarter campaign.[5][6][7] The console measures 1.2 by 0.7 by 0.3 inches (30.5 mm * 17.8 mm * 7.6 mm).",
+    'offset': 0
+  },
+]
 
 selectedColor = 0
-selectedFont = "BigBoy"
-selectedBook = "fox"
+selectedFont = 5
+selectedBook = 0
 
 def waitKeyRelease():
   while thumby.inputPressed():
     pass
 
+def setSelectedFont():
+  fancyFont.setFont(
+    fonts[selectedFont]['file'],
+    fonts[selectedFont]['width'],
+    fonts[selectedFont]['height']
+  )
+  
+setSelectedFont()
+
 while True:
   
-  offset = offsets[selectedBook]
+  offset = books[selectedBook]['offset']
   
   thumby.display.fill(selectedColor)
-  fancyFont.setVariableWidthFont(fonts[selectedFont])
-  # fancyFont.setFixedWidthFont("/lib/font3x5.bin", 3, 5)
-  fancyFont.drawTextWrapped(
-    books[selectedBook],
+  pos = fancyFont.drawTextWrapped(
+    books[selectedBook]['content'],
     selectedColor, # Left margin
     -1 * offset + selectedColor, # Top margin
     selectedColor ^ 1,  # Actual color
     thumby.display.width - selectedColor, # Right margin
     thumby.display.height - selectedColor # Bottom margin
   )
+  # print(int(pos[0]), int(pos[1]))
   thumby.display.update()
   
   # Wait for key release
@@ -69,28 +133,24 @@ while True:
       break
     if thumby.buttonB.pressed():
       waitKeyRelease()
-      titles = list(books.keys())
-      chosen = titles.index(selectedBook)
-      selectedBook = titles[(chosen + 1) % len(books)]
+      selectedBook = (selectedBook + 1) % len(books)
       break
     if thumby.buttonL.pressed():
       waitKeyRelease()
-      fontNames = list(fonts.keys())
-      chosen = fontNames.index(selectedFont)
-      selectedFont = fontNames[(chosen - 1) % len(fonts)]
+      selectedFont = (selectedFont - 1) % len(fonts)
+      setSelectedFont()
       break
     if thumby.buttonR.pressed():
       waitKeyRelease()
-      fontNames = list(fonts.keys())
-      chosen = fontNames.index(selectedFont)
-      selectedFont = fontNames[(chosen + 1) % len(fonts)]
+      selectedFont = (selectedFont + 1) % len(fonts)
+      setSelectedFont()
       break
     if thumby.buttonU.pressed():
       if offset > 0:
-          offsets[selectedBook] -= 1
+        books[selectedBook]['offset'] -= 1
       break
     if thumby.buttonD.pressed():
-      offsets[selectedBook] += 1
+      books[selectedBook]['offset'] += 1
       break
     
     # Sleep a bit in an attempt to be more battery efficient..?
