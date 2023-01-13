@@ -11,6 +11,7 @@ NEWLINE        = const(10)
 SPACE          = const(32)
 
 # For debugging
+
 # def dump(barray):
 #   result = ''
 #   for i in barray:
@@ -68,6 +69,14 @@ class FancyFont:
 
   @micropython.viper
   def _drawText(self, string:ptr8, strLen:int, xStart:int, yPos:int, color:int, xMax:int, yMax:int):
+    # Cast the input parameters (because type-hints are really just for show...)
+    string:ptr8 = ptr8(string)
+    strLen:int = int(strLen)
+    xStart:int = int(xStart)
+    yPos:int = int(yPos)
+    xMax:int = int(xMax)
+    yMax:int = int(yMax)
+
     # Define variables up front so we have a stable memory profile in the loop
     stringIndex:int     = 0
     characterOffset:int = 0
@@ -78,8 +87,9 @@ class FancyFont:
     fontByte:int        = 0
     blitWidth:int       = 0
     heightMask:int      = 0
-    newX:int            = 0
     xPos:int            = xStart
+
+    # Track the rightmost and lowest pixel that we draw to for return value
     bottom:int          = xPos
     right:int           = yPos
 
@@ -93,6 +103,7 @@ class FancyFont:
     characterHeight:int      = int(self.characterHeight)
     characterMarginWidth:int = int(self.characterMarginWidth)
     numCharactersInFont:int  = int(self.numCharactersInFont)
+    dispBufSize:int          = int(len(display.display.buffer))
 
     if characterWidth == VARIABLE_WIDTH:
       characterIndices  = self.characterIndices
@@ -133,52 +144,60 @@ class FancyFont:
         currentWidth = characterWidth
         characterOffset = 0
 
-      # Are we outside screen bounds? Then don't draw anything, just count
+      # Are we fully outside screen bounds? Then don't draw anything, just count
       if xPos + currentWidth <= 0 or xPos >= xMax or yPos + characterHeight <= 0:
         xPos += currentWidth + characterMarginWidth
         continue
-      # Are we below where we're allowed to draw? Then we're really done
+      # Are we fully below where we're allowed to draw? Then we're really done
       if yPos >= yMax:
         break;
 
-      # Can we draw the full character height?
-      heightMask = 0xFF
-      bottom = yPos + characterHeight - 1
-      if yPos + characterHeight > yMax:
-        heightMask >>= (8 - (yMax - yPos))   # Nope; just the top part
-        bottom = yMax - 1
-
       # Can we draw the full character width?
-      newX:int = xPos + currentWidth
-      if newX >= xMax:
-        blitWidth = xMax - xPos     # Nope; just the left part
-        right = xMax - 1
-      else:
-        blitWidth = currentWidth
-        if newX > right:
-          right = newX - 1
+      blitWidth = xMax - xPos        # What space do we have available?
+      if blitWidth > currentWidth:
+          blitWidth = currentWidth   # It's more than we need
 
-      # Blit the character bitmap to the display buffer in the right place
+      # Update drawn bounds
+      right = int(max(right, xPos + blitWidth - 1))
+      bottom = int(max(bottom, min(yPos + characterHeight - 1, yMax - 1)))
+
+      # Blit the character bitmap to the display buffer in the right place. Note
+      # that either the top or bottom byte to blit to may be outside the screen
+      # bounds, so we have to check for that before blitting to make sure we
+      # don't overwrite some random data (yay viper!)
       vertOffset = yPos & 7 # y % 8
       dispBufIndex = (yPos >> 3) * screenWidth + xPos
       if color == 0:
         for x in range(0, blitWidth):
-          fontByte = characterBufferPtr[characterOffset + x] & heightMask
-          displayBuffer[dispBufIndex + x] &= 0xFF ^ (fontByte << vertOffset)
-          displayBuffer[dispBufIndex + x + screenWidth] &= 0xFF ^ (fontByte >> (8 - vertOffset))
+          fontByte = characterBufferPtr[characterOffset + x]
+          if 0 <= dispBufIndex + x < dispBufSize:
+            displayBuffer[dispBufIndex + x] &= 0xFF ^ (fontByte << vertOffset)
+          if 0 <= dispBufIndex + x + screenWidth < dispBufSize:
+            displayBuffer[dispBufIndex + x + screenWidth] &= 0xFF ^ (fontByte >> (8 - vertOffset))
       else:
         for x in range(0, blitWidth):
-          fontByte = characterBufferPtr[characterOffset + x] & heightMask
-          displayBuffer[dispBufIndex + x] |= fontByte << vertOffset
-          displayBuffer[dispBufIndex + x + screenWidth] |= fontByte >> (8 - vertOffset)
+          fontByte = characterBufferPtr[characterOffset + x]
+          if 0 <= dispBufIndex + x < dispBufSize:
+            displayBuffer[dispBufIndex + x] |= fontByte << vertOffset
+          if 0 <= dispBufIndex + x + screenWidth < dispBufSize:
+            displayBuffer[dispBufIndex + x + screenWidth] |= fontByte >> (8 - vertOffset)
 
+      # Set the stage for the next character
       xPos += currentWidth + characterMarginWidth
 
     # Return the actual dimensions of the rendered text
     return bytearray([right, bottom])
 
   @micropython.viper
-  def _wrapText(self, string, strLen:int, xStart:int, yPos:int, xMax:int, yMax:int):
+  def _wrapText(self, string:ptr8, strLen:int, xStart:int, yPos:int, xMax:int, yMax:int):
+    # Cast the input parameters (because type-hints are really just for show...)
+    string:ptr8 = ptr8(string)
+    strLen:int = int(strLen)
+    xStart:int = int(xStart)
+    yPos:int = int(yPos)
+    xMax:int = int(xMax)
+    yMax:int = int(yMax)
+
     # Define variables up front so we have a stable memory profile in the loop
     stringIndex:int     = 0
     character:int       = 0
@@ -198,14 +217,13 @@ class FancyFont:
       characterIndices  = self.characterIndices
 
     # Write result to a new string, so we don't mess with the original
-    output = bytearray(int(len(string)))
+    output = bytearray(strLen)
     outputPtr:ptr8 = ptr8(output)
-    stringPtr:ptr8 = ptr8(string)
 
     while stringIndex < strLen:
 
       # Fetch character from string
-      character = stringPtr[stringIndex]
+      character = string[stringIndex]
       outputPtr[stringIndex] = character
       stringIndex += 1
 
@@ -244,13 +262,16 @@ class FancyFont:
       if xPos + currentWidth >= xMax:
         stringIndex -= 1 # Undo stringIndex increase after loading character
         problemIndex = stringIndex
-        while stringIndex > 0 and stringPtr[stringIndex] != SPACE:
+        while stringIndex > 0 and string[stringIndex] != SPACE:
           stringIndex -= 1
         # Did we go all the way back to the previous break, or can we add a NEWLINE?
         if stringIndex == 0 or outputPtr[stringIndex] == NEWLINE:
-            stringIndex = problemIndex
+          stringIndex = problemIndex
         else:
-            outputPtr[stringIndex] = NEWLINE
+          # Just as a guard:
+          if 0 > stringIndex >= strLen:
+            raise ValueError("Attempted to write outside string bounds: this should never happen!")
+          outputPtr[stringIndex] = NEWLINE
         stringIndex += 1
         yPos += characterHeight + 1
         xPos = xStart
