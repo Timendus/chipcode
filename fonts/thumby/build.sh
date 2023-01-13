@@ -18,3 +18,8 @@ python3 convert.py ./fonts/4-pix-high-ascii-layout.png ./fonts/4-pix-high.bin 4
 python3 convert.py ./fonts/5-pix-narrow-ascii-layout.png ./fonts/5-pix-narrow.bin 5
 python3 convert.py ./fonts/5-pix-wide-ascii-layout.png ./fonts/5-pix-wide.bin 5
 python3 convert.py ./fonts/6-pix-ascii-layout.png ./fonts/6-pix.bin 6
+
+# Minify library
+# Needs a pip3 install python-minifier
+
+pyminify --no-remove-annotations fancyFont.py > fancyFont-minified.py
