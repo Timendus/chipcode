@@ -1,17 +1,19 @@
 # FancyFont
 
-This is a font library for the Thumby playable keychain console. It's in this
-repository because I didn't think it really needed its own repository, and so it
-can share font definitions with the CHIP-8 version of the library.
+_A font library for the Thumby playable keychain console_
 
 FancyFont is a drop-in replacement to the `setFont()` and `drawText()` functions in
 the Thumby API. It has a couple of improvements over those functions:
 
   * Support for word wrapping with `drawTextWrapped()`
-  * Support for clipping
-  * Support for newline character (`\n`)
+  * Support for clipping (and not just at the edge of the screen)
+  * Support for the newline character (`\n`) in strings
   * Support for variable width fonts
-  * Can render to any graphics buffer, so "should work" with grayscale too
+  * Can render to any bytearray buffer, so "should work" with grayscale too
+
+This sub-project is in this repository because I didn't think it really needed
+its own repository, and so it can share font definitions with the CHIP-8 version
+of the library.
 
 ## Visual examples
 
