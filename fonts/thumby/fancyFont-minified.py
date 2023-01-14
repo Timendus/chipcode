@@ -1,4 +1,3 @@
-'\nFont rendering for fixed width and variable width fonts, with optional\nword-wrapping.\n\nClasses:\n\n    FancyFont\n'
 _A=None
 from os import stat
 from sys import path
@@ -6,24 +5,23 @@ VARIABLE_WIDTH=const(0)
 NEWLINE=const(10)
 SPACE=const(32)
 class FancyFont:
-	'\n  A container class that holds functions for font rendering for fixed width and\n  variable width fonts, with optional word-wrapping.\n\n  Methods:\n\n      __init__\n      setFont\n      drawText\n      drawTextWrapped\n\n  Attributes:\n\n      None that should be manipulated by the user\n  '
 	@micropython.native
-	def __init__(self,displayBuffer,displayWidth=72,displayHeight=40):'\n    Constructor function to initialize the FancyFont class.\n\n    Parameters:\n\n        displayBuffer : object\n            The display buffer to draw to. Usually\n            thumbyGraphics.display.display.buffer.\n\n        displayWidth : int\n            The width of the display to draw to, in pixels. Usually\n            thumbyGraphics.display.width. Defaults to 72.\n\n        displayHeight : int\n            The height of the display to draw to, in pixels. Usually\n            thumbyGraphics.display.height. Defaults to 40.\n    ';A=self;A.displayBuffer=displayBuffer;A.displayWidth=int(displayWidth);A.displayHeight=int(displayHeight)
+	def __init__(self,displayBuffer,displayWidth=72,displayHeight=40):A=self;A.displayBuffer=displayBuffer;A.displayWidth=int(displayWidth);A.displayHeight=int(displayHeight)
 	@micropython.native
 	def setFont(self,fontPath,width:int=_A,height:int=_A,space:int=1):
-		'\n    Set the font file at `fontPath` as the current font to be used for all\n    subsequent drawText commands.\n\n    Parameters:\n\n        fontPath : string\n            A path to a file that contains a font in either the TinyCircuits\n            fixed width font file format or a FancyFont variable width font\n            file.\n\n        width : int\n            The character width of the font, if the font is fixed width. Omit or\n            supply `None` for variable width. Note that characters with a width\n            of more than 8 pixels are *not supported*.\n\n        height : int\n            The character height of the font, if the font is fixed width. Omit\n            or supply `None` for variable width font files. The character height\n            will then be read from the font file. Note that characters with a\n            height of more than 8 pixels are *not supported*.\n\n        space : int\n            The margin between characters for fixed width fonts. Defaults to 1.\n            Ignored for variable width fonts.\n    ';D=height;C=width;B=fontPath;A=self;A.fontFile=open(A._findFile(B),'rb');A.characterBuffer=bytearray(9)
+		D=height;C=width;B=fontPath;A=self;B=A._findFile(B);A.fontFile=open(B,'rb');A.characterBuffer=bytearray(9)
 		if C==_A and D==_A:A.characterWidth=VARIABLE_WIDTH;A.characterMarginWidth=0;A.fontFile.readinto(A.characterBuffer);A.characterHeight=A.characterBuffer[0];A.numCharactersInFont=A.characterBuffer[1];A._collectCharacterIndices()
 		else:A.characterWidth=C;A.characterHeight=D;A.characterMarginWidth=space;A.numCharactersInFont=stat(B)[6]//A.characterWidth
 	@micropython.native
-	def drawText(self,string,xPos:int,yPos:int,color:int=1,xMax:int=_A,yMax:int=_A):'\n    Draw a string within the square defined by (xPos, yPos) and (xMax, yMax), in\n    the given color.\n\n    Parameters:\n\n        string : string\n            The string to draw to the screen.\n\n        xPos : int\n            The X coordinate to start drawing from, counting from the left side\n            of the screen.\n\n        yPos : int\n            The Y coordinate to start drawing from, counting from the top of the\n            screen.\n\n        color : int\n            The color to draw the string in: either 1 (white) or 0 (black).\n\n        xMax : int\n            The X coordinate to stop drawing from, counting from the left side\n            of the screen. Any text wider than xMax - xPos will be clipped.\n            Defaults to the display width supplied to the constructor.\n\n        yMax : int\n            The Y coordinate to stop drawing from, counting from the top of the\n            screen. Any line of text higher than yMax - yPos will be clipped.\n            Defaults to the display height supplied to the constructor.\n    ';B=string;A=self;return A._drawText(B,len(B),xPos,yPos,color,xMax or A.displayWidth,yMax or A.displayHeight)
+	def drawText(self,string,xPos:int,yPos:int,color:int=1,xMax:int=_A,yMax:int=_A):B=string;A=self;return A._drawText(B,len(B),xPos,yPos,color,xMax or A.displayWidth,yMax or A.displayHeight)
 	@micropython.native
-	def drawTextWrapped(self,string,xPos:int,yPos:int,color:int=1,xMax:int=_A,yMax:int=_A):'\n    Draw a string within the square defined by (xPos, yPos) and (xMax, yMax), in\n    the given color with word wrapping.\n\n    Parameters:\n\n        string : string\n            The string to draw to the screen.\n\n        xPos : int\n            The X coordinate to start drawing from, counting from the left side\n            of the screen.\n\n        yPos : int\n            The Y coordinate to start drawing from, counting from the top of the\n            screen.\n\n        color : int\n            The color to draw the string in: either 1 (white) or 0 (black).\n\n        xMax : int\n            The X coordinate to wrap the text at, counting from the left side of\n            the screen. Defaults to the display width supplied to the\n            constructor.\n\n        yMax : int\n            The Y coordinate to stop drawing from, counting from the top of the\n            screen. Any text higher than yMax - yPos will be clipped. Defaults\n            to the display height supplied to the constructor.\n    ';B=string;A=self;C=A._wrapText(B,len(B),xPos,yPos,xMax or A.displayWidth,yMax or A.displayHeight);return A._drawText(C,len(C),xPos,yPos,color,xMax or A.displayWidth,yMax or A.displayHeight)
-	def _findFile(B,filePath):
-		A=filePath
-		try:stat(A);return A
+	def drawTextWrapped(self,string,xPos:int,yPos:int,color:int=1,xMax:int=_A,yMax:int=_A):B=string;A=self;C=A._wrapText(B,len(B),xPos,yPos,xMax or A.displayWidth,yMax or A.displayHeight);return A._drawText(C,len(C),xPos,yPos,color,xMax or A.displayWidth,yMax or A.displayHeight)
+	def _findFile(D,filePath):
+		B=filePath
+		try:stat(B);return B
 		except OSError:pass
-		for dir in path:
-			try:stat(dir+'/'+A);return dir+'/'+A
+		for A in path:
+			try:C=(A+'/'if A and not A.endswith('/')else A)+B;stat(C);return C
 			except OSError:pass
 		raise OSError('Font file not found')
 	@micropython.viper
