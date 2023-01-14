@@ -9,13 +9,30 @@ the Thumby API. It has a couple of improvements over those functions:
   * Support for clipping (and not just at the edge of the screen)
   * Support for the newline character (`\n`) in strings
   * Support for variable width fonts
-  * Can render to any bytearray buffer, so "should work" with grayscale too
+  * Can render to any bytearray buffer, so "should work" with grayscale or
+    non-Thumby projects too
 
-This sub-project is in this repository because I didn't think it really needed
+(This sub-project is in this repository because I didn't think it really needed
 its own repository. And also so it can share font definitions with the CHIP-8
-version of the library.
+version of the library.)
 
-## Visual examples
+## Table of contents
+
+  * [Cool pictures](#cool-pictures)
+  * [Explanation by example](#explanation-by-example)
+    * [`setFont`](#setfont)
+    * [`drawText`](#drawtext)
+    * [`drawTextWrapped`](#drawtextwrapped)
+    * [Constructor](#constructor)
+  * [Minified version](#minified-version)
+  * [API documentation](#api-documentation)
+    * [`Class FancyFont`](#class-fancyfont)
+      * [`__init__`](#__init__displaybuffer-displaywidth--72-displayheight--40)
+      * [`setFont`](#setfontfontpath-widthint--none-heightint--none-spaceint--1)
+      * [`drawText`](#drawtextstring-xposint-yposint-colorint--1-xmaxint--none-ymaxint--none)
+      * [`drawTextWrapped`](#drawtextwrappedstring-xposint-yposint-colorint--1-xmaxint--none-ymaxint--none)
+
+## Cool pictures
 
 TODO: Nice pictures here
 
@@ -96,7 +113,7 @@ the string instead.
 Finally, both `drawText` and `drawTextWrapped` draw to the buffer that you
 specify in the FancyFont constructor. You must give the constructor a buffer
 (generally a bytearray) and optionally a width and a height, which default to 72
-and 40. For normal operation this mean you just do:
+and 40. For normal operation this means you just do:
 
 ```python
 fancyFont = FancyFont(thumbyGraphics.display.display.buffer)
@@ -169,7 +186,7 @@ Parameters:
   * `fontPath` : `string`
       * A path to a file that contains a font in either the TinyCircuits
         fixed width font file format or a FancyFont variable width font
-        file.
+        file. Path may be absolute or relative to any entry in `sys.path`.
 
   * `width` : `int`
       * The character width of the font, if the font is fixed width. Omit or
