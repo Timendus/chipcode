@@ -1,4 +1,11 @@
-# Note: characters can't be larger than 8 x 8 pixels
+"""
+Font rendering for fixed width and variable width fonts, with optional
+word-wrapping.
+
+Classes:
+
+    FancyFont
+"""
 
 # TODO:
 #  * Wrapping consistency issue (off by one on the width somewhere?)
@@ -23,15 +30,73 @@ SPACE          = const(32)
 #   return result
 
 class FancyFont:
+  """
+  A container class that holds functions for font rendering for fixed width and
+  variable width fonts, with optional word-wrapping.
+
+  Methods:
+
+      __init__
+      setFont
+      drawText
+      drawTextWrapped
+
+  Attributes:
+
+      None that should be manipulated by the user
+  """
 
   @micropython.native
   def __init__(self, displayBuffer, displayWidth = 72, displayHeight = 40):
+    """
+    Constructor function to initialize the FancyFont class.
+
+    Parameters:
+
+        displayBuffer : object
+            The display buffer to draw to. Usually
+            thumbyGraphics.display.display.buffer.
+
+        displayWidth : int
+            The width of the display to draw to, in pixels. Usually
+            thumbyGraphics.display.width. Defaults to 72.
+
+        displayHeight : int
+            The height of the display to draw to, in pixels. Usually
+            thumbyGraphics.display.height. Defaults to 40.
+    """
     self.displayBuffer = displayBuffer
     self.displayWidth = int(displayWidth)
     self.displayHeight = int(displayHeight)
 
   @micropython.native
   def setFont(self, fontPath, width:int = None, height:int = None, space:int = 1):
+    """
+    Set the font file at `fontPath` as the current font to be used for all
+    subsequent drawText commands.
+
+    Parameters:
+
+        fontPath : string
+            A path to a file that contains a font in either the TinyCircuits
+            fixed width font file format or a FancyFont variable width font
+            file.
+
+        width : int
+            The character width of the font, if the font is fixed width. Omit or
+            supply `None` for variable width. Note that characters with a width
+            of more than 8 pixels are *not supported*.
+
+        height : int
+            The character height of the font, if the font is fixed width. Omit
+            or supply `None` for variable width font files. The character height
+            will then be read from the font file. Note that characters with a
+            height of more than 8 pixels are *not supported*.
+
+        space : int
+            The margin between characters for fixed width fonts. Defaults to 1.
+            Ignored for variable width fonts.
+    """
     self.fontFile = open(self._findFile(fontPath), 'rb')
     self.characterBuffer = bytearray(9)
 
@@ -50,11 +115,40 @@ class FancyFont:
       self.characterMarginWidth = space
       self.numCharactersInFont = stat(fontPath)[6] // self.characterWidth
 
-  # Draw a string within the square defined by (xPos, yPos) and (xMax, yMax), in
-  # the given color with word wrapping
+  # This wrapper function is here because viper functions can't have a variable
+  # number of arguments
   @micropython.native
   def drawText(self, string, xPos:int, yPos:int, color:int = 1, xMax:int = None, yMax:int = None):
+    """
+    Draw a string within the square defined by (xPos, yPos) and (xMax, yMax), in
+    the given color.
 
+    Parameters:
+
+        string : string
+            The string to draw to the screen.
+
+        xPos : int
+            The X coordinate to start drawing from, counting from the left side
+            of the screen.
+
+        yPos : int
+            The Y coordinate to start drawing from, counting from the top of the
+            screen.
+
+        color : int
+            The color to draw the string in: either 1 (white) or 0 (black).
+
+        xMax : int
+            The X coordinate to stop drawing from, counting from the left side
+            of the screen. Any text wider than xMax - xPos will be clipped.
+            Defaults to the display width supplied to the constructor.
+
+        yMax : int
+            The Y coordinate to stop drawing from, counting from the top of the
+            screen. Any line of text higher than yMax - yPos will be clipped.
+            Defaults to the display height supplied to the constructor.
+    """
     return self._drawText(
       string,
       len(string),
@@ -67,6 +161,36 @@ class FancyFont:
 
   @micropython.native
   def drawTextWrapped(self, string, xPos:int, yPos:int, color:int = 1, xMax:int = None, yMax:int = None):
+    """
+    Draw a string within the square defined by (xPos, yPos) and (xMax, yMax), in
+    the given color with word wrapping.
+
+    Parameters:
+
+        string : string
+            The string to draw to the screen.
+
+        xPos : int
+            The X coordinate to start drawing from, counting from the left side
+            of the screen.
+
+        yPos : int
+            The Y coordinate to start drawing from, counting from the top of the
+            screen.
+
+        color : int
+            The color to draw the string in: either 1 (white) or 0 (black).
+
+        xMax : int
+            The X coordinate to wrap the text at, counting from the left side of
+            the screen. Defaults to the display width supplied to the
+            constructor.
+
+        yMax : int
+            The Y coordinate to stop drawing from, counting from the top of the
+            screen. Any text higher than yMax - yPos will be clipped. Defaults
+            to the display height supplied to the constructor.
+    """
     wrappedString = self._wrapText(
       string,
       len(string),
