@@ -1,10 +1,14 @@
 # Note: characters can't be larger than 8 x 8 pixels
 
 # TODO:
-#  * Stability issues (on wide words..?)
+#  * Wrapping consistency issue (off by one on the width somewhere?)
+#  * Idea: allow loading fonts as bytearray too?
+#  * Idea: use PATH for font lookups
 
-from thumbyGraphics import display
+# More broadly: rename fonts everywhere to their new names
+
 from os import stat
+from sys import path
 
 VARIABLE_WIDTH = const(0)
 NEWLINE        = const(10)
@@ -21,8 +25,14 @@ SPACE          = const(32)
 class FancyFont:
 
   @micropython.native
+  def __init__(self, displayBuffer, displayWidth = 72, displayHeight = 40):
+    self.displayBuffer = displayBuffer
+    self.displayWidth = int(displayWidth)
+    self.displayHeight = int(displayHeight)
+
+  @micropython.native
   def setFont(self, fontPath, width:int = None, height:int = None, space:int = 1):
-    self.fontFile = open(fontPath, 'rb')
+    self.fontFile = open(self._findFile(fontPath), 'rb')
     self.characterBuffer = bytearray(9)
 
     if width == None and height == None:
@@ -43,16 +53,51 @@ class FancyFont:
   # Draw a string within the square defined by (xPos, yPos) and (xMax, yMax), in
   # the given color with word wrapping
   @micropython.native
-  def drawTextWrapped(self, string, xPos:int, yPos:int, color:int = 1, xMax:int = display.width, yMax:int = display.height):
-    wrappedString = self._wrapText(string, len(string), xPos, yPos, xMax, yMax)
-    return self._drawText(wrappedString, len(wrappedString), xPos, yPos, color, xMax, yMax)
+  def drawText(self, string, xPos:int, yPos:int, color:int = 1, xMax:int = None, yMax:int = None):
 
-  # Draw a string within the square defined by (xPos, yPos) and (xMax, yMax), in
-  # the given color. This wrapper function is here because viper functions can't
-  # have a variable number of arguments
+    return self._drawText(
+      string,
+      len(string),
+      xPos,
+      yPos,
+      color,
+      xMax or self.displayWidth,
+      yMax or self.displayHeight
+    )
+
   @micropython.native
-  def drawText(self, string, xPos:int, yPos:int, color:int = 1, xMax:int = display.width, yMax:int = display.height):
-    return self._drawText(string, len(string), xPos, yPos, color, xMax, yMax)
+  def drawTextWrapped(self, string, xPos:int, yPos:int, color:int = 1, xMax:int = None, yMax:int = None):
+    wrappedString = self._wrapText(
+      string,
+      len(string),
+      xPos,
+      yPos,
+      xMax or self.displayWidth,
+      yMax or self.displayHeight
+    )
+    return self._drawText(
+      wrappedString,
+      len(wrappedString),
+      xPos,
+      yPos,
+      color,
+      xMax or self.displayWidth,
+      yMax or self.displayHeight
+    )
+
+  def _findFile(self, filePath):
+    try:
+      stat(filePath)
+      return filePath
+    except OSError:
+      pass
+    for dir in path:
+      try:
+        stat(dir + '/' + filePath)
+        return dir + '/' + filePath
+      except OSError:
+        pass
+    raise OSError('Font file not found')
 
   # Read through the file and cache the starting indices for all the characters
   @micropython.viper
@@ -92,16 +137,16 @@ class FancyFont:
     right:int           = yPos
 
     # Look up and cast all variables up front so we're faster in the loop
-    displayBuffer:ptr8       = ptr8(display.display.buffer)
+    displayBuffer:ptr8       = ptr8(self.displayBuffer)
     fontFile                 = self.fontFile
     characterBuffer          = self.characterBuffer
     characterBufferPtr:ptr8  = ptr8(characterBuffer)
-    screenWidth:int          = int(display.width)
+    screenWidth:int          = int(self.displayWidth)
     characterWidth:int       = int(self.characterWidth)
     characterHeight:int      = int(self.characterHeight)
     characterMarginWidth:int = int(self.characterMarginWidth)
     numCharactersInFont:int  = int(self.numCharactersInFont)
-    dispBufSize:int          = int(len(display.display.buffer))
+    dispBufSize:int          = int(len(self.displayBuffer))
 
     if characterWidth == VARIABLE_WIDTH:
       characterIndices  = self.characterIndices
@@ -278,6 +323,3 @@ class FancyFont:
       xPos += currentWidth + characterMarginWidth
 
     return output
-
-# Make an instance of the class available for importing
-fancyFont = FancyFont()

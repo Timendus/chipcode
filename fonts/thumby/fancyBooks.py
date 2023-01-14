@@ -10,10 +10,11 @@
 import sys
 sys.path.insert(0, '/Games/FancyBooks')
 
-from fancyFont import fancyFont
+from fancyFont import FancyFont
 from time import sleep_ms
 import thumby
 thumby.display.setFPS(0)
+fancyFont = FancyFont(thumby.display.display.buffer)
 
 AUTO = None
 
