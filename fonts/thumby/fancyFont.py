@@ -97,7 +97,8 @@ class FancyFont:
             The margin between characters for fixed width fonts. Defaults to 1.
             Ignored for variable width fonts.
     """
-    self.fontFile = open(self._findFile(fontPath), 'rb')
+    fontPath = self._findFile(fontPath)
+    self.fontFile = open(fontPath, 'rb')
     self.characterBuffer = bytearray(9)
 
     if width == None and height == None:
@@ -209,16 +210,19 @@ class FancyFont:
       yMax or self.displayHeight
     )
 
+  # Search for the requested file in all directories that are in `path`,
+  # starting with interpreting it as an absolute path.
   def _findFile(self, filePath):
     try:
       stat(filePath)
       return filePath
     except OSError:
       pass
-    for dir in path:
+    for p in path:
       try:
-        stat(dir + '/' + filePath)
-        return dir + '/' + filePath
+        fullPath = (p + '/' if p and not p.endswith('/') else p) + filePath
+        stat(fullPath)
+        return fullPath
       except OSError:
         pass
     raise OSError('Font file not found')
