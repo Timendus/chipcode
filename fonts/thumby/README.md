@@ -35,6 +35,7 @@ version of the library.)
     * [Widewest](#widewest)
     * [Truthful](#truthful)
     * [TinyCircuits fonts](#tinycircuits-fonts)
+  * [Making your own fonts](#making-your-own-fonts)
   * [API documentation](#api-documentation)
     * [`Class FancyFont`](#class-fancyfont)
       * [`__init__`](#__init__displaybuffer-displaywidth--72-displayheight--40)
@@ -185,11 +186,13 @@ to give credit to the author and that derivative works may only be distributed
 under the same or a compatible license. This way we make sure the body of
 publicly available pixel art fonts will only grow over time.
 
-The 3x3 fixed width font called "Auri" was designed by Thumby Discord regular
-Auri, with feedback from the Thumby community. You may give him credit as such.
+The 3x3 fixed width font called "Auri" was made by Thumby Discord regular Auri,
+with feedback from the Thumby community. You may give him credit as such.
 
-The other fonts have been designed by myself
-([Timendus](https://github.com/Timendus/)). Please credit me by linking to [this
+The other fonts have been designed and hand-drawn by myself
+([Timendus](https://github.com/Timendus/)). Any resemblance to existing
+typefaces is either pure coincidence or a result of the limited space of
+possibilities at these low resolutions. Please credit me by linking to [this
 font library](.), so others may find it and the fonts contained in it.
 
 ### Auri
@@ -301,6 +304,41 @@ font library](.), so others may find it and the fonts contained in it.
 | Author | TinyCircuits |
 | License | [GNU General Public License v3](https://github.com/TinyCircuits/TinyCircuits-Thumby-Code-Editor/blob/master/LICENSE) |
 | Download | [`font8x8.bin`](https://github.com/TinyCircuits/TinyCircuits-Thumby-Code-Editor/raw/master/ThumbyGames/lib/font8x8.bin) |
+
+## Making your own fonts
+
+If you feel like customizing on of the fonts above, or making your own
+altogether, you can definitely do so. You will need to download the script
+[`convert.py`](./convert.py) and install pillow as a dependency:
+
+```bash
+pip3 install pillow
+```
+
+Next, you need to create an image like the ones above for your new font. You can
+find the source images for the bundled fonts [here](./fonts/images). For the
+variable width fonts you will see a little "barcode" above each character. This
+is the desired width of that particular character in binary.
+
+Then, to convert your fancy new variable width font image to a `.bin` file, run:
+
+```bash
+python3 convert.py <font image> <bin file> <font height>
+```
+
+Where 'font height' is the character height in pixels (so without the one
+additional pixel for the barcode).
+
+Or to convert a fixed width font image to a `.bin` file, run:
+
+```bash
+python3 convert.py <font image> <bin file> <font height> <font width>
+```
+
+This should give you a working `.bin` file to use with FancyFont!
+
+Finally: if you have modified one of the existing fonts, please pay attention to
+the license of that font, give credit and share alike where necessary.
 
 ## API documentation
 
