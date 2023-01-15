@@ -28,26 +28,35 @@ def render(image, width):
 # Program start
 
 if len(argv) < 4:
-  print("Missing required parameters.\n\nUsage:\n  python3 convert.py <input file> <output file> <character height>")
+  print("Missing required parameters.\n\nUsage:\n  python3 convert.py <input file> <output file> <character height> <optional character width>\n\nIf a character width is supplied, the font is encoded as a fixed width font. Otherwise as a variable width font.")
   exit()
 
 inputFile = argv[1]
 outputFile = argv[2]
 characterHeight = int(argv[3])
+fixedWidth = False
 characterWidth = 8
+
+if len(argv) == 5:
+  fixedWidth = True
+  characterWidth = int(argv[4])
 
 image = Image.open(inputFile).convert('1', dither=Image.Dither.NONE)
 # print(render(image.tobytes(), image.width))
 
 characters = splitIntoSprites(image, characterWidth, characterHeight + 1)
-binary = bytearray([characterHeight, len(characters)])
+if fixedWidth:
+  binary = bytearray()
+else:
+  binary = bytearray([characterHeight, len(characters)])
 for character in characters:
   # print(render(character, characterWidth))
   width = character[0]
   charImage = Image.frombytes('1', (8, 8), bytes(list(character)[1:] + [0] * 8))
   charImage = charImage.rotate(270)
   charImage = charImage.crop((0, 0, 8, width))
-  binary.append(width)
+  if not fixedWidth:
+    binary.append(width)
   binary += charImage.tobytes()
 
 file = open(outputFile, 'wb')
