@@ -145,17 +145,46 @@ in the line that says `setFont('5pix-widewest.bin')`.
 ### `drawText`
 
 The `drawText` function seems to behave similarly to the Thumby API version at
-first, but there are some differences. First, we can omit the color parameter if
-we want to draw in white. Second, it will do the right thing if you give it a
-string with a newline character (`\n`) as shown in the example on line 17.
-Third, this version of `drawText` accepts two more parameters to tell it to clip
-the string at some row and column.
+first, but there are some differences:
+
+  * We can omit the color parameter if we want to draw in white;
+  * It will do the right thing if you give it a string with a newline character
+    (`\n`) as shown in the example on line 17;
+  * It returns the X and Y coordinates where it stopped drawing;
+  * It accepts two additional parameters to tell it to clip the string at some
+    row and column.
+
+To illustrate the last point, if we change line 17 to this instead:
+
+```python
+fancyFont.drawText('FancyFont\n---------', 9, 4, 1, 55, 10)
+```
+
+We'll see "FancyFont" being clipped at row 10 and column 55 instead of at the
+edge of the screen:
+
+![Example of a fixed width font clipping](./pictures/clipping.png)
 
 ### `drawTextWrapped`
 
 `drawTextWrapped` accepts the same inputs as `drawText`, the difference being
 that `drawTextwrapped` will treat the clipping column as the point to word-wrap
 the string instead.
+
+So if we were to change line 21 to this:
+
+```python
+fancyFont.drawTextWrapped('Hello there, Thumby user!', 8, 22, 1, 40, 38)
+```
+
+The string will wrap at column 40 instead of at the edge of the screen, and clip
+at row 38 instead of at the bottom of the screen:
+
+![Example of a variable width font word wrapping](./pictures/wrapping.png)
+
+Just like `drawText` it will return the coordinates where the drawing stopped,
+which can be very useful for some applications to know how high and how wide the
+wrapped result actually is.
 
 ### Constructor
 
