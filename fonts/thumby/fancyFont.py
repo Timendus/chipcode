@@ -9,10 +9,8 @@ Classes:
 
 # TODO:
 #  * Wrapping consistency issue (off by one on the width somewhere?)
+#  * Vertical clipping is broken
 #  * Idea: allow loading fonts as bytearray too?
-#  * Idea: use PATH for font lookups
-
-# More broadly: rename fonts everywhere to their new names
 
 from os import stat
 from sys import path
@@ -80,7 +78,7 @@ class FancyFont:
         fontPath : string
             A path to a file that contains a font in either the TinyCircuits
             fixed width font file format or a FancyFont variable width font
-            file.
+            file. Path may be absolute or relative to any entry in `sys.path`.
 
         width : int
             The character width of the font, if the font is fixed width. Omit or
