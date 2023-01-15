@@ -8,7 +8,7 @@ mkdir -p ./fonts/images
 for THING in ../fonts/*.png
 do
   FILE=`basename "$THING"`
-  echo $FILE
+  echo "Copying $FILE"
   cp "$THING" "./fonts/images/${FILE}"
 done
 

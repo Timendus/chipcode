@@ -40,18 +40,22 @@ characterWidth = 8
 if len(argv) == 5:
   fixedWidth = True
   characterWidth = int(argv[4])
+  print("Converting '%s' into '%s' in fixed width mode at %i by %i pixels" % (inputFile, outputFile, characterWidth, characterHeight))
+else:
+  print("Converting '%s' into '%s' in variable width mode and %i pixels tall" % (inputFile, outputFile, characterHeight))
 
 image = Image.open(inputFile).convert('1', dither=Image.Dither.NONE)
 # print(render(image.tobytes(), image.width))
 
-characters = splitIntoSprites(image, characterWidth, characterHeight + 1)
+characters = splitIntoSprites(image, 8, characterHeight + 1)
 if fixedWidth:
   binary = bytearray()
 else:
   binary = bytearray([characterHeight, len(characters)])
+
 for character in characters:
-  # print(render(character, characterWidth))
-  width = character[0]
+  # print(render(character, 8))
+  width = characterWidth if fixedWidth else character[0]
   charImage = Image.frombytes('1', (8, 8), bytes(list(character)[1:] + [0] * 8))
   charImage = charImage.rotate(270)
   charImage = charImage.crop((0, 0, 8, width))
