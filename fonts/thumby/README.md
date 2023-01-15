@@ -19,12 +19,13 @@ version of the library.)
 ## Table of contents
 
   * [Cool pictures](#cool-pictures)
+  * [Getting the library](#getting-the-library)
+    * [Minified version](#minified-version)
   * [Explanation by example](#explanation-by-example)
     * [`setFont`](#setfont)
     * [`drawText`](#drawtext)
     * [`drawTextWrapped`](#drawtextwrapped)
     * [Constructor](#constructor)
-  * [Minified version](#minified-version)
   * [Available fonts](#available-fonts)
     * [Auri](#auri)
     * [threesquare](#threesquare)
@@ -43,7 +44,43 @@ version of the library.)
 
 ## Cool pictures
 
-TODO: Nice pictures here
+Here's what some of the fonts look like on an actual Thumby! Sorry for the
+almost microscopic little dust and hairs on the device 😂
+
+![Example of the Widewest font](./pictures/example-widewest.jpg)
+_Example of the Widewest font_
+
+![Example of the Ausgezeichnet font](./pictures/example-ausgezeichnet.jpg)
+_Example of the Ausgezeichnet font_
+
+![Example of the Truthful font](./pictures/example-truthful.jpg)
+_Example of the Truthful font_
+
+## Getting the library
+
+You can [download the FancyFony library
+here](https://github.com/Timendus/chipcode/raw/main/fonts/thumby/fancyFont.py).
+You'll also need one or more font files. You can find an overview with downloads
+in the [Available fonts](#available-fonts) section of this manual.
+
+After that, you will have to upload both the fonts and the library to your
+Thumby in a place where your program will be able to find them. More about that
+below in the chapter [Explanation by example](#explanation-by-example).
+
+### Minified version
+
+Note that there is also a file called
+[`fancyFont-minified.py`](https://github.com/Timendus/chipcode/raw/main/fonts/thumby/fancyFont-minified.py)
+in this repository, which is functionally the same library, but without all the
+comments and documentation:
+
+```
+   15K  fancyFont.py
+  4.1K  fancyFont-minified.py
+```
+
+It makes quite a bit of difference, so you may want to ship your project with
+the minified version of the library.
 
 ## Explanation by example
 
@@ -51,8 +88,10 @@ To render this to the display using FancyFont:
 
 ![The visual result of the code example below](./pictures/code-example.png)
 
-You need to do something like this:
+And assuming that you have uploaded the FancyFont library and the Widewest font
+to `/Games/MyGame/`, you need to do something like this:
 
+**`/Games/MyGame/MyGame.py`**
 ```python
 # Fix import path so we can import files in our game directory
 from sys import path
@@ -73,7 +112,7 @@ fancyFont.setFont('font5x7.bin', 5, 7)
 fancyFont.drawText('FancyFont\n---------', 9, 4)
 
 # Select a FancyFont font and draw some wrapping text
-fancyFont.setFont('5-pix-wide.bin')
+fancyFont.setFont('5pix-widewest.bin')
 fancyFont.drawTextWrapped('Hello there, Thumby user!', 8, 22)
 
 # Show the result
@@ -90,7 +129,7 @@ absolute path. This means you can just call `setFont('font5x7.bin', 5, 7)` and
 it will find this file in the `/lib` folder, which is in the default path. After
 adding our project's directory to the path (in lines 2 and 3 of the example) we
 can also load a font that is stored in our project directory, with
-`setFont('5-pix-wide.bin')`.
+`setFont('5pix-widewest.bin')`.
 
 Something else to notice is that `setFont` can take three more parameters
 (character width, character height and gap width) for compatibility with the
@@ -100,7 +139,7 @@ usually what it's set to anyway.
 When loading variable width fonts in the FancyFont format, you must not give
 `setFont` a character width and height. That will tell it that you're loading a
 variable width font, and load the dimensions from the file. This is what happens
-in the line that says `setFont('5-pix-wide.bin')`.
+in the line that says `setFont('5pix-widewest.bin')`.
 
 ### `drawText`
 
@@ -134,20 +173,6 @@ But it gives you some flexibility to draw into another buffer, for example for
 use with the grayscale library. It also probably means that this library is not
 really a Thumby library, but rather a generic MicroPython library, and could
 probably be used for projects on other MicroPython based platforms too.
-
-## Minified version
-
-Note that there is also a file called
-[`fancyFont-minified.py`](./fancyFont-minified.py) in this repository, which is
-functionally the same library, but without all the comments and documentation:
-
-```
-   15K  fancyFont.py
-  4.1K  fancyFont-minified.py
-```
-
-It makes quite a bit of difference, so you may want to ship your project with
-the minified version of the library.
 
 ## Available fonts
 
