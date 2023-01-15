@@ -432,6 +432,12 @@ Parameters:
       * The margin between characters for fixed width fonts. Defaults to 1.
         Ignored for variable width fonts.
 
+Exceptions:
+
+  * `OSError` 'Font file not found'
+    * Will be raised when the given font path could not be resolved to a font
+      file as an absolute path or as a path relative to any entry in `sys.path`.
+
 #### `drawText(string, xPos:int, yPos:int, color:int = 1, xMax:int = None, yMax:int = None)`
 
 Draw a string within the square defined by (xPos, yPos) and (xMax, yMax), in
@@ -463,6 +469,11 @@ Parameters:
         screen. Any line of text higher than yMax - yPos will be clipped.
         Defaults to the display height supplied to the constructor.
 
+Return value:
+
+  * `[x, y]` : `bytearray` of `int`s
+      * The X and Y coordinate at which the drawing actually stopped, which
+        should always be equal to or smaller than (xMax, yMax).
 
 #### `drawTextWrapped(string, xPos:int, yPos:int, color:int = 1, xMax:int = None, yMax:int = None)`
 
@@ -494,3 +505,9 @@ Parameters:
       * The Y coordinate to stop drawing from, counting from the top of the
         screen. Any text higher than yMax - yPos will be clipped. Defaults
         to the display height supplied to the constructor.
+
+Return value:
+
+  * `[x, y]` : `bytearray` of `int`s
+      * The X and Y coordinate at which the drawing actually stopped, which
+        should always be equal to or smaller than (xMax, yMax).
