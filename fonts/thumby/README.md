@@ -151,6 +151,22 @@ the minified version of the library.
 
 ## Available fonts
 
+The fonts shipped with this library are released under the [Creative Commons
+Attribution-ShareAlike
+license](https://creativecommons.org/licenses/by-sa/4.0/).
+
+This means that when you use these fonts in your own projects, you are required
+to give credit to the author and that derivative works may only be distributed
+under the same or a compatible license. This way we make sure the body of
+publicly available pixel art fonts will only grow over time.
+
+The 3x3 fixed width font called "Auri" was designed by Thumby Discord regular
+Auri, with feedback from the Thumby community. You may give him credit as such.
+
+The other fonts have been designed by myself
+([Timendus](https://github.com/Timendus/)). Please credit me by linking to [this
+font library](.), so others may find it and the fonts contained in it.
+
 ### Auri
 
 |  |  | 
