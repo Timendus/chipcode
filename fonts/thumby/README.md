@@ -25,6 +25,15 @@ version of the library.)
     * [`drawTextWrapped`](#drawtextwrapped)
     * [Constructor](#constructor)
   * [Minified version](#minified-version)
+  * [Available fonts](#available-fonts)
+    * [Auri](#auri)
+    * [threesquare](#threesquare)
+    * [Ausgezeichnet](#ausgezeichnet)
+    * [Black sheep](#black-sheep)
+    * [Limited Narrow](#limited-narrow)
+    * [Widewest](#widewest)
+    * [Truthful](#truthful)
+    * [TinyCircuits fonts](#tinycircuits-fonts)
   * [API documentation](#api-documentation)
     * [`Class FancyFont`](#class-fancyfont)
       * [`__init__`](#__init__displaybuffer-displaywidth--72-displayheight--40)
@@ -139,6 +148,118 @@ functionally the same library, but without all the comments and documentation:
 
 It makes quite a bit of difference, so you may want to ship your project with
 the minified version of the library.
+
+## Available fonts
+
+### Auri
+
+|  |  | 
+|-------|-------------|
+| Type | Fixed width |
+| Size | 3 by 3 pixels |
+| Author | Auri |
+| License | [Creative Commons Attribution-ShareAlike](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Download | [`3x3-auri.bin`](https://github.com/Timendus/chipcode/raw/main/fonts/thumby/fonts/fixed-width/3x3-auri.bin) |
+
+![Auri font image](./pictures/3x3-fixed-auri.png)
+
+### threesquare
+
+|  |  | 
+|-------|-------------|
+| Type | Variable width |
+| Height | 3 pixels |
+| Author | Timendus |
+| License | [Creative Commons Attribution-ShareAlike](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Download | [`3pix-threesquare.bin`](https://github.com/Timendus/chipcode/raw/main/fonts/thumby/fonts/variable-width/3pix-threesquare.bin) |
+
+![Auri font image](./pictures/3pix-variable-threesquare.png)
+
+### Ausgezeichnet
+
+|  |  | 
+|-------|-------------|
+| Type | Variable width |
+| Height | 4 pixels |
+| Author | Timendus |
+| License | [Creative Commons Attribution-ShareAlike](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Download | [`4pix-ausgezeichnet.bin`](https://github.com/Timendus/chipcode/raw/main/fonts/thumby/fonts/variable-width/4pix-ausgezeichnet.bin) |
+
+![Auri font image](./pictures/4pix-variable-ausgezeichnet.png)
+
+### Black sheep
+
+|  |  | 
+|-------|-------------|
+| Type | Variable width |
+| Height | 4 pixels |
+| Author | Timendus |
+| License | [Creative Commons Attribution-ShareAlike](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Download | [`4pix-black-sheep.bin`](https://github.com/Timendus/chipcode/raw/main/fonts/thumby/fonts/variable-width/4pix-black-sheep.bin) |
+
+![Auri font image](./pictures/4pix-variable-black-sheep.png)
+
+### Limited Narrow
+
+|  |  | 
+|-------|-------------|
+| Type | Variable width |
+| Height | 5 pixels |
+| Author | Timendus |
+| License | [Creative Commons Attribution-ShareAlike](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Download | [`5pix-limited-narrow.bin`](https://github.com/Timendus/chipcode/raw/main/fonts/thumby/fonts/variable-width/5pix-limited-narrow.bin) |
+
+![Auri font image](./pictures/5pix-variable-limited-narrow.png)
+
+### Widewest
+
+|  |  | 
+|-------|-------------|
+| Type | Variable width |
+| Height | 5 pixels |
+| Author | Timendus |
+| License | [Creative Commons Attribution-ShareAlike](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Download | [`5pix-widewest.bin`](https://github.com/Timendus/chipcode/raw/main/fonts/thumby/fonts/variable-width/5pix-widewest.bin) |
+
+![Auri font image](./pictures/5pix-variable-widewest.png)
+
+### Truthful
+
+|  |  | 
+|-------|-------------|
+| Type | Variable width |
+| Height | 6 pixels |
+| Author | Timendus |
+| License | [Creative Commons Attribution-ShareAlike](https://creativecommons.org/licenses/by-sa/4.0/) |
+| Download | [`6pix-truthful.bin`](https://github.com/Timendus/chipcode/raw/main/fonts/thumby/fonts/variable-width/6pix-truthful.bin) |
+
+![Auri font image](./pictures/6pix-variable-truthful.png)
+
+### TinyCircuits fonts
+
+|  |  | 
+|-------|-------------|
+| Type | Fixed width |
+| Size | 3 by 5 pixels |
+| Author | TinyCircuits |
+| License | [GNU General Public License v3](https://github.com/TinyCircuits/TinyCircuits-Thumby-Code-Editor/blob/master/LICENSE) |
+| Download | [`font3x5.bin`](https://github.com/TinyCircuits/TinyCircuits-Thumby-Code-Editor/raw/master/ThumbyGames/lib/font3x5.bin) |
+
+|  |  | 
+|-------|-------------|
+| Type | Fixed width |
+| Size | 5 by 7 pixels |
+| Author | TinyCircuits |
+| License | [GNU General Public License v3](https://github.com/TinyCircuits/TinyCircuits-Thumby-Code-Editor/blob/master/LICENSE) |
+| Download | [`font5x7.bin`](https://github.com/TinyCircuits/TinyCircuits-Thumby-Code-Editor/raw/master/ThumbyGames/lib/font5x7.bin) |
+
+|  |  | 
+|-------|-------------|
+| Type | Fixed width |
+| Size | 8 by 8 pixels |
+| Author | TinyCircuits |
+| License | [GNU General Public License v3](https://github.com/TinyCircuits/TinyCircuits-Thumby-Code-Editor/blob/master/LICENSE) |
+| Download | [`font8x8.bin`](https://github.com/TinyCircuits/TinyCircuits-Thumby-Code-Editor/raw/master/ThumbyGames/lib/font8x8.bin) |
 
 ## API documentation
 

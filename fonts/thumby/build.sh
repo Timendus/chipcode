@@ -22,6 +22,16 @@ python3 convert.py ./fonts/images/5pix-variable-limited-narrow.png ./fonts/varia
 python3 convert.py ./fonts/images/5pix-variable-widewest.png ./fonts/variable-width/5pix-widewest.bin 5
 python3 convert.py ./fonts/images/6pix-variable-truthful.png ./fonts/variable-width/6pix-truthful.bin 6
 
+# Scale font images for README
+# needs a `brew install ffmpeg` or similar
+
+for IMAGE in ./fonts/images/*.png
+do
+  FILE=`basename "$IMAGE"`
+  echo "Resizing $FILE for README"
+  ffmpeg -hide_banner -loglevel error -y -i "$IMAGE" -vf scale=704:-1:flags=neighbor "./pictures/${FILE}"
+done
+
 # Minify library
 # Needs a `pip3 install python-minifier`
 
