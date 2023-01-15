@@ -9,7 +9,6 @@ Classes:
 
 # TODO:
 #  * Wrapping consistency issue (off by one on the width somewhere?)
-#  * Vertical clipping is broken
 #  * Idea: allow loading fonts as bytearray too?
 
 from os import stat
@@ -326,6 +325,11 @@ class FancyFont:
       if blitWidth > currentWidth:
           blitWidth = currentWidth   # It's more than we need
 
+      # Can we draw the full character height?
+      heightMask = 0xFF
+      if yPos + characterHeight > yMax:
+        heightMask >>= (8 - (yMax - yPos))   # Nope; just the top part
+
       # Update drawn bounds
       right = int(max(right, xPos + blitWidth - 1))
       bottom = int(max(bottom, min(yPos + characterHeight - 1, yMax - 1)))
@@ -338,14 +342,14 @@ class FancyFont:
       dispBufIndex = (yPos >> 3) * screenWidth + xPos
       if color == 0:
         for x in range(0, blitWidth):
-          fontByte = characterBufferPtr[characterOffset + x]
+          fontByte = characterBufferPtr[characterOffset + x] & heightMask
           if 0 <= dispBufIndex + x < dispBufSize:
             displayBuffer[dispBufIndex + x] &= 0xFF ^ (fontByte << vertOffset)
           if 0 <= dispBufIndex + x + screenWidth < dispBufSize:
             displayBuffer[dispBufIndex + x + screenWidth] &= 0xFF ^ (fontByte >> (8 - vertOffset))
       else:
         for x in range(0, blitWidth):
-          fontByte = characterBufferPtr[characterOffset + x]
+          fontByte = characterBufferPtr[characterOffset + x] & heightMask
           if 0 <= dispBufIndex + x < dispBufSize:
             displayBuffer[dispBufIndex + x] |= fontByte << vertOffset
           if 0 <= dispBufIndex + x + screenWidth < dispBufSize:
