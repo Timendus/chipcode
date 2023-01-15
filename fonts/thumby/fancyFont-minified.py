@@ -30,35 +30,37 @@ class FancyFont:
 		for C in range(int(A.numCharactersInFont)):A.characterIndices.append(B);A.fontFile.seek(B);A.fontFile.readinto(A.characterBuffer);B+=int(A.characterBuffer[0])+1
 	@micropython.viper
 	def _drawText(self,string:ptr8,strLen:int,xStart:int,yPos:int,color:int,xMax:int,yMax:int):
-		T=strLen;S=string;O=yMax;N=xMax;M=xStart;C=yPos;B=self;S:ptr8=ptr8(S);T:int=int(T);M:int=int(M);C:int=int(C);N:int=int(N);O:int=int(O);U:int=0;P:int=0;F:int=0;G:int=0;J:int=0;D:int=0;H:int=0;I:int=0;e:int=0;E:int=M;V:int=E;W:int=C;Q:ptr8=ptr8(B.displayBuffer);X=B.fontFile;a=B.characterBuffer;Y:ptr8=ptr8(a);K:int=int(B.displayWidth);L:int=int(B.characterWidth);Z:int=int(B.characterHeight);b:int=int(B.characterMarginWidth);c:int=int(B.numCharactersInFont);R:int=int(len(B.displayBuffer))
-		if L==VARIABLE_WIDTH:d=B.characterIndices
-		while U<T:
-			F=S[U];U+=1
-			if F==NEWLINE:C+=Z+1;E=M;continue
+		V=strLen;U=string;O=xMax;N=xStart;H=yMax;C=self;A=yPos;U:ptr8=ptr8(U);V:int=int(V);N:int=int(N);A:int=int(A);O:int=int(O);H:int=int(H);W:int=0;P:int=0;F:int=0;G:int=0;K:int=0;D:int=0;I:int=0;J:int=0;Q:int=0;E:int=N;X:int=E;Y:int=A;R:ptr8=ptr8(C.displayBuffer);Z=C.fontFile;b=C.characterBuffer;a:ptr8=ptr8(b);L:int=int(C.displayWidth);M:int=int(C.characterWidth);S:int=int(C.characterHeight);c:int=int(C.characterMarginWidth);d:int=int(C.numCharactersInFont);T:int=int(len(C.displayBuffer))
+		if M==VARIABLE_WIDTH:e=C.characterIndices
+		while W<V:
+			F=U[W];W+=1
+			if F==NEWLINE:A+=S+1;E=N;continue
 			F=F-SPACE
-			if not 0<=F<c:continue
-			if L==VARIABLE_WIDTH:X.seek(int(d[F]))
-			else:X.seek(F*L)
-			X.readinto(a)
-			if L==VARIABLE_WIDTH:G=Y[0];P=1
-			else:G=L;P=0
-			if E+G<=0 or E>=N or C+Z<=0:E+=G+b;continue
-			if C>=O:break
-			I=N-E
-			if I>G:I=G
-			W=int(max(W,E+I-1));V=int(max(V,min(C+Z-1,O-1)));J=C&7;D=(C>>3)*K+E
+			if not 0<=F<d:continue
+			if M==VARIABLE_WIDTH:Z.seek(int(e[F]))
+			else:Z.seek(F*M)
+			Z.readinto(b)
+			if M==VARIABLE_WIDTH:G=a[0];P=1
+			else:G=M;P=0
+			if E+G<=0 or E>=O or A+S<=0:E+=G+c;continue
+			if A>=H:break
+			J=O-E
+			if J>G:J=G
+			Q=255
+			if A+S>H:Q>>=8-(H-A)
+			Y=int(max(Y,E+J-1));X=int(max(X,min(A+S-1,H-1)));K=A&7;D=(A>>3)*L+E
 			if color==0:
-				for A in range(0,I):
-					H=Y[P+A]
-					if 0<=D+A<R:Q[D+A]&=255^H<<J
-					if 0<=D+A+K<R:Q[D+A+K]&=255^H>>8-J
+				for B in range(0,J):
+					I=a[P+B]&Q
+					if 0<=D+B<T:R[D+B]&=255^I<<K
+					if 0<=D+B+L<T:R[D+B+L]&=255^I>>8-K
 			else:
-				for A in range(0,I):
-					H=Y[P+A]
-					if 0<=D+A<R:Q[D+A]|=H<<J
-					if 0<=D+A+K<R:Q[D+A+K]|=H>>8-J
-			E+=G+b
-		return bytearray([W,V])
+				for B in range(0,J):
+					I=a[P+B]&Q
+					if 0<=D+B<T:R[D+B]|=I<<K
+					if 0<=D+B+L<T:R[D+B+L]|=I>>8-K
+			E+=G+c
+		return bytearray([Y,X])
 	@micropython.viper
 	def _wrapText(self,string:ptr8,strLen:int,xStart:int,yPos:int,xMax:int,yMax:int):
 		L=yMax;K=xMax;H=string;F=yPos;E=xStart;D=strLen;C=self;H:ptr8=ptr8(H);D:int=int(D);E:int=int(E);F:int=int(F);K:int=int(K);L:int=int(L);A:int=0;B:int=0;I:int=0;J:int=E;M=C.fontFile;O=C.characterBuffer;R:ptr8=ptr8(O);G:int=int(C.characterWidth);P:int=int(C.characterHeight);S:int=int(C.characterMarginWidth);T:int=int(C.numCharactersInFont)
