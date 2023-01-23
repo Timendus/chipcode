@@ -9,7 +9,6 @@ Classes:
 
 # TODO:
 #  * Wrapping consistency issue (off by one on the width somewhere?)
-#  * Idea: allow loading fonts as bytearray too?
 
 from os import stat
 from sys import path
