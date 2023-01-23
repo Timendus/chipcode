@@ -1,6 +1,7 @@
 _A=None
 from os import stat
 from sys import path
+from io import BytesIO
 VARIABLE_WIDTH=const(0)
 NEWLINE=const(10)
 SPACE=const(32)
@@ -9,9 +10,11 @@ class FancyFont:
 	def __init__(self,displayBuffer,displayWidth=72,displayHeight=40):A=self;A.displayBuffer=displayBuffer;A.displayWidth=int(displayWidth);A.displayHeight=int(displayHeight)
 	@micropython.native
 	def setFont(self,fontPath,width:int=_A,height:int=_A,space:int=1):
-		D=height;C=width;B=fontPath;A=self;B=A._findFile(B);A.fontFile=open(B,'rb');A.characterBuffer=bytearray(9)
+		D=height;C=width;B=fontPath;A=self;A.characterBuffer=bytearray(9)
+		if type(B)==str:B=A._findFile(B);A.fontFile=open(B,'rb');A.fontSize=stat(B)[6]
+		else:A.fontFile=BytesIO(B);A.fontSize=len(B)
 		if C==_A and D==_A:A.characterWidth=VARIABLE_WIDTH;A.characterMarginWidth=0;A.fontFile.readinto(A.characterBuffer);A.characterHeight=A.characterBuffer[0];A.numCharactersInFont=A.characterBuffer[1];A._collectCharacterIndices()
-		else:A.characterWidth=C;A.characterHeight=D;A.characterMarginWidth=space;A.numCharactersInFont=stat(B)[6]//A.characterWidth
+		else:A.characterWidth=C;A.characterHeight=D;A.characterMarginWidth=space;A.numCharactersInFont=A.fontSize//C
 	@micropython.native
 	def drawText(self,string,xPos:int,yPos:int,color:int=1,xMax:int=_A,yMax:int=_A):B=string;A=self;return A._drawText(B,len(B),xPos,yPos,color,xMax or A.displayWidth,yMax or A.displayHeight)
 	@micropython.native
