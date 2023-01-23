@@ -13,6 +13,7 @@ Classes:
 
 from os import stat
 from sys import path
+from io import BytesIO
 
 VARIABLE_WIDTH = const(0)
 NEWLINE        = const(10)
@@ -94,9 +95,16 @@ class FancyFont:
             The margin between characters for fixed width fonts. Defaults to 1.
             Ignored for variable width fonts.
     """
-    fontPath = self._findFile(fontPath)
-    self.fontFile = open(fontPath, 'rb')
     self.characterBuffer = bytearray(9)
+    if type(fontPath) == str:
+      # Assume `fontPath` points to a font file
+      fontPath = self._findFile(fontPath)
+      self.fontFile = open(fontPath, 'rb')
+      self.fontSize = stat(fontPath)[6]
+    else:
+      # Assume `fontPath` is secretly a bytearray representing the font
+      self.fontFile = BytesIO(fontPath)
+      self.fontSize = len(fontPath)
 
     if width == None and height == None:
       # Assume variable width FancyFont file format
@@ -111,7 +119,7 @@ class FancyFont:
       self.characterWidth = width
       self.characterHeight = height
       self.characterMarginWidth = space
-      self.numCharactersInFont = stat(fontPath)[6] // self.characterWidth
+      self.numCharactersInFont = self.fontSize // width
 
   # This wrapper function is here because viper functions can't have a variable
   # number of arguments
