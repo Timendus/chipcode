@@ -3,13 +3,14 @@
 _A MicroPython font library for the Thumby playable keychain console_
 
 FancyFont is a drop-in replacement to the `setFont()` and `drawText()` functions in
-the Thumby API. It has a couple of improvements over those functions:
+the Thumby API. It has a couple of improvements over those functions, supporting:
 
-  * Support for word wrapping with `drawTextWrapped()`
-  * Support for clipping (and not just at the edge of the screen)
-  * Support for the newline character (`\n`) in strings
-  * Support for variable width fonts
-  * Can render to any bytearray buffer, so "should work" with grayscale or
+  * Variable width fonts
+  * Proper word wrapping with `drawTextWrapped()`
+  * Loading fonts from file or a `bytearray`
+  * Clipping (and not just at the edge of the screen)
+  * The newline character (`\n`) in strings
+  * Rendering to any bytearray buffer, so "should work" with grayscale or
     non-Thumby projects too
 
 (This sub-project is in this repository because I didn't think it really needed
@@ -141,6 +142,12 @@ When loading variable width fonts in the FancyFont format, you must not give
 `setFont` a character width and height. That will tell it that you're loading a
 variable width font, and load the dimensions from the file. This is what happens
 in the line that says `setFont('5pix-widewest.bin')`.
+
+As an additional bonus feature, fonts can be loaded from a bytearray instead of
+a file. This is mostly for power-users who are working on a font in the emulator
+or programmatically modifying fonts. If you are one of those users: you can
+supply the `setFont` function with a bytearray instead of a path, and it will
+Just Work™️ for both types of font formats.
 
 ### `drawText`
 
@@ -336,7 +343,7 @@ font library](.), so others may find it and the fonts contained in it.
 
 ## Making your own fonts
 
-If you feel like customizing on of the fonts above, or making your own
+If you feel like customizing one of the fonts above, or making your own
 altogether, you can definitely do so. You will need to download the script
 [`convert.py`](./convert.py) and install pillow as a dependency:
 
@@ -412,10 +419,14 @@ subsequent drawText commands.
 
 Parameters:
 
-  * `fontPath` : `string`
-      * A path to a file that contains a font in either the TinyCircuits
-        fixed width font file format or a FancyFont variable width font
-        file. Path may be absolute or relative to any entry in `sys.path`.
+  * `fontPath` : `string` or `bytearray`
+      * If `string`: A path to a file that contains a font in either the
+        TinyCircuits fixed width font file format or a FancyFont variable
+        width font file. Path may be absolute or relative to any entry in
+        `sys.path`.
+      * If `bytearray`: A bytearray containing a font in either the
+        TinyCircuits fixed width font format or a FancyFont variable width
+        format.
 
   * `width` : `int`
       * The character width of the font, if the font is fixed width. Omit or

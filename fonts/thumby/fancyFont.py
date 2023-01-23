@@ -75,10 +75,14 @@ class FancyFont:
 
     Parameters:
 
-        fontPath : string
-            A path to a file that contains a font in either the TinyCircuits
-            fixed width font file format or a FancyFont variable width font
-            file. Path may be absolute or relative to any entry in `sys.path`.
+        fontPath : string or bytearray
+            If string: A path to a file that contains a font in either the
+            TinyCircuits fixed width font file format or a FancyFont variable
+            width font file. Path may be absolute or relative to any entry in
+            `sys.path`.
+            If bytearray: A bytearray containing a font in either the
+            TinyCircuits fixed width font format or a FancyFont variable width
+            format.
 
         width : int
             The character width of the font, if the font is fixed width. Omit or
