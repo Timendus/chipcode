@@ -395,7 +395,7 @@ class FancyFont:
     numCharactersInFont:int  = int(self.numCharactersInFont)
 
     if characterWidth == VARIABLE_WIDTH:
-      characterIndices  = self.characterIndices
+      characterIndices = self.characterIndices
 
     # Write result to a new string, so we don't mess with the original
     output = bytearray(strLen)
