@@ -15,14 +15,6 @@ VARIABLE_WIDTH = const(0)
 NEWLINE        = const(10)
 SPACE          = const(32)
 
-# For debugging
-
-# def dump(barray):
-#   result = ''
-#   for i in barray:
-#     result += "0x%02x" % i + ' '
-#   return result
-
 class FancyFont:
   """
   A container class that holds functions for font rendering for fixed width and
