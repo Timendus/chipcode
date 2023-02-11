@@ -165,6 +165,10 @@ To illustrate the last point, if we change line 17 to this instead:
 
 ```python
 fancyFont.drawText('FancyFont\n---------', 9, 4, 1, 55, 10)
+
+# or
+
+fancyFont.drawText('FancyFont\n---------', 9, 4, xMax=55, yMax=10)
 ```
 
 We'll see "FancyFont" being clipped at row 10 and column 55 instead of at the
@@ -182,6 +186,10 @@ So if we were to change line 21 to this:
 
 ```python
 fancyFont.drawTextWrapped('Hello there, Thumby user!', 8, 22, 1, 40, 38)
+
+# or
+
+fancyFont.drawTextWrapped('Hello there, Thumby user!', 8, 22, xMax=40, yMax=38)
 ```
 
 The string will wrap at column 40 instead of at the edge of the screen, and clip
@@ -202,7 +210,9 @@ and 40. For normal operation this means you just do:
 
 ```python
 fancyFont = FancyFont(thumbyGraphics.display.display.buffer)
-  # or
+
+# or
+
 fancyFont = FancyFont(thumby.display.display.buffer)
 ```
 
