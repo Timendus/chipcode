@@ -66,26 +66,26 @@ class FancyFont:
 		return bytearray([Y,X])
 	@micropython.viper
 	def _wrapText(self,string:ptr8,strLen:int,xStart:int,yPos:int,xMax:int,yMax:int):
-		L=yMax;K=xMax;H=string;F=yPos;E=xStart;D=strLen;C=self;H:ptr8=ptr8(H);D:int=int(D);E:int=int(E);F:int=int(F);K:int=int(K);L:int=int(L);A:int=0;B:int=0;I:int=0;J:int=E;M=C.fontFile;O=C.characterBuffer;R:ptr8=ptr8(O);G:int=int(C.characterWidth);P:int=int(C.characterHeight);S:int=int(C.characterMarginWidth);T:int=int(C.numCharactersInFont)
-		if G==VARIABLE_WIDTH:U=C.characterIndices
-		Q=bytearray(D);N:ptr8=ptr8(Q)
-		while A<D:
-			B=H[A];N[A]=B;A+=1
-			if B==NEWLINE:F+=P+1;J=E;continue
+		M=yMax;L=xMax;G=yPos;F=xStart;E=strLen;D=string;C=self;D:ptr8=ptr8(D);E:int=int(E);F:int=int(F);G:int=int(G);L:int=int(L);M:int=int(M);A:int=0;B:int=0;I:int=0;J:int=F;N=C.fontFile;O=C.characterBuffer;R:ptr8=ptr8(O);H:int=int(C.characterWidth);P:int=int(C.characterHeight);S:int=int(C.characterMarginWidth);T:int=int(C.numCharactersInFont)
+		if H==VARIABLE_WIDTH:U=C.characterIndices
+		Q=bytearray(E);K:ptr8=ptr8(Q)
+		while A<E:
+			B=D[A];K[A]=B;A+=1
+			if B==NEWLINE:G+=P+1;J=F;continue
 			B=B-SPACE
 			if not 0<=B<T:continue
-			if G==VARIABLE_WIDTH:M.seek(U[B])
-			else:M.seek(B*G)
-			M.readinto(O);I=G
-			if G==VARIABLE_WIDTH:I=R[0]
-			if F>=L:break
-			if J+I>=K:
+			if H==VARIABLE_WIDTH:N.seek(U[B])
+			else:N.seek(B*H)
+			I=H
+			if H==VARIABLE_WIDTH:N.readinto(O);I=R[0]
+			if G>=M:break
+			if J+I>=L:
 				A-=1;V=A
-				while A>0 and H[A]!=SPACE:A-=1
-				if A==0 or N[A]==NEWLINE:A=V
+				while A>0 and D[A]!=SPACE and K[A]!=NEWLINE:A-=1
+				if A!=0 and K[A]!=NEWLINE:K[A]=NEWLINE;G+=P+1;J=F
 				else:
-					if 0>A>=D:raise ValueError('Attempted to write outside string bounds: this should never happen!')
-					N[A]=NEWLINE
-				A+=1;F+=P+1;J=E;continue
+					A=V
+					while A<E and D[A]!=SPACE and D[A]!=NEWLINE:A+=1
+				A+=1;continue
 			J+=I+S
 		return Q
