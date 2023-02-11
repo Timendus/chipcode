@@ -61,7 +61,7 @@ _Example of the Truthful font_
 ## Getting the library
 
 You can [download the FancyFony library
-here](https://github.com/Timendus/chipcode/raw/main/fonts/thumby/fancyFont.py).
+here](https://github.com/Timendus/chipcode/blob/main/fonts/thumby/fancyFont.py).
 You'll also need one or more font files. You can find an overview with downloads
 in the [Available fonts](#available-fonts) section of this manual.
 
@@ -72,7 +72,7 @@ below in the chapter [Explanation by example](#explanation-by-example).
 ### Minified version
 
 Note that there is also a file called
-[`fancyFont-minified.py`](https://github.com/Timendus/chipcode/raw/main/fonts/thumby/fancyFont-minified.py)
+[`fancyFont-minified.py`](https://github.com/Timendus/chipcode/blob/main/fonts/thumby/fancyFont-minified.py)
 in this repository, which is functionally the same library, but without all the
 comments and documentation:
 
