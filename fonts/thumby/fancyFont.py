@@ -7,9 +7,6 @@ Classes:
     FancyFont
 """
 
-# TODO:
-#  * Wrapping consistency issue (off by one on the width somewhere?)
-
 from os import stat
 from sys import path
 from io import BytesIO
@@ -430,35 +427,44 @@ class FancyFont:
       else:
         fontFile.seek(character * characterWidth)
 
-      # Load the character bitmap from file into our buffer
-      fontFile.readinto(characterBuffer)
-
-      # Load the width of this character (for variable width fonts)
+      # Determine the width of this character
       currentWidth = characterWidth
       if characterWidth == VARIABLE_WIDTH:
+        # Load the character bitmap from file into our buffer
+        fontFile.readinto(characterBuffer)
         currentWidth = characterBufferPtr[0]
 
       # Are we below where we're allowed to draw? Then we're really done
       if yPos >= yMax:
         break;
 
-      # Are we overflowing the horizontal bounds? Then add in a NEWLINE
+      # Are we overflowing the horizontal bounds? Then wrap the string
       if xPos + currentWidth >= xMax:
         stringIndex -= 1 # Undo stringIndex increase after loading character
         problemIndex = stringIndex
-        while stringIndex > 0 and string[stringIndex] != SPACE:
+
+        # Find the previous space or newline
+        while stringIndex > 0 and string[stringIndex] != SPACE and outputPtr[stringIndex] != NEWLINE:
           stringIndex -= 1
-        # Did we go all the way back to the previous break, or can we add a NEWLINE?
-        if stringIndex == 0 or outputPtr[stringIndex] == NEWLINE:
-          stringIndex = problemIndex
-        else:
-          # Just as a guard:
-          if 0 > stringIndex >= strLen:
-            raise ValueError("Attempted to write outside string bounds: this should never happen!")
+
+        # Did we go all the way back to the previous break?
+        if stringIndex != 0 and outputPtr[stringIndex] != NEWLINE:
+          # No; we can safely replace this space with a newline in the output
+          # string.
           outputPtr[stringIndex] = NEWLINE
+          yPos += characterHeight + 1
+          xPos = xStart
+
+        else:
+          # Yes; Word is too long!
+          # Search forward to the next space or newline, because we know we
+          # will not be rendering the rest of this word
+          stringIndex = problemIndex
+          while stringIndex < strLen and string[stringIndex] != SPACE and string[stringIndex] != NEWLINE:
+            stringIndex += 1
+
+        # Do the next character!
         stringIndex += 1
-        yPos += characterHeight + 1
-        xPos = xStart
         continue
 
       xPos += currentWidth + characterMarginWidth
