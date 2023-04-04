@@ -57,6 +57,7 @@ function octopussify(file, filepath) {
     file.split('\n')
         .filter((line, i) => conditionals(line, outputting, i + 1))
         .map(line => loadImages(line, filepath))
+        .map(line => loadBinaries(line, filepath))
         .map(line => includes(line, mode, filepath))
         .join('\n');
 }
@@ -157,6 +158,37 @@ function loadImages(line, filepath) {
   return imageLoader.load(fileToInclude, modifier);
 }
 
+// Including binary files directly
+
+function loadBinaries(line, filepath) {
+  const extensions = [
+    '.bin',
+    '.ch8',
+  ];
+
+  const matches = match(line, `:include${whitespace}["'](.*(${extensions.join('|')}))["']`);
+
+  if ( !matches )
+    return line;
+
+  const data = loadFile(matches[1], filepath, true);
+  console.log(typeof data);
+
+  if (typeof data == "string")
+    return data;
+
+  // Output the binary data in a format Octo understands
+  let output = "";
+  const stride = 16;
+  for ( let i = 0; i < data.length; i += stride ) {
+    output += " ";
+    for ( let j = i; j < data.length && j < i + stride; j++ )
+      output += ` 0x${data[j].toString(16).padStart(2, '0')}`;
+    output +=  `\n`;
+  }
+  return output;
+}
+
 // Reordering :code and :data
 
 function reorder(file) {
@@ -184,16 +216,16 @@ function selectLines(onlyCode = true) {
 
 // Helpers
 
-function loadFile(filename, filepath) {
+function loadFile(filename, filepath, binary=false) {
   // If file is part of the current project, include it
   const localFile = filepath + path.sep + filename;
   if ( fs.existsSync(localFile) )
-    return fs.readFileSync(localFile).toString();
+    return binary ? fs.readFileSync(localFile) : fs.readFileSync(localFile).toString();
 
   // Otherwise, see if we're including from a dependency
   try {
     filename = require.resolve(filename);
-    return fs.readFileSync(filename).toString();
+    return binary ? fs.readFileSync(filename) : fs.readFileSync(filename).toString();
   } catch(e) {
     return `# Error: Requested file '${filename}' not found\n:assert "Requested file '${filename}' not found" { 0 }`;
   }

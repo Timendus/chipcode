@@ -34,7 +34,9 @@ function octopussify(input, output) {
     const command = __dirname + path.sep + `../index.js ${input} ${output}`;
     exec(command, (err, stdout, stderr) => {
       // We're not interested in the program's output, as long as it has run
-      // without errors
+      // without errors. For debugging:
+      // console.log(stdout);
+      // console.error(stderr);
       if (err) return reject(err);
       resolve();
     });
