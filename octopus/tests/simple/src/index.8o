@@ -55,3 +55,17 @@
 :else
   :include "included-vip.8o"
 :end
+
+# We can also include a binary file as-is:
+
+: chip8-logo-rom
+  :include "chip8-logo.ch8"
+
+# Including files that don't exist gives us useful errors:
+
+:include "nonexistent.8o"
+:include "nonexistent.bin"
+
+# Including an image without the image-loader present gives a useful error:
+
+:include "mypicture.png"
