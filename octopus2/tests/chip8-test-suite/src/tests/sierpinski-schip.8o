@@ -1,0 +1,60 @@
+:alias pointX v4
+:alias pointY v5
+
+: main
+	hires
+
+	# Pick starting point for the chaos game
+	pointX := 64
+	pointY := 0
+
+	loop
+		# Pick a random vertex of the triangle
+		i := triangle
+		pick-vertex
+		
+		# Move the current point to the average between it and the chosen vertex
+		v2 := pointX
+		average
+		pointX := v0
+		v0 := v1
+		v2 := pointY
+		average
+		pointY := v0
+		
+		# Draw the new point
+		i := point
+		sprite pointX pointY 1
+		if vF != 0 then sprite pointX pointY 1
+	again
+	
+# Add a random value of 0, 2 or 4 to i and load v0, v1
+: pick-vertex
+	v2 := 6
+	loop
+		v2 := random 0b00000110
+		if v2 == 6 then
+	again
+	i += v2
+	load v1
+	return
+	
+# Given v0 and v2, return the average in v0
+: average
+	if v0 > v2 begin
+		vF := v0
+		v0 := v2
+		v2 := vF
+	end
+	v2 -= v0
+	v2 >>= v2
+	v0 += v2
+	return
+
+: triangle
+	64  0
+	0   64
+	128 64
+
+: point
+	0b10000000
