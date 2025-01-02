@@ -1,0 +1,143 @@
+# Bad Apple for XO-CHIP, 2022
+# Written for OctoJam 9
+#  * Video encoding and decoding - Timendus
+#  * Music arrangement and coding - Kouzeru
+
+:include "music/header.8o"
+
+:alias ticks vA
+:alias current-frame-hi vB
+:alias current-frame-lo vC
+:alias playing vD
+:alias frames-per-image vE
+
+:const STOPPED 0
+:const PLAYING 1
+:const STEPPING 2
+:const SMOOTHING 1 # To trigger the inclusion of the smoothing algorithm
+
+: main
+  :if HIRES
+    hires
+  :end
+  clear
+  loadSong 0 70 # or 65?
+  :alias unpack-hi current-frame-hi
+  :alias unpack-lo current-frame-lo
+  :unpack long bad_apple_000
+  playing := STEPPING
+  frames-per-image := 0
+  delay := frames-per-image # Reset timing
+
+: main-loop
+  # This loop syncs to 15FPS and does the high-frequency stuff
+  :if HIRES
+    ticks := 2 # 2/60th = 1/30th of a second = 30 FPS
+  :else
+    ticks := 6 # 6/60th = 1/10th of a second = 10 FPS
+  :end
+  loop
+    loop
+      # Handle key input
+      vF := 6
+      if vF key begin
+        v0 := PLAYING
+        playing ^= v0 # Play / pause the video
+        loop if vF key then again
+      end
+      vF := 9
+      if vF key begin
+        playing := STEPPING
+        loop if vF key then again
+      end
+      vF := 4
+      if vF key then jump main  # Restart the video
+
+      # Are we playing?
+      if playing == STOPPED begin
+        vF := 0
+        buzzer := vF
+        jump main-loop
+      end
+
+      # Wait for one display refresh
+      vF := delay
+      if vF != 0 then
+    again
+    vF := 1
+    delay := vF
+
+    # Play the music, which destroys every register under the sun
+    i := safe-storage  save vA - vE
+    songPlayNextTick
+    i := safe-storage  load vA - vE
+
+    ticks -= 1
+    if ticks != 0 then
+  again
+
+  # From here on down we know we're running this code at 15FPS
+
+  # If we're stepping, stop after this frame
+  if playing == STEPPING then playing := STOPPED
+
+  # Do we have any duplicate frames left to play?
+  if frames-per-image != 0 begin
+    frames-per-image -= 1
+    jump main-loop
+  end
+
+  # Show the next frame on the screen
+  frames-per-image := 0
+  get-frame-pointer
+  decode
+
+  # Are we done..?
+  :alias unpack-hi v2
+  :alias unpack-lo v3
+  :unpack long the-end
+  if current-frame-hi != v2 then jump main-loop
+  if current-frame-lo != v3 then jump main-loop
+
+  # We're done! 🎉
+  vF := 0
+  buzzer := vF
+  loop
+    vF := 4
+    if vF key then jump main  # Restart the video
+  again
+
+# Get pointer to current frame in i
+: get-frame-pointer
+  i := smc-load-current-frame
+  save current-frame-hi - current-frame-lo
+  0xF0 0x00 # i := long ...
+: smc-load-current-frame
+  0 0
+  return
+
+# Move frame pointer vF bytes
+: update-frame-pointer
+  current-frame-lo += vF
+  current-frame-hi += vF
+  return
+
+: safe-storage
+  0 0 0 0 0 0
+: safe-storage2
+  0 0 0 0
+
+:include "music/player.8o"
+:include "music/song.8o"
+
+:include "video/decoder.8o"
+
+:if HIRES
+  :include "video/hires/codebook.8o"
+  :include "video/hires/frames.8o"
+:else
+  :include "video/lores/codebook.8o"
+  :include "video/lores/frames.8o"
+:end
+:segment data
+: the-end  # So we know when we're out of frames
