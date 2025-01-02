@@ -1,0 +1,334 @@
+# Show the contents of the display buffer on the screen
+: display-copy-values
+  0 1 8 16 24 32 40 48 56 15
+: display-copy
+  i := display-copy-values
+  load v9
+  i := display-buffer
+
+  s8plane 0xF
+  clear
+
+  s8plane 1
+  sprite v0 v1 15   i += v9
+  sprite v0 v3 15   i += v9
+  sprite v2 v1 15   i += v9
+  sprite v2 v3 15   i += v9
+  sprite v3 v1 15   i += v9
+  sprite v3 v3 15   i += v9
+  sprite v4 v1 15   i += v9
+  sprite v4 v3 15   i += v9
+  sprite v5 v1 15   i += v9
+  sprite v5 v3 15   i += v9
+  sprite v6 v1 15   i += v9
+  sprite v6 v3 15   i += v9
+  sprite v7 v1 15   i += v9
+  sprite v7 v3 15   i += v9
+  sprite v8 v1 15   i += v9
+  sprite v8 v3 15   i += v9
+
+  s8plane 2
+  sprite v0 v1 15   i += v9
+  sprite v0 v3 15   i += v9
+  sprite v2 v1 15   i += v9
+  sprite v2 v3 15   i += v9
+  sprite v3 v1 15   i += v9
+  sprite v3 v3 15   i += v9
+  sprite v4 v1 15   i += v9
+  sprite v4 v3 15   i += v9
+  sprite v5 v1 15   i += v9
+  sprite v5 v3 15   i += v9
+  sprite v6 v1 15   i += v9
+  sprite v6 v3 15   i += v9
+  sprite v7 v1 15   i += v9
+  sprite v7 v3 15   i += v9
+  sprite v8 v1 15   i += v9
+  sprite v8 v3 15   i += v9
+
+  :if OCTO
+    s8plane 1
+  :else
+    s8plane 4
+  :end
+  sprite v0 v1 15   i += v9
+  sprite v0 v3 15   i += v9
+  sprite v2 v1 15   i += v9
+  sprite v2 v3 15   i += v9
+  sprite v3 v1 15   i += v9
+  sprite v3 v3 15   i += v9
+  sprite v4 v1 15   i += v9
+  sprite v4 v3 15   i += v9
+  sprite v5 v1 15   i += v9
+  sprite v5 v3 15   i += v9
+  sprite v6 v1 15   i += v9
+  sprite v6 v3 15   i += v9
+  sprite v7 v1 15   i += v9
+  sprite v7 v3 15   i += v9
+  sprite v8 v1 15   i += v9
+  sprite v8 v3 15   i += v9
+
+  :if OCTO
+    s8plane 1
+  :else
+    s8plane 8
+  :end
+  sprite v0 v1 15   i += v9
+  sprite v0 v3 15   i += v9
+  sprite v2 v1 15   i += v9
+  sprite v2 v3 15   i += v9
+  sprite v3 v1 15   i += v9
+  sprite v3 v3 15   i += v9
+  sprite v4 v1 15   i += v9
+  sprite v4 v3 15   i += v9
+  sprite v5 v1 15   i += v9
+  sprite v5 v3 15   i += v9
+  sprite v6 v1 15   i += v9
+  sprite v6 v3 15   i += v9
+  sprite v7 v1 15   i += v9
+  sprite v7 v3 15   i += v9
+  sprite v8 v1 15   i += v9
+  sprite v8 v3 15   i += v9
+
+  return
+
+# Display buffer contains 8 * 15 * 2 bytes = 240 bytes per layer
+# 240 / 15 = 16. So either load 16 values 15 times or the other way around
+: display-clear-values
+  0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+: display-clear
+  i := display-clear-values
+  load vF
+  i := display-buffer
+
+  # Plane 1
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF
+
+  # Plane 2
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF
+
+  # Plane 3
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF
+
+  # Plane 4
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF  save vF
+  save vF  save vF  save vF
+  return
+
+# v0, v1 = complex sprite address
+# v2 = X coordinate
+# v3 = Y coordinate
+# Preserves v2 - v3
+# Destroys v0, v1, v4 - vA and i
+: display-complex-sprite
+  :alias layer vA
+
+  layer := 0
+  i := display-complex-sprite-address
+  save v1
+
+  loop
+    # Get i to point to the complex sprite
+    0xF0 0x00 # i := long ....
+  : display-complex-sprite-address
+    0x00 0x00
+    load v1
+    v4 := v1
+
+    # Done all layers? Then return
+    if layer == v0 then return
+
+    # Get pointer to the right sprite data
+    i += layer
+    i += layer
+    i += layer
+
+    # Get plane
+    load v0
+    v5 := v0
+
+    load v1
+    display-sprite
+
+    layer += 1
+  again
+
+# Render a sprite to the display buffer
+# v0, v1 = sprite address
+# v2 = X coordinate
+# v3 = Y coordinate
+# v4 = height (in pixels)
+# v5 = target plane (0-3, 4-7 for mask)
+# Preserves v2 - v5
+# Destroys v0, v1, v6 - v9 and i
+
+# Overhead: 5 instructions
+# Per row: ~38 instructions
+# Per shift: 7 instructions
+# So for 8x8 sprite at bad alignment: 5 + 8 * (38 + 7*7) = 701 instructions
+# For 8x8 sprite at good alignment: 5 + 8 * (38 + 2) = 325 instructions
+: display-sprite
+  :alias X v2
+  :alias Y v3
+  :alias height v4
+  :alias targetplane v5
+  :alias row v6
+  :alias leftPart v7
+  :alias rightPart v8
+  :alias offset v1
+  :alias temp1 v9
+
+  row := 0
+  i := display-sprite-address
+  save v1
+
+  # Normalize coordinates
+  v0 := 31
+  v3 &= v0
+  v0 := 63
+  v2 &= v0
+
+  loop
+    if row == height then return # Done
+    v0 := Y
+    v0 += row
+    if v0 == 30 then return # Overflowing bottom of screen, so done
+
+    # Get the sprite data to put on the display buffer
+    0xF0 0x00 # i := long ....
+  : display-sprite-address
+    0x00 0x00
+    i += row
+    load v0
+
+    offset := 0b00000111
+    offset &= X
+    rightPart := 0
+    leftPart := v0
+
+    # Do some shifting magic for unaligned sprites
+    loop
+      while offset != 0
+      rightPart >>= rightPart
+      leftPart >>= leftPart
+      if vF != 0 then rightPart += 128
+      offset -= 1
+    again
+
+    # Calculate place in buffer
+    offset := X
+    offset >>= offset
+    offset >>= offset
+    offset >>= offset
+    i := long display-buffer
+    # Get right plane
+    temp1 := targetplane
+    v0 := 3
+    temp1 &= v0
+    v0 := 240
+    loop
+      while temp1 > 0
+      i += v0
+      temp1 -= 1
+    again
+    # Get right column
+    v0 := 30 # rows
+    loop
+      while offset != 0
+      i += v0
+      offset -= 1
+    again
+    # Get right row
+    i += Y
+    i += row
+
+    # Write the new data to the buffer
+    load v0 - v0 # Don't auto-increment i
+    if targetplane > 3 begin
+      temp1 := 0xFF
+      leftPart ^= temp1
+      v0 &= leftPart
+    else
+      v0 |= leftPart
+    end
+    save v0 - v0
+    if X < 56 begin
+      vF := 30
+      i += vF
+      load v0 - v0
+      if targetplane > 3 begin
+        temp1 := 0xFF
+        rightPart ^= temp1
+        v0 &= rightPart
+      else
+        v0 |= rightPart
+      end
+      save v0 - v0
+    end
+
+    row += 1
+  again
+
+:segment data
+
+: display-buffer
+: display-buffer-plane1
+  # 4 planes of 7.5 times 32 bytes each. 240 bytes per layer, 960 bytes total.
+  # The image is layed out in consecutive vertical slices of 8 pixels wide
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+: display-buffer-plane1-plus-15
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+: display-buffer-plane2
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+: display-buffer-plane2-plus-15
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+: display-buffer-plane3
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+: display-buffer-plane3-plus-15
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+: display-buffer-plane4
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+: display-buffer-plane4-plus-15
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0

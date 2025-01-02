@@ -1,0 +1,132 @@
+# Make exploding enemies go boom
+: explode-enemies
+  # Pre-load current level for generate-enemy
+  i := long level
+  load vC - vC
+  vE := 0
+  loop
+    i := long enemies
+    i += vE
+    load v0 - v0
+    if v0 == 5 begin
+      generate-enemy
+    end
+    if v0 == 4 begin
+      v0 := 5
+      save v0
+    end
+    if v0 == 3 begin
+      v0 := 4
+      save v0
+    end
+    vE += 5
+    if vE == ENEMY_BYTES then return # Checked all NUM_ENEMIES enemies?
+  again
+
+# Revive enemies that have been disabled
+: revive-enemies
+  # Don't revive enemies while on "Get ready" or "Game over" screen
+  i := long level-screen
+  load v0
+  if v0 == 1 then return
+  i := long game-over
+  load v0
+  if v0 == 3 then return
+  # Pre-load current level for generate-enemy
+  i := long level
+  load vC - vC
+  vE := 0
+  loop
+    i := long enemies
+    i += vE
+    load v0 - v0
+    if v0 == 0 then generate-enemy
+    vE += 5
+    if vE == ENEMY_BYTES then return # Checked all NUM_ENEMIES enemies?
+  again
+
+: hide-enemies
+  vE := 0
+  loop
+    i := long enemies
+    i += vE
+    v0 := 0
+    save v0
+    vE += 5
+    if vE == ENEMY_BYTES then return # Checked all NUM_ENEMIES enemies?
+  again
+
+: generate-enemy
+  # v0 / Type: 0, 1 or 2 (0 most likely)
+  v0 := random 3
+  if vC == 1 then v0 := random 31
+  if vC == 2 then v0 := random 15
+  if vC == 3 then v0 := random 7
+  if v0 > 2 then v0 := 0
+  # v1 / Vx: Negative number from -1 to -3
+  v2 := random 7
+  v2 >>= v2
+  if vF == 1 begin # 50% chance of -1
+    v1 := -1
+  else
+    v1 := 3
+    v2 &= v1
+    if v2 == 3 begin
+      v1 := -3 # 12.5% chance of -3
+    else
+      v1 := -2 # 37.5% chance of -2
+    end
+  end
+  # Add the current level as a speed boost (level must be in vC)
+  v1 -= vC
+  # v2 / X coordinate: always start on the right, fixed point 6.2 bits number
+  v2 := 0xFF
+  # v3 / Y coordinate: random between 0 and 15, fixed point 6.2 bits number
+  v3 := random 0x0F
+  v3 += 5
+  v3 <<= v3
+  v3 <<= v3
+  # v4 / Vy: Number from -1 to 1 (0 most likely)
+  v4 := 1
+  vF := random 3
+  v4 -= vF
+  if v4 == -2 then v4 := 0
+  # Save all values for this enemy
+  save v4
+  return
+
+:segment data
+
+: enemies # 30 of 'em
+  0 0 0 0 0 # Type, Vx, X, Y, Vy
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+  0 0 0 0 0
+
+:monitor enemies 50

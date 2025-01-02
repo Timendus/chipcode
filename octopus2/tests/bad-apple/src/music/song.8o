@@ -1,0 +1,128 @@
+# +-----------------------------------------
+# | XO-Tracker v0.1.1 Clean Version
+# +-----------------------------------------
+
+# Song: Bad Apple!! By Touhou / ZUN
+# 1bit arrangement by Kouzeru
+# Code by Kouzeru, cut into pieces by Timendus 😄
+
+:segment data
+
+#+-----------------------+-----------------------+-----------------------+-----------------------+
+#| Song timeline         | Song loop point       | Song properties       | Song sequence data    |
+#+-----------------------+-----------------------+-----------------------+-----------------------+
+ :                                         song-BadApple
+ |>  seqTime-BadApple     |>  seqLoop-BadApple    |>  seqProp-BadApple    |>  seqData-BadApple
+
+################################################################
+#   IMPORTANT NOTE:
+#   Both seqTime and seqLoop must be paired for every song, and
+#   must be in order: seqTime, seqLoop, then last seqProp.
+
+#   If song has no loop, it has to loop within an empty frame
+
+: seqTime-BadApple # Song timeline of frames
+  0x00 0x01 0x00 0x01 0x00 0x01 0x00 0x02 0x03 0x04 0x03 0x05 0x03 0x04 0x03 0x06
+  0x07 0x08 0x09 0x0A 0x0B 0x0C 0x0D 0x0E 0x0F 0x08 0x09 0x0A 0x0B 0x0C 0x0D 0x10
+  0x11 0x12 0x13 0x14 0x15 0x16 0x17 0x18 0x19 0x12 0x13 0x14 0x15 0x16 0x17 0x1A
+  0x1B 0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22 0x23 0x1C 0x1D 0x1E 0x24 0x25 0x26 0x27
+  0x28 0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22 0x23 0x1C 0x1D 0x1E 0x24 0x25 0x26 0x27
+  0x28 0x29 0x2A 0x2B 0x2C 0x2D 0x2E 0x2F 0x30 0x29 0x2A 0x2B 0x2C 0x2D 0x2E 0x2F
+  0x30 0x29 0x2A 0x2B 0x2C 0x2D 0x2E 0x2F 0x30 0x29 0x2A 0x2B 0x31 0x32 0x33 0x34
+  0x35 0x03 0x04 0x03 0x05 0x03 0x04 0x03 0x06 0x07 0x08 0x09 0x0A 0x0B 0x0C 0x0D
+  0x0E 0x0F 0x08 0x09 0x0A 0x0B 0x0C 0x0D 0x10 0x11 0x12 0x13 0x14 0x15 0x16 0x17
+  0x18 0x19 0x12 0x13 0x14 0x15 0x16 0x17 0x3B 0x3C 0x1C 0x1D 0x1E 0x1F 0x20 0x21
+  0x22 0x23 0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22 0x3D 0x1C 0x1D 0x1E 0x1F 0x20 0x21
+  0x22 0x23 0x1C 0x1D 0x1E 0x24 0x25 0x26 0x27 0x3E 0x3F 0x40 0x41 0x42 0x43 0x44
+  0x45 0x46 0x3F 0x40 0x41 0x42 0x43 0x44 0x45 0x36 0x3F 0x40 0x41 0x42 0x43 0x44
+  0x45 0x46 0x3F 0x40 0x41 0x37 0x38 0x39 0x3A 0x48 0x48 0x48 0x48 0x48 0x48 0x48
+  0x48 0x48 0x48 0x48 0x48 0x48 0x48 0x48
+: seqLoop-BadApple # The song loop point
+  0x49
+
+: seqProp-BadApple # Song properties
+#  _______ _______ _______ _______
+# |Speed A|Speed B|Speed C|Speed D|
+   7       6       4       3
+#  __________________ ______________ _____________________
+# |Default tick rate |Rows per Frame|Rows per quarter note|
+   60                 16             4
+
+: seqData-BadApple
+# __________ __________ __________ __________ __________ __________ __________ __________ __________ __________ __________ __________ __________ __________ __________ __________ _______
+#| Row 0    | Row 1    | Row 2    | Row 3    | Row 4    | Row 5    | Row 6    | Row 7    | Row 8    | Row 9    | Row 10   | Row 11   | Row 12   | Row 13   | Row 14   | Row 15   | Frame |
+#|Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |Key DOS G |   #   |
+  C-3 -.K 0  ... -.. 1  C-2 -.H 0  C-2 -.H 1  C-3 -.S 0  ... -.. 1  C-2 -.H 0  C-2 -.H 1  C-3 -.K 0  ... -.. 1  C-2 -.H 0  C-2 -.H 1  C-3 -.S 0  C-3 -.S 1  C-3 -.S 0  C-3 -.S 1   # 0x00
+  C-3 -.K 0  ... -.. 1  C-2 -.H 0  C-2 -.H 1  C-3 -.S 0  ... -.. 1  C-2 -.H 0  C-2 -.H 1  C-3 -.K 0  ... -.. 1  C-2 -.H 0  C-2 -.H 1  C-3 -.S 0  ... -.. 1  C-3 -.S 0  ... -.. 1   # 0x01
+  C-3 -.K 0  ... -.. 1  C-2 -.H 0  C-2 -.H 1  C-3 -.S 0  ... -.. 1  C-2 -.H 0  C-2 -.H 1  C-3 -.K 0  ... -.. 1  C-2 -.H 0  ... -.. 1  C-3 -.H 0  ... -.. 1  ... -.. 0  ... -.. 1   # 0x02
+  D$2 U-6 0  ... -.. 1  C$3 U-5 0  D$3 U-5 1  D$3 U-7 0  D$3 U-4 1  C$3 U-5 0  D$3 U-5 1  D$2 U-6 0  ... -.. 1  C$3 U-5 0  D$3 U-5 1  D$3 U-7 0  D$3 U-7 1  C$3 U-7 0  D$3 U-7 1   # 0x03
+  D$2 U-6 0  ... -.. 1  C$3 U-5 0  D$3 U-5 1  D$3 U-7 0  D$3 U-4 1  C$3 U-5 0  D$3 U-5 1  D$2 U-6 0  ... -.. 1  D$3 U-5 0  F$3 U-5 1  F$2 U-7 0  ... -.. 1  F$3 U-7 0  G$3 U-5 1   # 0x04
+  D$2 U-6 0  ... -.. 1  C$3 U-5 0  D$3 U-5 1  D$3 U-7 0  D$3 U-4 1  C$3 U-5 0  D$3 U-5 1  G$2 U-6 0  ... -.. 1  F$3 U-5 0  G$3 U-5 1  F$2 U-7 0  ... -.. 1  D$3 U-7 0  F$3 U-5 1   # 0x05
+  D$2 U-6 2  ... -.. 3  ... -.. 3  ... -.. 3  C$3 U-5 2  ... -.. 3  D$3 U-5 3  ... -.. 3  D$3 U-7 2  ... -.. 3  D$3 U-4 3  ... -.. 3  C$3 U-5 2  ... -.. 3  D$3 U-5 3  ... -.. 3   # 0x06
+  G$2 U-7 3  ... -.. 3  ... -.. 3  G$2 U-7 3  F$3 U-4 3  ... -.. 3  G$3 U-7 2  ... -.. 2  F$2 U-7 3  ... -.. 3  ... -.. 3  F$2 U-7 3  D$3 U-4 3  ... -.. 3  F$3 U-7 2  ... -.. 2   # 0x07
+  D$4 C.K 2  D$2 U-4 3  D$4 C.. 3  ... -.. 3  F-4 C.H 2  C$3 U-4 3  F-4 C.H 3  D$3 U-4 3  F$4 C.S 2  ... -.. 3  F$4 C.. 3  D$3 U-4 3  G$4 C.H 2  C$3 U-4 3  G$4 C.. 3  D$3 U-4 3   # 0x08
+  A$4 C.K 2  D$2 U-4 3  A$4 B.. 3  ... -.. 3  A$4 C.H 2  C$3 U-4 3  F$4 B.H 3  D$3 U-4 3  D$5 C.S 2  ... -.. 3  ... -.. 3  D$3 U-4 3  C$5 C.H 2  C$3 U-4 3  C$5 B.. 3  D$3 U-4 3   # 0x09
+  A$4 C.K 2  D$2 U-4 3  A$4 B.. 3  ... -.. 3  A$4 C.H 2  C$3 U-4 3  D$5 B.H 3  D$3 U-4 3  D$4 C.S 2  ... -.. 3  ... -.. 3  D$3 U-4 3  D$4 C.H 2  C$3 U-4 3  A$4 B.. 3  D$3 U-4 3   # 0x0A
+  A$4 C.K 2  D$2 U-4 3  A$4 C.. 3  ... -.. 3  G$4 C.H 2  D$3 U-4 3  G$4 C.H 3  F$3 U-4 3  F$4 C.S 2  F$2 U-4 3  F$4 C.. 3  ... -.. 3  F-4 C.S 2  F$3 U-4 3  F-4 C.. 3  G$3 U-4 3   # 0x0B
+  D$4 C.K 2  B-1 U-4 3  D$4 C.. 3  ... -.. 3  F-4 C.H 2  C$3 U-4 3  F-4 C.H 3  D$3 U-4 3  F$4 C.S 2  ... -.. 3  F$4 C.. 3  D$3 U-4 3  G$4 C.H 2  C$3 U-4 3  G$4 C.. 3  D$3 U-4 3   # 0x0C
+  A$4 C.K 2  B-1 U-4 3  A$4 B.. 3  ... -.. 3  A$4 C.H 2  C$3 U-4 3  F$4 C.H 3  D$3 U-4 3  G$4 C.S 2  D$3 U-4 3  G$4 B.. 3  D$3 U-4 3  F$4 C.H 2  C$3 U-4 3  F$4 B.. 3  D$3 U-4 3   # 0x0D
+  F-4 C.K 2  C-2 U-4 3  G$4 B.. 3  ... -.. 3  D$4 C.H 2  C$3 U-4 3  F-4 B.H 3  D$3 U-4 3  F-4 C.S 2  D$3 U-4 3  D$4 B.. 3  D$3 U-4 3  F$4 C.H 2  C$3 U-4 3  F-4 B.. 3  D$3 U-4 3   # 0x0E
+  F-4 C.K 2  D-2 U-4 3  F$4 B.. 3  ... -.. 3  D$4 C.H 2  F$3 U-4 3  D$4 B.H 3  G$3 U-4 3  C$4 C.S 2  F$2 U-4 3  C$4 B.. 3  ... -.. 3  F-4 C.S 2  ... -.. 3  D$4 B.. 3  F$3 U-4 3   # 0x0F
+  F-4 C.K 2  C$2 U-4 3  F-4 B.. 3  ... -.. 3  F-4 C.H 2  C$3 U-4 3  G$4 C.H 3  D$3 U-4 3  F$4 C.S 2  ... -.. 3  ... -.. 3  D$3 U-4 3  F$4 C.H 2  C$3 U-4 3  F-4 C.. 3  D$3 U-4 3   # 0x10
+  G$4 C.S 3  D-2 U-4 3  G$4 A.. 3  G$4 U-7 3  ... -.. 3  F$4 B.. 3  F$3 U-7 2  G$3 U-4 2  A$4 B.S 3  F$2 U-4 3  A$4 B.. 3  A$4 U-7 3  ... -.. 3  D$3 U-4 3  G$4 B.S 2  F$3 U-4 2   # 0x11
+  D$4 B.K 2  D$2 U-4 3  D$4 C.. 3  G$4 BJ. 3  F-4 B.H 2  C$3 U-4 3  F-4 C.H 3  D$3 U-4 3  F$4 B.S 2  ... -.. 3  F$4 C.. 3  G$4 BJ. 3  G$4 B.H 2  C$3 U-4 3  G$4 C.. 3  D$3 U-4 3   # 0x12
+  A$4 B.K 2  D$2 U-4 3  A$4 B.. 3  G$4 BJ. 3  A$4 B.H 2  C$3 U-4 3  F$4 B.H 3  D$3 U-4 3  D$5 B.S 2  ... -.. 3  ... -.. 3  G$4 BJ. 3  C$5 B.H 2  C$3 U-4 3  C$5 B.. 3  D$3 U-4 3   # 0x13
+  A$4 B.K 2  D$2 U-4 3  A$4 B.. 3  G$4 BJ. 3  G$4 B.H 2  C$3 U-4 3  D$5 B.H 3  D$3 U-4 3  D$4 B.S 2  ... -.. 3  ... -.. 3  G$4 BJ. 3  D$4 B.H 2  C$3 U-4 3  A$4 B.. 3  D$3 U-4 3   # 0x14
+  A$4 B.K 2  D$2 U-4 3  A$4 C.. 3  G$4 BJ. 3  G$4 B.H 2  D$3 U-4 3  G$4 C.H 3  F$3 U-4 3  F$4 B.S 2  F$2 U-4 3  F$4 C.. 3  G$4 BJ. 3  F-4 B.S 2  F$3 U-4 3  F-4 C.. 3  G$3 U-4 3   # 0x15
+  D$4 B.K 2  D$2 U-4 3  D$4 C.. 3  E-4 BJ. 3  F-4 B.H 2  C$3 U-4 3  F-4 C.H 3  D$3 U-4 3  F$4 B.S 2  ... -.. 3  F$4 C.. 3  E-4 BJ. 3  G$4 B.H 2  C$3 U-4 3  G$4 C.. 3  D$3 U-4 3   # 0x16
+  A$4 B.K 2  B-1 U-4 3  A$4 B.. 3  E-4 BJ. 3  A$4 B.H 2  C$3 U-4 3  F$4 C.H 3  D$3 U-4 3  G$4 B.S 2  D$3 U-4 3  G$4 B.. 3  E-4 BJ. 3  F$4 B.H 2  C$3 U-4 3  F$4 B.. 3  D$3 U-4 3   # 0x17
+  F-4 B.K 2  C-2 U-4 3  G$4 B.. 3  F$4 BJ. 3  D$4 B.H 2  C$3 U-4 3  F-4 B.H 3  D$3 U-4 3  F-4 B.S 2  D$3 U-4 3  D$4 B.. 3  F$4 BJ. 3  F$4 B.H 2  C$3 U-4 3  F-4 B.. 3  D$3 U-4 3   # 0x18
+  F-4 B.K 2  D-2 U-4 3  F$4 B.. 3  G-4 BJ. 3  D$4 B.H 2  F$3 U-4 3  D$4 B.H 3  G$3 U-4 3  C$4 B.S 2  F$2 U-4 3  C$4 B.. 3  G-4 BJ. 3  F-4 B.S 2  ... -.. 3  D$4 B.. 3  F$3 U-4 3   # 0x19
+  F-4 B.K 2  C$2 U-4 3  F-4 B.. 3  F$4 BJ. 3  F-4 C.H 2  C$3 U-4 3  G$4 C.H 3  D$3 U-4 3  F$4 B.S 2  ... -.. 3  ... -.. 3  F$4 BJ. 3  F$4 C.H 2  C$3 U-4 3  F-4 C.. 3  D$3 U-4 3   # 0x1A
+  G$4 B.S 3  D-2 U-4 3  G$4 A.. 3  G$4 U-7 3  G-4 BJ. 3  F$4 B.. 3  F$3 U-7 2  G$3 U-4 2  A$4 B.S 3  F$2 U-4 3  A$4 B.. 3  A$4 U-7 3  G-4 BJ. 3  D$3 U-4 3  G$4 B.S 2  F$3 U-4 2   # 0x1B
+  C$5 B.K 2  D$2 U-4 3  C$5 B.. 3  E-4 BJ. 3  D$5 B.H 2  C$3 U-4 3  D$5 C.H 3  D$3 U-4 3  A$4 B.S 2  ... -.. 3  ... -.. 3  E-4 BJ. 3  G$4 B.H 2  C$3 U-4 3  G$4 B.. 3  D$3 U-4 3   # 0x1C
+  A$4 B.K 2  D$2 U-4 3  A$4 B.. 3  E-4 BJ. 3  E-4 BJH 2  C$3 U-4 3  D$5 C.H 3  D$3 U-4 3  G$4 B.S 2  ... -.. 3  ... -.. 3  E-4 BJ. 3  A$4 B.H 2  C$3 U-4 3  A$4 C.. 3  D$3 U-4 3   # 0x1D
+  C$5 B.K 2  D$2 U-4 3  C$5 B.. 3  F$4 BJ. 3  D$5 B.H 2  C$3 U-4 3  D$5 C.H 3  D$3 U-4 3  A$4 B.S 2  ... -.. 3  ... -.. 3  F$4 BJ. 3  G$4 B.H 2  C$3 U-4 3  G$4 B.. 3  D$3 U-4 3   # 0x1E
+  A$4 B.K 2  D$2 U-4 3  A$4 B.. 3  F$4 BJ. 3  F$4 B.H 2  D$3 U-4 3  D$5 C.H 3  F$3 U-4 3  G$4 B.S 2  F$2 U-4 3  G$4 B.. 3  F$4 BJ. 3  A$4 B.S 2  F$3 U-4 3  A$4 C.. 3  G$3 U-4 3   # 0x1F
+  G$4 B.K 2  B-1 U-4 3  G$4 B.. 3  G$4 BJ. 3  F$4 B.H 2  C$3 U-4 3  F$4 B.H 3  D$3 U-4 3  F-4 B.S 2  ... -.. 3  ... -.. 3  G$4 BJ. 3  C$4 B.H 2  C$3 U-4 3  C$4 B.. 3  D$3 U-4 3   # 0x20
+  D$4 B.K 2  B-1 U-4 3  D$4 B.. 3  G$4 BJ. 3  G$4 B.H 2  C$3 U-4 3  F$4 C.H 3  D$3 U-4 3  C$4 B.S 2  ... -.. 3  ... -.. 3  G$4 BJ. 3  D$4 B.H 2  C$3 U-4 3  D$4 C.. 3  D$3 U-4 3   # 0x21
+  F-4 B.K 2  C$2 U-4 3  F-4 B.. 3  G$4 BJ. 3  F$4 B.H 2  C$3 U-4 3  F$4 B.H 3  D$3 U-4 3  G$4 B.S 2  ... -.. 3  ... -.. 3  G$4 BJ. 3  A$4 B.H 2  C$3 U-4 3  A$4 B.. 3  D$3 U-4 3   # 0x22
+  D$4 B.K 2  D-2 U-4 3  D$4 B.. 3  G$4 BJ. 3  G$4 U-5 2  F$3 U-4 3  F$4 C.H 3  G$3 U-4 3  G$4 B.S 2  F$2 U-4 3  G$4 B.. 3  G$4 BJ. 3  A$4 B.S 2  D$3 U-4 3  A$4 B.. 3  F$3 U-4 3   # 0x23
+  A$4 B.K 2  D$2 U-4 3  A$4 B.. 3  F$4 BJ. 3  A$4 B.H 2  D$3 U-4 3  D$5 C.H 3  F$3 U-4 3  D$5 B.S 2  F$2 U-4 3  D$5 B.. 3  F$4 BJ. 3  F-5 B.S 2  F$3 U-4 3  F-5 C.. 3  G$3 U-4 3   # 0x24
+  F$5 B.K 2  B-1 U-4 3  F$5 B.. 3  G$4 BJ. 3  F-5 B.H 2  C$3 U-4 3  F-5 B.H 3  D$3 U-4 3  D$5 B.S 2  ... -.. 3  ... -.. 3  G$4 BJ. 3  C$5 B.H 2  C$3 U-4 3  C$5 B.. 3  D$3 U-4 3   # 0x25
+  A$4 B.K 2  B-1 U-4 3  A$4 B.. 3  G$4 BJ. 3  A$4 B.H 2  C$3 U-4 3  F-5 C.H 3  D$3 U-4 3  G$4 B.S 2  ... -.. 3  ... -.. 3  G$4 BJ. 3  A$4 B.H 2  C$3 U-4 3  A$4 C.. 3  D$3 U-4 3   # 0x26
+  G$4 B.K 2  C$2 U-4 3  G$4 B.. 3  G$4 BJ. 3  F$4 B.H 2  C$3 U-4 3  F$4 B.H 3  D$3 U-4 3  F-4 B.S 2  ... -.. 3  ... -.. 3  G$4 BJ. 3  C$4 B.H 2  C$3 U-4 3  C$4 B.. 3  D$3 U-4 3   # 0x27
+  D$4 B.S 3  D-2 U-4 3  G$4 BJ. 3  D$4 B.S 3  D$4 B.. 3  F$3 U-4 3  F$4 C.S 2  G$3 U-4 2  G$4 B.S 3  F$2 U-4 3  G$4 BJ. 3  G$4 B.S 3  A$4 B.. 3  D$3 U-4 3  A$4 B.S 2  F$3 U-4 2   # 0x28
+  C$5 B.K 3  D$2 U-4 3  C$5 B.. 3  E-4 BJ. 3  D$5 B.. 3  C$3 U-4 3  D$5 C.. 2  D$3 U-4 2  A$4 B.. 3  ... -.. 3  ... -.. 3  E-4 BJ. 3  G$4 B.. 3  C$3 U-4 3  G$4 B.. 2  D$3 U-4 2   # 0x29
+  A$4 B.H 3  D$2 U-4 3  A$4 B.. 3  E-4 BJ. 3  ... -.. 3  C$3 U-4 3  D$5 C.. 2  D$3 U-4 2  G$4 B.. 3  ... -.. 3  ... -.. 3  E-4 BJ. 3  A$4 B.. 3  C$3 U-4 3  A$4 C.. 2  D$3 U-4 2   # 0x2A
+  C$5 B.K 3  D$2 U-4 3  C$5 B.. 3  F$4 BJ. 3  D$5 B.. 3  C$3 U-4 3  D$5 C.. 2  D$3 U-4 2  A$4 B.. 3  ... -.. 3  ... -.. 3  F$4 BJ. 3  G$4 B.. 3  C$3 U-4 3  G$4 B.. 2  D$3 U-4 2   # 0x2B
+  A$4 B.H 3  D$2 U-4 3  A$4 B.. 3  F$4 BJ. 3  ... -.. 3  D$3 U-4 3  D$5 C.. 2  F$3 U-4 2  G$4 B.. 3  F$2 U-4 3  G$4 B.. 3  F$4 BJ. 3  A$4 B.. 3  F$3 U-4 3  A$4 C.. 2  G$3 U-4 2   # 0x2C
+  G$4 B.K 3  D$2 U-4 3  G$4 B.. 3  G$4 BJ. 3  F$4 B.. 3  C$3 U-4 3  F$4 B.. 2  D$3 U-4 2  F-4 B.. 3  ... -.. 3  ... -.. 3  G$4 BJ. 3  C$4 B.. 3  C$3 U-4 3  C$4 B.. 2  D$3 U-4 2   # 0x2D
+  D$4 B.H 3  D$2 U-4 3  D$4 B.. 3  G$4 BJ. 3  ... -.. 3  C$3 U-4 3  F$4 C.. 2  D$3 U-4 2  C$4 B.. 3  ... -.. 3  ... -.. 3  G$4 BJ. 3  D$4 B.. 3  C$3 U-4 3  D$4 C.. 2  D$3 U-4 2   # 0x2E
+  F-4 B.K 3  D$2 U-4 3  F-4 B.. 3  G$4 BJ. 3  F$4 B.. 3  C$3 U-4 3  F$4 B.. 2  D$3 U-4 2  G$4 B.. 3  ... -.. 3  ... -.. 3  G$4 BJ. 3  A$4 B.. 3  C$3 U-4 3  A$4 B.. 2  D$3 U-4 2   # 0x2F
+  D$4 B.H 3  D$2 U-4 3  D$4 B.. 3  G$4 BJ. 3  G$4 B.K 3  F$3 U-4 3  F$4 C.. 2  G$3 U-4 2  G$4 B.. 3  F$2 U-4 3  G$4 B.. 3  G$4 BJ. 3  A$4 B.K 3  D$3 U-4 3  A$4 B.. 2  F$3 U-4 2   # 0x30
+  A$4 B.H 3  D$2 U-4 3  A$4 B.. 3  F$4 BJ. 3  ... -.. 3  D$3 U-4 3  D$5 C.. 2  F$3 U-4 2  D$5 B.. 3  F$2 U-4 3  G$4 B.. 3  F$4 BJ. 3  F-5 B.. 3  F$3 U-4 3  D$5 C.. 2  G$3 U-4 2   # 0x31
+  F$5 B.K 2  B-1 U-4 3  F$5 B.. 3  G$4 BJ. 3  F-5 B.. 2  C$3 U-4 3  F-5 B.. 3  D$3 U-4 3  D$5 B.. 2  ... -.. 3  ... -.. 3  G$4 BJ. 3  C$5 B.. 2  C$3 U-4 3  C$5 B.. 3  D$3 U-4 3   # 0x32
+  A$4 B.H 2  B-1 U-4 3  A$4 B.. 3  G$4 BJ. 3  A$4 B.. 2  C$3 U-4 3  F-5 C.. 3  D$3 U-4 3  G$4 B.. 2  ... -.. 3  ... -.. 3  G$4 BJ. 3  A$4 B.. 2  C$3 U-4 3  A$4 C.. 3  D$3 U-4 3   # 0x33
+  G$4 B.K 2  C$2 U-4 3  G$4 B.. 3  G$4 BJ. 3  F$4 B.. 2  C$3 U-4 3  F$4 B.. 3  D$3 U-4 3  F-4 B.. 2  ... -.. 3  ... -.. 3  G$4 BJ. 3  C$4 B.. 2  C$3 U-4 3  C$4 B.. 3  D$3 U-4 3   # 0x34
+  D$4 B.S 2  D-2 U-4 3  G$4 BJ. 3  D$4 B.. 3  D$4 B.. 2  F$3 U-4 3  F$4 C.. 3  G$3 U-4 3  G$4 B.S 2  F$2 U-4 3  G$4 BJ. 3  G$4 B.. 3  A$4 B.S 2  D$3 U-4 3  A$4 B.S 3  F$3 U-4 3   # 0x35
+  F-4 B.H 3  F-2 U-4 3  F-4 B.. 3  A$4 BJ. 3  A$4 B.K 3  G$3 U-4 3  G$4 C.. 2  A$3 U-4 2  A$4 B.. 3  G$2 U-4 3  A$4 B.. 3  A$4 BJ. 3  C-5 B.. 3  F-3 U-4 3  C-5 B.. 2  G$3 U-4 2   # 0x36
+  C-5 B.H 3  F-2 U-4 3  C-5 B.. 3  G$4 BJ. 3  ... -.. 3  F-3 U-4 3  F-5 C.. 2  G$3 U-4 2  F-5 B.. 3  G$2 U-4 3  A$4 B.. 3  G$4 BJ. 3  G-5 B.. 3  G$3 U-4 3  F-5 C.. 2  A$3 U-4 2   # 0x37
+  G$5 B.K 2  C$2 U-4 3  G$5 B.. 3  A$4 BJ. 3  G-5 B.. 2  D$3 U-4 3  G-5 B.. 3  F-3 U-4 3  F-5 B.. 2  ... -.. 3  ... -.. 3  A$4 BJ. 3  D$5 B.. 2  D$3 U-4 3  D$5 B.. 3  F-3 U-4 3   # 0x38
+  C-5 B.H 2  C$2 U-4 3  C-5 B.. 3  A$4 BJ. 3  C-5 B.. 2  D$3 U-4 3  G-5 C.. 3  F-3 U-4 3  A$4 B.. 2  ... -.. 3  ... -.. 3  A$4 BJ. 3  C-5 B.. 2  D$3 U-4 3  C-5 C.. 3  F-3 U-4 3   # 0x39
+  A$4 B.K 2  D$2 U-4 3  A$4 B.. 3  A$4 BJ. 3  G$4 B.. 2  D$3 U-4 3  G$4 B.. 3  F-3 U-4 3  G-4 B.. 2  ... -.. 3  ... -.. 3  A$4 BJ. 3  D$4 B.. 2  D$3 U-4 3  D$4 B.. 3  F-3 U-4 3   # 0x3A
+  F-4 B.S 2  C$2 U-4 3  F-4 B.. 3  F$4 BJ. 3  F-4 C.. 2  C$3 U-4 3  G$4 C.. 3  D$3 U-4 3  F$4 B.S 2  ... -.. 3  ... -.. 3  F$4 BJ. 3  F$4 C.. 2  C$3 U-4 3  F-4 C.. 3  D$3 U-4 3   # 0x3B
+  G$4 B.S 2  D-2 U-4 3  G$4 A.. 3  G$4 U-4 3  G-4 BJ. 2  F$4 B.. 3  F$3 U-4 3  G$3 U-4 3  A$4 B.S 2  F$2 U-4 3  A$4 B.. 3  A$4 U-4 3  G-4 BJ. 2  D$3 U-4 3  G$4 B.. 3  F$3 U-4 3   # 0x3C
+  D$4 B.S 3  D-2 U-4 3  D$4 B.. 3  G$4 BJS 3  G$4 U-5 3  F$3 U-4 3  F$4 C.S 2  G$3 U-4 2  G$4 B.S 3  F$2 U-4 3  G$4 B.. 3  G$4 BJS 3  A$4 B.. 3  D$3 U-4 3  A$4 B.S 2  F$3 U-4 2   # 0x3D
+  D$4 B.S 3  D-2 U-4 3  G$4 BJ. 3  D$4 B.S 3  D$4 B.. 3  F$3 U-4 3  F$4 C.S 2  G$3 U-4 2  A$4 B.S 3  F$2 U-4 3  G$4 BJ. 3  G$4 B.S 3  C-5 B.. 3  D$3 U-4 3  A$4 B.S 2  F$3 U-4 2   # 0x3E
+  D$5 B.K 3  F-2 U-4 3  D$5 B.. 3  F$4 BJ. 3  F-5 B.. 3  D$3 U-4 3  F-5 C.. 2  F-3 U-4 2  C-5 B.. 3  ... -.. 3  ... -.. 3  F$4 BJ. 3  A$4 B.. 3  D$3 U-4 3  A$4 B.. 2  F-3 U-4 2   # 0x3F
+  C-5 B.H 3  F-2 U-4 3  C-5 B.. 3  F$4 BJ. 3  ... -.. 3  D$3 U-4 3  F-5 C.. 2  F-3 U-4 2  A$4 B.. 3  ... -.. 3  ... -.. 3  F$4 BJ. 3  C-5 B.. 3  D$3 U-4 3  C-5 C.. 2  F-3 U-4 2   # 0x40
+  D$5 B.K 3  F-2 U-4 3  D$5 B.. 3  G$4 BJ. 3  F-5 B.. 3  D$3 U-4 3  F-5 C.. 2  F-3 U-4 2  C-5 B.. 3  ... -.. 3  ... -.. 3  G$4 BJ. 3  A$4 B.. 3  D$3 U-4 3  A$4 B.. 2  F-3 U-4 2   # 0x41
+  C-5 B.H 3  F-2 U-4 3  C-5 B.. 3  G$4 BJ. 3  ... -.. 3  F-3 U-4 3  F-5 C.. 2  G$3 U-4 2  A$4 B.. 3  G$2 U-4 3  A$4 B.. 3  G$4 BJ. 3  C-5 B.. 3  G$3 U-4 3  C-5 C.. 2  A$3 U-4 2   # 0x42
+  A$4 B.K 3  F-2 U-4 3  A$4 B.. 3  A$4 BJ. 3  G$4 B.. 3  D$3 U-4 3  G$4 B.. 2  F-3 U-4 2  G-4 B.. 3  ... -.. 3  ... -.. 3  A$4 BJ. 3  D$4 B.. 3  D$3 U-4 3  D$4 B.. 2  F-3 U-4 2   # 0x43
+  F-4 B.H 3  F-2 U-4 3  F-4 B.. 3  A$4 BJ. 3  ... -.. 3  D$3 U-4 3  G$4 C.. 2  F-3 U-4 2  D$4 B.. 3  ... -.. 3  ... -.. 3  A$4 BJ. 3  F-4 B.. 3  D$3 U-4 3  F-4 C.. 2  F-3 U-4 2   # 0x44
+  G-4 B.K 3  F-2 U-4 3  G-4 B.. 3  A$4 BJ. 3  G$4 B.. 3  D$3 U-4 3  G$4 B.. 2  F-3 U-4 2  A$4 B.. 3  ... -.. 3  ... -.. 3  A$4 BJ. 3  C-5 B.. 3  D$3 U-4 3  C-5 B.. 2  F-3 U-4 2   # 0x45
+  F-4 B.H 3  F-2 U-4 3  F-4 B.. 3  A$4 BJ. 3  A$4 B.K 3  G$3 U-4 3  G$4 C.. 2  A$3 U-4 2  A$4 B.. 3  G$2 U-4 3  A$4 B.. 3  A$4 BJ. 3  C-5 B.K 3  F-3 U-4 3  C-5 B.. 2  G$3 U-4 2   # 0x46
+  F-4 B.H 2  E-2 U-4 3  A$4 BJ. 3  F-4 B.. 3  F-4 B.. 2  G$3 U-4 3  G$4 C.. 3  A$3 U-4 3  F-4 B.. 2  G$2 U-4 3  F-4 BJ. 3  F-4 B.. 3  F-4 B.S 2  F-3 U-4 3  F-4 B.. 3  G$3 U-4 3   # 0x47
+  A$3 BJ. 2  ... -.. 3  ... -.. 3  ... -.. 3  ... -.. 2  ... -.. 3  ... -.. 3  ... -.. 3  ... -.. 2  ... -.. 3  ... -.. 3  ... -.. 3  ... -.. 2  ... -.. 3  ... -.. 3  ... -.. 3   # 0x48
+  A$3 -.. 2  ... -.. 3  ... -.. 3  ... -.. 3  ... -.. 2  ... -.. 3  ... -.. 3  ... -.. 3  ... -.. 2  ... -.. 3  ... -.. 3  ... -.. 3  ... -.. 2  ... -.. 3  ... -.. 3  ... -.. 3   # 0x49
