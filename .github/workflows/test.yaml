@@ -50,12 +50,12 @@ jobs:
       - name: Run Go unit tests
         working-directory: ./octopus2
         run: make test
-      - name: Run regression tests
-        working-directory: ./octopus2
-        run: make regression-test
       - name: Build binaries
         working-directory: ./octopus2
         run: make build
+      - name: Run regression tests
+        working-directory: ./octopus2
+        run: make regression-test
       - name: Upload Linux binary
         uses: actions/upload-artifact@v4
         with:
