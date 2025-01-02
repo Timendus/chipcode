@@ -6,3 +6,6 @@ build:
 
 test:
 	@go test ./...
+
+regression-test:
+	@cd tests && go run regression-tests.go
