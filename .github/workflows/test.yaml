@@ -53,6 +53,9 @@ jobs:
       - name: Build binaries
         working-directory: ./octopus2
         run: make build
+      - name: Run regression tests
+        working-directory: ./octopus2
+        run: make regression-test
       - name: Upload Linux binary
         uses: actions/upload-artifact@v4
         with:
