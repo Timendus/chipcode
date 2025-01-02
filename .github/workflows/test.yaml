@@ -47,9 +47,6 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
           cache-dependency-path: octopus2/go.sum
-      - name: Install dependencies
-        working-directory: ./octopus2
-        run: go get .
       - name: Run Go unit tests
         working-directory: ./octopus2
         run: make test
