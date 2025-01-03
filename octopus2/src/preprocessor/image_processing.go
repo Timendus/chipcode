@@ -13,10 +13,10 @@ func threshold(image *image.RGBA, palette []color) {
 		for x := 0; x < width; x++ {
 			index := (y*width + x) * 4
 
-			newColor := nearestColor(color{
-				image.Pix[index+0],
-				image.Pix[index+1],
-				image.Pix[index+2],
+			newColor := nearestColor([]float64{
+				float64(image.Pix[index+0]),
+				float64(image.Pix[index+1]),
+				float64(image.Pix[index+2]),
 			}, palette)
 
 			image.Pix[index+0] = newColor.r
@@ -42,15 +42,7 @@ func dither(image *image.RGBA, palette []color) {
 		for x := 0; x < width; x++ {
 			index := (y*width + x) * 4
 
-			// targetColor := color{
-			// 	byte(math.Max(math.Min(pixelBuffer[index+0], 255), 0)),
-			// 	byte(math.Max(math.Min(pixelBuffer[index+1], 255), 0)),
-			// 	byte(math.Max(math.Min(pixelBuffer[index+2], 255), 0)),
-			// }
-
-			// closestColor := nearestColor(targetColor, palette)
-
-			closestColor := nearestColor2([]float64{
+			closestColor := nearestColor([]float64{
 				pixelBuffer[index+0],
 				pixelBuffer[index+1],
 				pixelBuffer[index+2],
@@ -109,28 +101,10 @@ func dither(image *image.RGBA, palette []color) {
 	}
 }
 
-// Find the closest color in the palette to the given color
-func nearestColor(test color, palette []color) color {
-	distance := math.MaxFloat64
-	bestMatch := color{}
-	for _, col := range palette {
-		// Algorithm for color distance taken from
-		// https://stackoverflow.com/questions/2103368/color-logic-algorithm
-		rmean := (int64(test.r) + int64(col.r)) / 2
-		r := int64(test.r) - int64(col.r)
-		g := int64(test.g) - int64(col.g)
-		b := int64(test.b) - int64(col.b)
-		dist := math.Sqrt(float64((((512 + rmean) * r * r) >> 8) + 4*g*g + (((767 - rmean) * b * b) >> 8)))
-		if dist < distance {
-			distance = dist
-			bestMatch = col
-		}
-	}
-	return bestMatch
-}
-
-// Find the closest color in the palette to the given color
-func nearestColor2(test []float64, palette []color) color {
+// Find the closest color in the palette to the given color. Operates on
+// float64s to avoid overflows and so it can take in ranges <0 and >255 for the
+// dithering algorithm.
+func nearestColor(test []float64, palette []color) color {
 	distance := math.MaxFloat64
 	bestMatch := color{}
 	for _, col := range palette {
