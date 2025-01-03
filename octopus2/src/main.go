@@ -24,65 +24,27 @@ func main() {
 		options[option] = true
 	}
 
-	switch path.Ext(input) {
-	case ".8o":
-		switch path.Ext(output) {
-		case ".8o":
-			fmt.Printf("Octopussifying '%s' 🡆 '%s'\n", input, output)
-
-			// Octopussify the input file
-			octopussified, errs := preprocessor.Octopussify(input, options)
-			if len(errs) > 0 {
-				fmt.Println("\033[91;1mCould not complete octopussification due to the following errors:\033[0m")
-				for _, error := range errs {
-					fmt.Println("   - ", error)
-				}
-				os.Exit(1)
-			}
-
-			// And output to the destination file
-			err := os.WriteFile(output, []byte(octopussified), 0644)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-
-		case ".ch8":
-			fmt.Printf("Assembling '%s' 🡆 '%s'\n", input, output)
-
-			// Octopussify the input file
-			octopussified, errs := preprocessor.Octopussify(input, options)
-			if len(errs) > 0 {
-				fmt.Println("\033[91;1mCould not complete preprocessing due to the following errors:\033[0m")
-				for _, error := range errs {
-					fmt.Println("   - ", error)
-				}
-				os.Exit(1)
-			}
-
-			// Assemble the intermediate format to a CHIP-8 binary
-			// binary, errs := assembler.Assemble(octopussified)
-			// if len(errs) > 0 {
-			// 	fmt.Println("\033[91;1mCould not complete assembly due to the following errors:\033[0m")
-			// 	for _, error := range errs {
-			// 		fmt.Println("   - ", error)
-			// 	}
-			// 	os.Exit(1)
-			// }
-
-			// And output to the destination file
-			// err := os.WriteFile(output, binary, 0644)
-			err := os.WriteFile(output, []byte(octopussified), 0644)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		default:
-			fmt.Printf("\033[91;1mDon't know how to convert '%s' to '%s'\033[0m\n", path.Ext(input), path.Ext(output))
-			os.Exit(1)
-		}
-	default:
+	if path.Ext(input) != ".8o" || path.Ext(output) != ".8o" {
 		fmt.Printf("\033[91;1mDon't know how to convert '%s' to '%s'\033[0m\n", path.Ext(input), path.Ext(output))
+		os.Exit(1)
+	}
+
+	fmt.Printf("Octopussifying '%s' 🡆 '%s'\n", input, output)
+
+	// Octopussify the input file
+	octopussified, errs := preprocessor.Octopussify(input, options)
+	if len(errs) > 0 {
+		fmt.Println("\033[91;1mCould not complete octopussification due to the following errors:\033[0m")
+		for _, error := range errs {
+			fmt.Println("   - ", error)
+		}
+		os.Exit(1)
+	}
+
+	// And output to the destination file
+	err := os.WriteFile(output, []byte(octopussified), 0644)
+	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
