@@ -1,0 +1,701 @@
+# Opcode implementations
+
+## Inputs
+# Not all of these are set for each opcode. It depends a bit on the path taken
+# through the decoder.
+:alias opcode-hi v2
+:alias opcode-lo v3
+:alias second-nibble v4
+:alias vX v5
+:alias vY v6
+# `i` -> register X
+
+## Helpers
+
+: skip-next-opcode
+    point-to PC
+    load v0 - v1
+    vF := 2
+    v1 += vF
+    v0 += vF
+    save v0 - v1
+    return
+
+: step-back-one-opcode
+    point-to PC
+    load v0 - v1
+    vF := 2
+    v1 -= vF
+    if vF == 0 then v0 -= 1
+    save v0 - v1
+    return
+
+## Flow control
+
+: jump-to
+    opcode-hi := second-nibble
+    point-to PC
+    save opcode-hi - opcode-lo
+    return
+
+: jump0-to
+    get-quirk v0 JUMP_QUIRK
+    point-to REGISTERS
+    if v0 != 0 then i += second-nibble
+    load v1 - v1
+    v0 := second-nibble
+    v1 += opcode-lo
+    v0 += vF
+    point-to PC
+    save v1
+    return
+
+: call-to
+    # Load and increase stack pointer
+    point-to SP
+    load v0 - v0
+    v5 := v0
+    v0 += 2
+    save v0
+    # Load old PC and write call destination
+    point-to PC
+    load v0 - v1
+    opcode-hi := second-nibble
+    save opcode-hi - opcode-lo
+    point-to STACK
+    i += v5
+    save v0 - v1
+    return
+
+: ret
+    # Load and decrease stack pointer
+    point-to SP
+    load v0 - v0
+    v0 -= 2
+    save v0
+    # Restore PC
+    point-to STACK
+    i += v0
+    load v1
+    point-to PC
+    save v1
+    return
+
+## Conditional skips
+
+: skip-eq-val
+    point-to REGISTERS
+    i += second-nibble
+    load v0
+    if v0 == opcode-lo then jump skip-next-opcode
+    return
+
+: skip-neq-val
+    point-to REGISTERS
+    i += second-nibble
+    load v0
+    if v0 != opcode-lo then jump skip-next-opcode
+    return
+
+: skip-eq-reg
+    point-to REGISTERS
+    i += second-nibble
+    load v0
+    point-to REGISTERS
+    opcode-lo >>= opcode-lo
+    opcode-lo >>= opcode-lo
+    opcode-lo >>= opcode-lo
+    opcode-lo >>= opcode-lo
+    i += opcode-lo
+    load v1 - v1
+    if v0 == v1 then jump skip-next-opcode
+    return
+
+: skip-neq-reg
+    point-to REGISTERS
+    i += second-nibble
+    load v0
+    point-to REGISTERS
+    opcode-lo >>= opcode-lo
+    opcode-lo >>= opcode-lo
+    opcode-lo >>= opcode-lo
+    opcode-lo >>= opcode-lo
+    i += opcode-lo
+    load v1 - v1
+    if v0 != v1 then jump skip-next-opcode
+    return
+
+: skip-key-pressed
+    point-to FOCUSSED
+    load v0
+    if v0 != 1 then return
+    if vX key then jump skip-next-opcode
+    return
+
+: skip-key-released
+    point-to FOCUSSED
+    load v0
+    if v0 != 1 then jump skip-next-opcode
+    if vX -key then jump skip-next-opcode
+    return
+
+## Setting registers
+
+: set-reg
+    point-to REGISTERS
+    i += second-nibble
+    save opcode-lo - opcode-lo
+    return
+
+: set-random
+    point-to REGISTERS
+    i += second-nibble
+    v0 := random 0xFF
+    v0 &= opcode-lo
+    save v0
+    return
+
+# Wait for key and return in register X
+: get-key
+    point-to FOCUSSED
+    load v0
+    if v0 != 1 then jump step-back-one-opcode
+    point-to KEYPAD_MODE
+    load v1 - v1
+    v0 := 0
+    if v1 != KEYPAD_WAITING_FOR_KEY_PRESS begin
+        loop
+            if v0 key then jump step-back-one-opcode
+            v0 += 1
+            if v0 != 0x10 then
+        again
+        if v1 == KEYPAD_NOT_WAITING begin
+            v1 := KEYPAD_WAITING_FOR_KEY_PRESS
+            save v1 - v1
+            jump step-back-one-opcode
+        end
+        v1 := KEYPAD_NOT_WAITING
+        save v1 - v1
+        return
+    end
+    loop
+        if v0 key begin
+            v1 := KEYPAD_WAITING_FOR_KEY_RELEASE
+            save v1 - v1
+            point-to REGISTERS
+            i += second-nibble
+            save v0
+            jump step-back-one-opcode
+        end
+        v0 += 1
+        if v0 != 0x10 then
+    again
+    jump step-back-one-opcode
+
+: set-i
+    opcode-hi := second-nibble
+    point-to INDEX
+    save opcode-hi - opcode-lo
+    return
+
+# Point i to font sprite for value in register X
+: set-font
+    load v0
+    v1 := v0
+    v1 <<= v1
+    v1 <<= v1
+    v1 += v0
+    v0 := 0
+    point-to INDEX
+    save v1
+    return
+
+# Point i to big font sprite for value in register X
+: set-big-font
+    load v0
+    v1 := v0
+    v1 <<= v1
+    v1 <<= v1
+    v1 <<= v1
+    v1 += v0
+    v1 += v0
+    v1 += 80
+    v0 := 0
+    point-to INDEX
+    save v1
+    return
+
+## Perform maths operations
+
+# Add immediate value to register
+: add-value
+    point-to REGISTERS
+    i += second-nibble
+    load v0 - v0
+    v0 += opcode-lo
+    save v0
+    return
+
+# Add register X to i
+: add-to-i
+    load v2 - v2
+    point-to INDEX
+    load v0 - v1
+    v1 += v2
+    v0 += vF
+    save v1
+    return
+
+# Copy value of register Y into register X
+: copy-reg
+    save vY - vY
+    return
+
+# Register X |= register Y
+: or-reg
+    vX |= vY
+    jump bin-ops-save
+
+# Register X &= register Y
+: and-reg
+    vX &= vY
+    jump bin-ops-save
+
+# Register X ^= register Y
+: xor-reg
+    vX ^= vY
+: bin-ops-save
+    save vX - vX
+    get-quirk v0 VF_QUIRK
+    vF := 0
+    if v0 != 0 then jump save-flag
+    return
+
+# Register X += register Y
+: add-reg
+    vX += vY
+    jump maths-save
+
+# Register X -= register Y
+: sub-reg
+    vX -= vY
+: maths-save
+    save vX - vX
+    jump save-flag
+
+# Register X = register Y << 1
+: shift-left
+    get-quirk v1 SHIFT_QUIRK
+    if v1 != 0 then vY := vX
+    vY <<= vY
+    jump shift-save
+# Register X = register Y >> 1
+: shift-right
+    get-quirk v1 SHIFT_QUIRK
+    if v1 != 0 then vY := vX
+    vY >>= vY
+: shift-save
+    v0 := vF
+    point-to REGISTERS
+    i += second-nibble
+    save vY - vY
+    vF := v0
+    jump save-flag
+
+# Register X = register Y - register X
+: reg-sub
+    vY -= vX
+    save vY - vY
+    jump save-flag
+
+: save-flag
+    v0 := vF
+    :calc VF_REGISTER { REGISTERS + 0xF }
+    point-to VF_REGISTER
+    save v0
+    return
+
+## Miscellaneous
+
+: exit-interpreter
+    point-to RUNNING
+    v0 := STATE_STOPPED
+    save v0
+    jump step-back-one-opcode
+
+# BCD encode register X to i
+: bcd-encode
+    load v2 - v2
+    point-to INDEX
+    load v1
+    point-to RAM
+    add-16-bit-to-i
+    bcd v2
+    return
+
+## Read / write special registers
+
+# Write register X to sound timer
+: write-sound
+    load v0
+    point-to SOUND_TIMER
+    jump special-regs-save
+
+# Write register X into delay timer
+: write-delay
+    load v0
+    point-to DELAY_TIMER
+    jump special-regs-save
+
+# Load delay timer into register X
+: read-delay
+    point-to DELAY_TIMER
+    load v0
+    point-to REGISTERS
+    i += second-nibble
+: special-regs-save
+    save v0
+    return
+
+## Loading and saving registers
+
+: read-from-memory
+    v2 := 0
+    loop
+        point-to INDEX
+        load v1
+        point-to RAM
+        add-16-bit-to-i
+        i += v2
+        load v1 - v1
+        point-to REGISTERS
+        i += v2
+        save v1 - v1
+        v2 += 1
+        if v2 <= second-nibble then
+    again
+    get-quirk v0 MEM_QUIRK
+    if v0 != 0 begin
+        point-to INDEX
+        load v0 - v1
+        second-nibble += 1
+        v1 += second-nibble
+        v0 += vF
+        save v1
+    end
+    return
+
+: write-to-memory
+    v2 := 0
+    loop
+        point-to REGISTERS
+        i += v2
+        load v3 - v3
+        point-to INDEX
+        load v1
+        point-to RAM
+        add-16-bit-to-i
+        i += v2
+        save v3 - v3
+        v2 += 1
+        if v2 <= second-nibble then
+    again
+    get-quirk v0 MEM_QUIRK
+    if v0 != 0 begin
+        point-to INDEX
+        load v0 - v1
+        second-nibble += 1
+        v1 += second-nibble
+        v0 += vF
+        save v1
+    end
+    return
+
+: read-from-flags
+    v2 := 0
+    loop
+        point-to USERFLAGS
+        i += v2
+        load v1 - v1
+        point-to REGISTERS
+        i += v2
+        save v1 - v1
+        v2 += 1
+        if v2 <= second-nibble then
+    again
+    return
+
+: write-to-flags
+    v2 := 0
+    loop
+        point-to REGISTERS
+        i += v2
+        load v4 - v4
+        point-to USERFLAGS
+        i += v2
+        save v4 - v4
+        v2 += 1
+        if v2 <= second-nibble then
+    again
+    return
+
+## Special Chipception opcode
+
+: launch-program
+    point-to REGISTERS
+    load v3 - v4
+    jump start-program
+
+## Display manipulation
+
+: clear-screen
+    point-to DISPLAY_MODE
+    load v3 - v3
+    point-to RAM 
+    v0 := 0x10
+    v1 := 0x00
+    add-16-bit-to-i
+    v0 := 0
+    v1 := 0
+    v2 := 1
+    if v3 == DISPLAY_HIRES then v2 := 4
+    loop
+        loop
+            save v0
+            v1 += 1
+            if v1 != 0 then
+        again
+        v2 -= 1
+        if v2 != 0 then
+    again
+    return
+
+# Note that the scrolling opcodes are not finished and have been disabled to
+# save executable memory space. The ROMs I'm running don't need these opcodes
+# and doing them right would take up more valuable space than I'm currently
+# willing to invest in something I'm not using. Using these opcodes will act as
+# a no-op.
+
+# Scroll the display down N pixels
+: scrll-down
+    :if SCROLLING
+        # TODO: operate on own buffer
+        opcode-lo >>= opcode-lo
+        opcode-lo >>= opcode-lo
+        opcode-lo >>= opcode-lo
+        opcode-lo >>= opcode-lo
+        vF := 0xC0
+        opcode-lo |= vF
+        i := scroll-down-smc
+        save opcode-lo - opcode-lo
+        :next scroll-down-smc
+        scroll-down 0
+        return
+    :end
+
+# Scroll the display left 4 pixels
+: scrll-left
+    :if SCROLLING
+        # TODO: operate on own buffer
+        scroll-left
+        return
+    :end
+
+# Scroll the display right 4 pixels
+: scrll-right
+    :if SCROLLING
+        # TODO: operate on own buffer
+        scroll-right
+    :else
+        return
+    :end
+
+: set-lores
+    v0 := DISPLAY_LORES
+    jump set-res
+
+: set-hires
+    i := long window-mode
+    v0 := MODE_FULLSCREEN
+    save v0
+    v0 := DISPLAY_HIRES
+: set-res
+    point-to DISPLAY_MODE
+    save v0
+    jump clear-screen
+
+: draw-sprite
+    get-quirk v0 DISP_QUIRK
+    if v0 != 0 begin
+        point-to RUNNING
+        load v0 - v0
+        if v0 == STATE_WAITING_FOR_INTERRUPT then
+            jump step-back-one-opcode
+        if v0 == STATE_RUNNING begin
+            v0 := STATE_WAITING_FOR_INTERRUPT
+            save v0
+            jump step-back-one-opcode
+        end
+        if v0 == STATE_INTERRUPT_TRIGGERED begin
+            v0 := STATE_RUNNING
+            save v0
+        end
+    end
+
+    # Note for future self: These aliases have been chosen such that they
+    # overlap perfectly with those in blit-sprite.
+    :alias sprite-address-hi    v0
+    :alias sprite-address-lo    v1
+    :alias x-coord              v2
+    :alias y-coord              v3
+    :alias temp                 v4
+    :alias mask-left            v5
+    :alias sprite-height-pixels v6
+    :alias sprite-width-bytes   v7
+    :alias mask-right           v8
+    :alias disp-width           v9
+    :alias temp1                vA
+    :alias temp2                vB
+    :alias disp-height          vC
+
+    # Load X coordinate from first register
+    point-to REGISTERS
+    i += second-nibble
+    load x-coord - x-coord
+
+    # Get height from opcode
+    sprite-height-pixels := opcode-lo
+    vF := 0x0F
+    sprite-height-pixels &= vF
+    sprite-width-bytes := 1
+    if sprite-height-pixels == 0 begin
+        sprite-height-pixels := 16
+        sprite-width-bytes := 2
+    end
+
+    # Load Y coordinate from second register
+    opcode-lo >>= opcode-lo
+    opcode-lo >>= opcode-lo
+    opcode-lo >>= opcode-lo
+    opcode-lo >>= opcode-lo
+    point-to REGISTERS
+    i += opcode-lo
+    load y-coord - y-coord
+
+    # Get display resolution and wrap coordinates if needed
+    point-to DISPLAY_MODE
+    load v0
+    disp-width := 63
+    disp-height := 31
+    if v0 == DISPLAY_HIRES begin
+        disp-width := 127
+        disp-height := 63
+    end
+    x-coord &= disp-width
+    y-coord &= disp-height
+    disp-width += 1
+    disp-height += 1
+
+    # Get real-world sprite address
+    i := long current-machine-ptr
+    load sprite-address-hi - sprite-address-lo
+    vF := RAM
+    sprite-address-lo += vF
+    sprite-address-hi += vF
+    point-to INDEX
+    load temp1 - temp2
+    sprite-address-lo += temp2
+    sprite-address-hi += vF
+    sprite-address-hi += temp1
+
+    # Clip sprite width and height on display dimensions if clip quirk is active
+    get-quirk temp CLIP_QUIRK
+    if temp != 0 begin
+        # If the sprite clips that the bottom of the display, we can just
+        # instruct the draw instruction to draw a couple of lines less.
+        # if Y-coord > (disp-height - sprite-height):
+        #     sprite-height = disp-height - Y-coord
+        temp := disp-height
+        temp -= sprite-height-pixels
+        if y-coord > temp begin
+            sprite-height-pixels := disp-height
+            sprite-height-pixels -= y-coord
+        end
+
+        # If the sprite clips on the right of the display we have a bigger
+        # issue. Then we actually have to mask out the sprite to the correct new
+        # width, and use the masked out sprite instead of the original.
+        # if X-coord > (disp-width - sprite-width):
+        #     sprite-width = disp-width - X-coord
+        temp := disp-width
+        temp -= 8
+        if sprite-width-bytes == 2 then temp -= 8
+        if x-coord > temp begin
+            temp := disp-width
+            temp -= x-coord
+
+            # Make a bitmask for the sprite so we can make the sprite the max available width
+            vF := 8
+            if sprite-height-pixels == 16 then vF := 16
+            temp =- vF
+            mask-right := 0xFF
+            mask-left := 0xFF
+            loop
+                mask-left <<= mask-left
+                mask-right <<= mask-right
+                mask-left += vF
+                # if vF != 0 then mask-left += 1
+                temp -= 1
+                if temp != 0 then
+            again
+
+            # Create a masked version of the sprite in the sprite-store
+            temp := 0
+            loop
+                i := draw-sprite-smc
+                save sprite-address-hi - sprite-address-lo
+                0xF0 0x00   # i := long ...
+                : draw-sprite-smc
+                0x00 0x00   # sprite address
+                i += temp
+                # i points to the current row in the original sprite
+                if sprite-height-pixels == 16 begin
+                    i += temp
+                    load temp1 - temp2
+                    vA &= mask-left   # Mask out overflowing bits / pixels
+                    vB &= mask-right
+                    i := long draw-sprite-store
+                    i += temp
+                    i += temp
+                    save temp1 - temp2
+                else
+                    load temp1 - temp1
+                    vA &= mask-right  # Mask out overflowing bits / pixels
+                    i := long draw-sprite-store
+                    i += temp
+                    save temp1 - temp1
+                end
+                temp += 1
+                if temp != sprite-height-pixels then
+            again
+
+            :alias unpack-hi sprite-address-hi
+            :alias unpack-lo sprite-address-lo
+            :unpack long draw-sprite-store
+        end
+    end
+
+    # Render sprite to our private display buffer
+    vF := RAM
+    unpack-pointer
+    vA += 0x10
+    blit-sprite
+    jump save-flag
+
+:segment data
+
+: draw-sprite-store
+    0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0
+    0 0 0 0 0 0 0 0

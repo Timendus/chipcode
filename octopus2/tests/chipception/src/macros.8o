@@ -1,0 +1,116 @@
+# The machine definition offsets
+
+:const PC 0
+:calc  SP                { PC + 2 }
+:calc  REGISTERS         { SP + 1 }
+:calc  INDEX             { REGISTERS + 16 }
+:calc  STACK             { INDEX + 2 }
+:calc  DELAY_TIMER       { STACK + 24 }
+:calc  SOUND_TIMER       { DELAY_TIMER + 1 }
+:calc  USERFLAGS         { SOUND_TIMER + 1 }
+
+:calc  RUNNING           { USERFLAGS + 16 }
+:calc  ROM               { RUNNING + 1 }
+:calc  DISPLAY_MODE      { ROM + 2 }
+:calc  KEYPAD_MODE       { DISPLAY_MODE + 1 }
+:calc  QUIRKS            { KEYPAD_MODE + 1 }
+:calc  CYCLES_PER_FRAME  { QUIRKS + 1 }
+:calc  WINDOW_POSITION   { CYCLES_PER_FRAME + 1 }
+:calc  WINDOW_POSITION_X { WINDOW_POSITION + 0 }
+:calc  WINDOW_POSITION_Y { WINDOW_POSITION + 1 }
+:calc  WINDOW_POSITION_Z { WINDOW_POSITION + 2 }
+:calc  FOCUSSED          { WINDOW_POSITION + 3 }
+
+:calc  RAM               { FOCUSSED + 1 }
+:calc  MACHINE_SIZE      { RAM + 4096 + 1024 }
+
+:alias cycle vD
+:alias current-machine vE
+:const MAX_MACHINES 6
+
+:macro point-to PTR {
+    vF := PTR
+    pointer-to
+}
+
+:macro no-op {
+    v0 += 0
+}
+
+# Helpers for setting values in memory
+
+:macro make16 REGa REGb WORD {
+    :calc hi { ( WORD >> 8 ) & 0xFF }
+    :calc lo { WORD & 0xFF }
+    REGa := hi
+    REGb := lo
+}
+
+:macro set16 PTR WORD {
+    make16 v0 v1 WORD
+    point-to PTR
+    save v1
+}
+
+:macro set8 PTR BYTE {
+    point-to PTR
+    vF := BYTE
+    save vF - vF
+}
+
+# A few constants giving meaning to magic values
+
+:const STATE_STOPPED 0
+:const STATE_RUNNING 1
+:const STATE_WAITING_FOR_INTERRUPT 2
+:const STATE_INTERRUPT_TRIGGERED 3
+
+:const KEYPAD_NOT_WAITING 0
+:const KEYPAD_WAITING_FOR_KEY_PRESS 1
+:const KEYPAD_WAITING_FOR_KEY_RELEASE 2
+
+:const DISPLAY_LORES 0
+:const DISPLAY_HIRES 1
+
+:const MODE_WINDOWED 0
+:const MODE_FULLSCREEN 1
+
+# Constants and macros for quirks
+
+:const VF_QUIRK    0b10000000
+:const SHIFT_QUIRK 0b01000000
+:const MEM_QUIRK   0b00100000
+:const JUMP_QUIRK  0b00010000
+:const DISP_QUIRK  0b00001000
+:const CLIP_QUIRK  0b00000100
+
+:calc CHIP8     { VF_QUIRK + MEM_QUIRK + CLIP_QUIRK }
+:calc VIP       { VF_QUIRK + MEM_QUIRK + DISP_QUIRK + CLIP_QUIRK }
+:calc SUPERCHIP { SHIFT_QUIRK + JUMP_QUIRK + CLIP_QUIRK }
+
+:macro get-quirk REG QUIRK {
+    point-to QUIRKS
+    load REG - REG
+    vF := QUIRK
+    REG &= vF
+}
+:macro set-quirk QUIRK {
+    point-to QUIRKS
+    load v0 - v0
+    vF := QUIRK
+    v0 |= vF
+    save v0 - v0
+}
+:macro reset-quirk QUIRK {
+    :calc INVERTED { ~ QUIRK }
+    point-to QUIRKS
+    load v0 - v0
+    vF := INVERTED
+    v0 &= vF
+    save v0 - v0
+}
+:macro set-quirks CHOSEN-QUIRKS {
+    point-to QUIRKS
+    vF := CHOSEN-QUIRKS
+    save vF - vF
+}

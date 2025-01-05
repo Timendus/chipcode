@@ -1,0 +1,665 @@
+:include "macros.8o"
+
+: main
+    # Render title image
+    hires
+    :unpack long title-image
+    display-overwrite
+    display-copy
+    vF := 60
+    delay := vF
+
+    # Initialize machines table at `free-memory`, machines will be created after
+    # the machines table.
+    :alias unpack-hi v0
+    :alias unpack-lo v1
+    :unpack long free-memory
+    v4 := MAX_MACHINES
+    v1 += v4
+    v0 += vF
+    v1 += v4
+    v0 += vF
+    make16 v2 v3 MACHINE_SIZE
+    i := long free-memory
+    loop
+        save v1
+        v1 += v3
+        v0 += vF
+        v0 += v2
+        if vF != 0 begin
+            :breakpoint "Can't store that many machines"
+            no-op
+        end
+        v4 -= 1
+        if v4 != 0 then
+    again
+
+    # Make sure we sound friendly
+    i := long beep-pattern
+    audio
+    v0 := 70
+    pitch := v0
+
+    # Initialize the launcher app
+    start-launcher
+
+    # Do the scroll down animation to the desktop
+    sleep
+    vE := 0
+    loop
+        plane 3
+        scroll-up 2
+        i := long background-image
+        i += vE
+        v0 := 0
+        v1 := 62
+        v2 := 64
+        plane 1
+        loop
+            sprite v0 v1 2
+            i += v2
+            v0 += 8
+            if v0 == 128 then plane 2
+            if v0 != 0 then
+        again
+        vF := 1
+        delay := vF
+        sleep
+        vE += 2
+        if vE != 64 then
+    again
+
+    # Run forever
+    loop
+        v0 := 1
+        delay := v0
+
+        # Run each CPU for the requested number of cycles
+        current-machine := 0
+        loop
+            i := long current-number-of-machines
+            load v0
+            while current-machine != v0
+            select-machine
+            point-to RUNNING
+            load v0
+            if v0 != STATE_STOPPED begin
+                point-to CYCLES_PER_FRAME
+                load cycle - cycle
+                loop
+                    run-cycle
+                    cycle -= 1
+                    if cycle != 0 then
+                again
+            end
+            current-machine += 1
+        again
+
+        # Run all the timer stuff for each CPU
+        current-machine := 0
+        vD := 0
+        i := long current-number-of-machines
+        load vC - vC
+        loop
+            while current-machine != vC
+            select-machine
+            point-to RUNNING
+            load v0
+            if v0 != STATE_STOPPED begin
+                # Decrement timers and play sound
+                point-to DELAY_TIMER
+                load v0 - v0
+                if v0 != 0 then v0 -= 1
+                save v0
+                point-to SOUND_TIMER
+                load v0 - v0
+                if v0 != 0 begin
+                    v0 -= 1
+                    vD := 1
+                end
+                save v0
+
+                # Check if we're waiting for dispQuirk
+                point-to RUNNING
+                load v0 - v0
+                if v0 == STATE_WAITING_FOR_INTERRUPT then
+                    v0 := STATE_INTERRUPT_TRIGGERED
+                save v0
+            end
+
+            current-machine += 1
+        again
+        buzzer := vD
+
+        composite-display
+
+        # Wait to sync up with reality
+        sleep
+
+        # Check for magic key combo's
+        v0 := 0xA
+        if v0 key begin
+
+            # Z + R -> Reset program
+            v0 := 0xD
+            if v0 key then reset-focussed
+
+            # Z + 1 -> Cycle through programs
+            v0 := 1
+            if v0 key then alt-tab
+
+            # Z + C -> Close program
+            v0 := 0xB
+            if v0 key then close-focussed
+
+            # Z + W -> Move window
+            v0 := 5
+            if v0 key then move-focussed
+
+            # Z + F -> Go full screen
+            v0 := 0xE
+            if v0 key begin
+                i := long window-mode
+                load v0 - v0
+                vF := MODE_FULLSCREEN
+                v0 ^= vF
+                save v0
+                wait-release
+            end
+
+            # Z + S -> Open launcher
+            v0 := 8
+            if v0 key then start-launcher
+        end
+    again
+
+: start-launcher
+    :alias unpack-hi v3
+    :alias unpack-lo v4
+    :unpack long launcher
+    start-program
+    point-to WINDOW_POSITION
+    v0 := 32
+    v1 := 18
+    save v1
+    :alias unpack-hi v0
+    :alias unpack-lo v1
+    jump wait-release
+
+# Input: v3, v4 point to one of the ROM labels
+: start-program
+    # Find an unused machine or create a new machine
+    i := long current-number-of-machines
+    load v2 - v2
+    current-machine := 0
+    loop
+        select-machine
+        point-to RUNNING
+        load v0
+        while v0 != STATE_STOPPED
+        while current-machine != v2
+        current-machine += 1
+    again
+    if current-machine == v2 begin
+        # Bail if we don't have the memory
+        if current-machine == MAX_MACHINES begin
+            update-focussed # restore current-machine
+            return
+        end
+        v2 += 1
+        i := long current-number-of-machines
+        save v2 - v2
+    end
+
+    # Extract quirks
+    i := start-program-smc
+    save v3 - v4
+    0xF0 0x00   # i := long ...
+    : start-program-smc
+    0x00 0x00
+    load v5 - v6
+
+    # Save start of ROM and quirks
+    vF := 2
+    v4 += vF
+    v3 += vF
+    select-machine
+    point-to ROM
+    save v3 - v4
+    # Quirks and cycles per frame are sequential in memory, make use of this to
+    # save both in one go:
+    point-to QUIRKS
+    save v5 - v6
+
+    # Position window
+    point-to WINDOW_POSITION
+    # X = number between 2 and 61
+    v0 := random 59
+    v0 += 2
+    # Y = number between 8 and 30
+    v1 := random 22
+    v1 += 8
+    # Z = just stack it on top(?)
+    v2 := current-machine
+    save v2
+
+    # Launch this machine
+    reset
+    update-focussed
+    jump wait-release-all
+
+# Rerender the screen
+: composite-display
+    i := long window-mode
+    load v0
+    if v0 == MODE_FULLSCREEN begin
+        # Just draw the focussed window to the display in lores mode
+        update-focussed
+        point-to DISPLAY_MODE
+        load v2 - v2
+        point-to RAM 
+        v0 := 0x10
+        v1 := 0x00
+        add-16-bit-to-i
+        if v2 == DISPLAY_HIRES begin
+            v8 := 128
+            hires
+        else
+            v8 := 64
+            lores
+        end
+        jump buffer-to-display
+    end
+
+    # Draw the whole scene with the background and all the windows
+    :unpack long background-image
+    display-overwrite
+    vD := 0
+    loop
+        i := long current-number-of-machines
+        load v0
+        while vD != v0
+        # Find the interpreter at this depth
+        find-z-position
+        if v2 == 0 begin
+            # Render this CPUs display
+            point-to WINDOW_POSITION
+            load v0 - v1
+            v0 -= 1
+            v1 -= 7
+            v2 := 66
+            v3 := 40
+            point-to FOCUSSED
+            load v4 - v4
+            vC := 0xFF
+            if v4 == 1 then vC := 0
+            draw-window
+            point-to WINDOW_POSITION
+            load v2 - v3
+            point-to DISPLAY_MODE
+            load v0
+            if v0 == DISPLAY_HIRES begin
+                :alias unpack-hi vA
+                :alias unpack-lo vB
+                :unpack long hires-placeholder-message
+            else
+                vF := RAM
+                unpack-pointer
+                vA += 0x10
+            end
+            v4 := 8
+            v5 := 32
+            blit-to-display
+        end
+        vD += 1
+    again
+    jump display-copy
+
+# Waste time until the delay timer has run out
+: sleep
+    loop
+        vF := delay
+        if vF == 0 then return
+    again
+
+# Add v0, v1 as a 16-bit value to i
+: add-16-bit-to-i
+    loop
+        while v0 != 0
+        # Do i += 0x100 in two parts
+        vF := 0x80
+        i += vF
+        i += vF
+        v0 -= 1
+    again
+    i += v1
+    return
+
+# Find the machine that is at the given z-position.
+# Input: vD is desired z-position
+# Returns:
+#  * v2 == 0 if found; right machine selected
+#  * v2 == 1 if not found
+: find-z-position
+    current-machine := 0
+    i := long current-number-of-machines
+    load vC - vC
+: find-z-pos-loop
+    v2 := 1
+    if current-machine == vC then return
+    v2 := 0
+    select-machine
+    current-machine += 1
+    point-to RUNNING
+    load v0
+    if v0 == STATE_STOPPED then jump find-z-pos-loop
+    point-to WINDOW_POSITION_Z
+    load v0
+    if v0 == vD then return
+    jump find-z-pos-loop
+
+# Update the focussed properties on all machines. A machine is focussed (`1`) if
+# its Z position is the highest, so in other words: it's on top. Otherwise, it
+# is `0`. Purposeful side-effect: this routine selects the focussed machine.
+: update-focussed
+    # Find window with highest Z position that's running
+    current-machine := 0
+    v2 := 0
+    v3 := 0
+    i := long current-number-of-machines
+    load v4 - v4
+    loop
+        while current-machine != v4
+        select-machine
+        point-to FOCUSSED
+        v0 := 0
+        save v0
+        point-to RUNNING
+        load v0
+        if v0 != STATE_STOPPED begin
+            point-to WINDOW_POSITION_Z
+            load v0
+            if v0 > v3 begin
+                v3 := v0
+                v2 := current-machine
+            end
+        end
+        current-machine += 1
+    again
+    current-machine := v2
+    select-machine
+    point-to FOCUSSED
+    v0 := 1
+    save v0
+    return
+
+# Swap focussed window with a window v9 levels down
+: swap-with-below
+    update-focussed
+    v5 := current-machine
+    v6 := current-machine
+    point-to WINDOW_POSITION_Z
+    load vD - vD
+    if vD == 0 then return # I'm the "lowest" window :(
+    v7 := vD
+    v3 := v9
+    loop
+        while v3 > vD
+        v3 -= vD
+    again
+    # Find v9th window below me
+    v2 := 1
+    loop
+        while vD != 255
+        while v3 != 0
+        loop
+            vD -= 1
+            while vD != 255
+            find-z-position
+            if v2 == 1 then
+        again
+        v3 -= 1
+    again
+
+    # We've found and selected a window below me.
+    # Swap Z position with that window.
+    point-to WINDOW_POSITION_Z
+    load v8 - v8
+    save v7 - v7
+    current-machine := v5
+    select-machine
+    point-to WINDOW_POSITION_Z
+    save v8 - v8
+
+    return
+
+: alt-tab
+    # We don't have any safe registers left, so store Alt-Tab distance in RAM
+    v0 := 0
+    i := long alt-tab-store
+    save v0
+    loop
+        # If A released, we're done
+        v0 := 0xA
+        if v0 -key then return
+        # If 1 pressed, cycle through windows
+        v0 := 1
+        if v0 key begin
+            i := long alt-tab-store
+            load v9 - v9
+            v9 += 1
+            save v9 - v9
+            swap-with-below
+            update-focussed
+            composite-display
+            # Wait for release
+            v0 := 1
+            loop
+                if v0 key then
+            again
+        end
+    again
+:segment data
+: alt-tab-store
+    0
+:segment code
+
+: reset-focussed
+    update-focussed
+    reset
+    jump wait-release
+
+: move-focussed
+    wait-release
+    loop
+        # Move focussed window around
+        update-focussed
+        point-to WINDOW_POSITION
+        load v0 - v1
+        if v1 != 8 begin
+            v2 := 5
+            if v2 key then v1 -= 1
+        end
+        if v0 != 2 begin
+            v2 := 7
+            if v2 key then v0 -= 1
+        end
+        if v1 != 30 begin
+            v2 := 8
+            if v2 key then v1 += 1
+        end
+        if v0 != 62 begin
+            v2 := 9
+            if v2 key then v0 += 1
+        end
+        save v0 - v1
+        composite-display
+
+        # Limit movement to one pixel per frame
+        v0 := 1
+        delay := v0
+        sleep
+
+        # Exit movement code by pressing Z
+        v0 := 0xA
+        if v0 key then return
+    again
+
+: close-focussed
+    update-focussed
+    set8 RUNNING STATE_STOPPED
+    update-focussed
+
+    # If window "below" this one is lores, and we're in fullscreen mode, jump
+    # back to windowed mode.
+    point-to DISPLAY_MODE
+    load v1 - v1
+    i := long window-mode
+    load v0 - v0
+    if v0 == MODE_FULLSCREEN begin
+        if v1 != DISPLAY_HIRES then v0 := MODE_WINDOWED
+        save v0
+    end
+    # jump wait-release  # fall through
+
+: wait-release
+    v0 := 0xA
+    if v0 key then jump wait-release
+    return
+
+: wait-release-all
+    v0 := 0
+: wait-release-loop
+    if v0 key then jump wait-release-loop
+    v0 += 1
+    if v0 != 16 then jump wait-release-loop
+    return
+
+# Lazily reset the interpreter
+: reset
+    set16 PC               0x200
+    set8  SP               0
+    set8  DISPLAY_MODE     DISPLAY_LORES
+    set8  RUNNING          STATE_RUNNING
+    clear-screen
+    :alias unpack-hi v1
+    :alias unpack-lo v2
+    :unpack long chip-8-font
+    load-font
+    # load-program  # Fall through
+    # return
+
+# Copy interpreter's ROM into RAM at 0x200
+: load-program
+    point-to ROM
+    load v1
+    i := load-program-smc
+    save v1
+    make16 vC v1 0
+    loop
+        0xF0 0x00
+        : load-program-smc
+        0x00 0x00
+        # i == program address
+        v0 := vC
+        add-16-bit-to-i
+        # i == byte within program
+        load v2 - v9
+        point-to RAM
+        vC += 2
+        v0 := vC
+        add-16-bit-to-i
+        vC -= 2
+        save v2 - v9
+
+        # Increase index
+        vF := 8
+        v1 += vF
+        vC += vF
+
+        # Are we done? (Just fill RAM, whatever)
+        if vC != 0x0E then
+    again
+    return
+
+# (v1, v2) point to font data, copy it into RAM at 0x000
+: load-font
+    v3 := 0
+    loop
+        i := load-font-smc
+        save v1 - v2
+        0xF0 0x00   # i := long ...
+        : load-font-smc
+        0x00 0x00
+        i += v3
+        load v0
+        point-to RAM
+        i += v3
+        save v0
+        v3 += 1
+        if v3 != 180 then
+    again
+    return
+
+: pointer-to
+    i := long current-machine-ptr
+    load vA - vB
+    i := load-pointer-smc
+    save vA - vB
+    0xF0 0x00   # i := long ...
+    : load-pointer-smc
+    0x00 0x00
+    i += vF
+    return
+
+: unpack-pointer
+    i := long current-machine-ptr
+    load vA - vB
+    vB += vF
+    vA += vF
+    return
+
+: select-machine
+    i := long free-memory
+    i += current-machine
+    i += current-machine
+    load v1
+    i := long current-machine-ptr
+    save v1
+    return
+
+:segment data
+
+: window-mode
+    :byte MODE_WINDOWED
+: current-machine-ptr
+    :pointer free-memory
+: current-number-of-machines
+    0
+
+: beep-pattern
+    0xFF 0x00 0xFF 0x00 0xFF 0x00 0xFF 0x00 0xFF 0x00 0xFF 0x00 0xFF 0x00 0xFF 0x00
+
+:include "decoder.8o"
+:include "opcodes.8o"
+:include "display.8o"
+:include "gui.8o"
+:include "fonts.8o"
+:include "roms.8o"
+:include "images.8o"
+
+: free-memory
+    # Starts here
+
+:monitor current-number-of-machines 1
+
+:monitor free-memory "%2x %2x %2x %2x %2x %2x"
+
+:calc machine0 { free-memory + ( MAX_MACHINES * 2 ) + ( MACHINE_SIZE * 0 ) }
+:monitor machine0 73
+
+:calc machine1 { free-memory + ( MAX_MACHINES * 2 ) + ( MACHINE_SIZE * 1 ) }
+:monitor machine1 73
+
+:calc machine2 { free-memory + ( MAX_MACHINES * 2 ) + ( MACHINE_SIZE * 2 ) }
+:monitor machine2 73

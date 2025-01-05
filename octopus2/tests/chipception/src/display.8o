@@ -1,0 +1,439 @@
+# The display buffers (at the bottom of this file) are structured in a way that
+# makes them easy to sprite to the screen. So the data is layed out in 8-pixel
+# wide columns, left to right. The first buffer is for plane 1 and the second
+# one for plane 2.
+
+# Show the contents of the display buffer on the screen.
+# Takes ~425 cycles to execute.
+: display-copy
+    i := long display-copy-values
+    load v6
+    i := long display-buffer
+
+    hires
+    plane 3
+    clear
+
+    plane 1
+    loop
+        sprite v0 v1 15   i += v2  # 0 0
+        sprite v0 v2 15   i += v2  # 0 15
+        sprite v0 v3 15   i += v2  # 0 30
+        sprite v0 v4 15   i += v2  # 0 45
+        sprite v0 v5 4    i += v6  # 0 60
+        v0 += 8
+        if v0 != 128 then
+    again
+
+    plane 2
+    v0 := 0
+    loop
+        sprite v0 v1 15   i += v2  # 0 0
+        sprite v0 v2 15   i += v2  # 0 15
+        sprite v0 v3 15   i += v2  # 0 30
+        sprite v0 v4 15   i += v2  # 0 45
+        sprite v0 v5 4    i += v6  # 0 60
+        v0 += 8
+        if v0 != 128 then
+    again
+
+    return
+
+:segment data
+: display-copy-values
+    0 0 15 30 45 60 4
+:segment code
+
+# Overwrite the display buffer contents with this image
+# Inputs:
+#   * v0, v1 = pointer to image
+: display-overwrite
+    i := overwrite-smc
+    save v1
+    make16 vC v1 0
+    loop
+        0xF0 0x00 # i := long ....
+        : overwrite-smc
+        0 0
+        v0 := vC
+        add-16-bit-to-i
+        load v2 - v9
+        i := long display-buffer
+        v0 := vC
+        add-16-bit-to-i
+        save v2 - v9
+        vF := 8
+        v1 += vF
+        vC += vF
+        if vC != 0x08 then
+    again
+    return
+
+# Blit a buffer to the display buffer
+# Inputs:
+#   * vA, vB = pointer to source buffer
+#   * v2 = X coordinate in pixels
+#   * v3 = Y coordinate in pixels
+#   * v4 = source width in bytes
+#   * v5 = source height in pixels
+:alias X v2
+:alias Y v3
+:alias width v4
+:alias height v5
+:alias leftPart v6
+:alias rightPart v7
+:alias leftMask vA
+:alias rightMask vB
+:alias offset v1
+:alias row v8
+:alias column v9
+:const display-buffer-height 64
+
+: blit-to-display
+    i := blit-buffer-smc
+    save vA - vB
+
+    column := 0
+    loop
+        row := 0
+        loop
+            0xF0 0x00 # i := long ....
+            : blit-buffer-smc
+            0 0
+            v0 := column
+            v1 := height
+            loop
+                while v0 != 0
+                i += v1
+                v0 -= 1
+            again
+            i += row
+            load v0
+
+            # Do some shifting magic for unaligned data
+            offset := 0b00000111
+            offset &= X
+            rightPart := 0
+            leftPart := v0
+            rightMask := 0
+            leftMask := 0xFF
+            loop
+                while offset != 0
+                rightPart >>= rightPart
+                leftPart >>= leftPart
+                if vF != 0 then rightPart += 128
+                rightMask >>= rightMask
+                leftMask >>= leftMask
+                if vF != 0 then rightMask += 128
+                offset -= 1
+            again
+            v0 := 0xFF
+            leftMask ^= v0
+            rightMask ^= v0
+
+            # Get pointer to the right place in the display buffer
+            i := long display-buffer-plane1
+            v0 := X
+            v0 >>= v0
+            v0 >>= v0
+            v0 >>= v0
+            v0 += column
+            # Get right column
+            v1 := display-buffer-height
+            loop
+                while v0 != 0
+                i += v1
+                v0 -= 1
+            again
+            # Get right row
+            i += Y
+            i += row
+
+            # i now points to the right byte, so write it!
+            load v0 - v0
+            v0 &= leftMask
+            v0 |= leftPart
+            save v0 - v0
+            vF := display-buffer-height
+            i += vF
+            load v0 - v0
+            v0 &= rightMask
+            v0 |= rightPart
+            save v0 - v0
+
+            row += 1
+            if row != height then
+        again
+        column += 1
+        if column != width then
+    again
+    return
+
+# Blit a sprite to a given buffer
+# Inputs:
+#   * v0, v1 = pointer to sprite
+#   * vA, vB = pointer to buffer
+#   * v9, vC = target buffer width and height
+#   * v2 = X coordinate in pixels
+#   * v3 = Y coordinate in pixels
+#   * v6 = source height in pixels
+#   * v7 = source width in bytes
+:alias X v2
+:alias Y v3
+:alias width v7
+:alias height v6
+:alias leftPart v5
+:alias rightPart v4
+:alias offset v1
+:alias row v8
+:alias column vA
+:alias flipped vB
+:alias target-buffer-width v9
+:alias target-buffer-height vC
+
+: blit-sprite
+    i := blit-sprite-smc1
+    save v0 - v1
+    i := blit-sprite-smc2
+    save vA - vB
+
+    v0 := target-buffer-width
+    v0 -= 1
+    X &= v0
+
+    column := 0
+    flipped := 0
+    loop
+        row := 0
+        loop
+            0xF0 0x00 # i := long ....
+            : blit-sprite-smc1
+            0 0
+            v0 := row
+            v1 := width
+            loop
+                while v0 != 0
+                i += v1
+                v0 -= 1
+            again
+            i += column
+            load v0
+
+            # Do some shifting magic for unaligned data
+            offset := 0b00000111
+            offset &= X
+            rightPart := 0
+            leftPart := v0
+            loop
+                while offset != 0
+                rightPart >>= rightPart
+                leftPart >>= leftPart
+                if vF != 0 then rightPart += 128
+                offset -= 1
+            again
+
+            # Get pointer to the right place in the target buffer
+            0xF0 0x00 # i := long ....
+            : blit-sprite-smc2
+            0 0
+            v0 := X
+            v0 >>= v0
+            v0 >>= v0
+            v0 >>= v0
+            v0 += column
+            # Get right column
+            v1 := target-buffer-height
+            loop
+                while v0 != 0
+                i += v1
+                v0 -= 1
+            again
+            # Get right row
+            v0 := Y
+            v0 += row
+            # v1 is still target-buffer-height
+            v1 -= 1
+            v0 &= v1
+            i += v0
+
+            # i now points to the right byte, so write it!
+            load v0 - v0
+            v1 := v0
+            v1 &= leftPart
+            if v1 != 0 then flipped := 1
+            v0 ^= leftPart
+            save v0 - v0
+            v0 := target-buffer-width
+            v0 -= 8
+            if X < v0 begin
+                vF := target-buffer-height
+                i += vF
+                load v0 - v0
+                v1 := v0
+                v1 &= rightPart
+                if v1 != 0 then flipped := 1
+                v0 ^= rightPart
+                save v0 - v0
+            end
+
+            row += 1
+            if row != height then
+        again
+        column += 1
+        if column != width then
+    again
+    vF := flipped
+    return
+
+:if SCROLLING
+# Note that the scrolling opcodes are not finished and have been disabled to
+# save executable memory space. The ROMs I'm running don't need these opcodes
+# and doing them right would take up more valuable space than I'm currently
+# willing to invest in something I'm not using. Using these opcodes will act as
+# a no-op.
+
+# Scroll a given display buffer 4 pixels left or right
+# TODO: make it work for hires?
+# Inputs:
+#   * v0, v1 = pointer to buffer
+#   * v8 = 0 for left, 1 for right
+: display-scroll-horiz
+    i := display-scroll-horiz-smc
+    save v1
+    0xF0 0x00 # i := long ....
+    : display-scroll-horiz-smc
+    0 0
+    v2 := 0
+    v3 := 0
+    v4 := 0x80
+    loop
+        load v0 - v0
+        v1 := v0
+        v0 >>= v0
+        v0 >>= v0
+        v0 >>= v0
+        v0 >>= v0
+        v1 <<= v1
+        v1 <<= v1
+        v1 <<= v1
+        v1 <<= v1
+        # if v0 == 1 begin
+            v2 |= v0
+            v2 := v1
+        # else
+        #     v2 |= v1
+        #     v2 := v0
+        # end
+        save v0
+        v3 -= 1
+        if v3 != 0 then
+    again
+    return
+:end
+
+# Copy the given buffer to the display, for full screen mode
+# Inputs:   i = pointer to buffer, v8 = 128 for hires, 64 for lores
+# Destroys: v0 - v7, i
+: buffer-to-display
+    v0 := 0
+    v1 := 0
+    v2 := 15
+    v3 := 30
+    v4 := 45
+    v5 := 60
+    v6 := 4
+    v7 := 2
+
+    plane 3
+    clear
+
+    plane 1
+    loop
+        sprite v0 v1 15   i += v2  # 0 0
+        sprite v0 v2 15   i += v2  # 0 15
+        if v8 == 128 begin
+            sprite v0 v3 15   i += v2  # 0 30
+            sprite v0 v4 15   i += v2  # 0 45
+            sprite v0 v5 4    i += v6  # 0 60
+        else
+            sprite v0 v3 2    i += v7  # 0 30
+        end
+        v0 += 8
+        if v0 != v8 then
+    again
+
+    return
+
+
+:segment data
+
+: display-buffer
+: display-buffer-plane1
+  # 2 planes of 32 times 32 bytes each. 1024 bytes per layer, 2048 bytes total.
+  # The image is layed out in consecutive vertical slices of 8 pixels wide
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+: display-buffer-plane2
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0

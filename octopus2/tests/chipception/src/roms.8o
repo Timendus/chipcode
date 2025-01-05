@@ -1,0 +1,100 @@
+:segment data
+
+: launcher
+    :byte SUPERCHIP     # Quirks
+    60                  # Cycles per frame
+    :include "../roms/launcher.ch8"
+
+
+: rom-table
+    # Number of ROMs, max is currently 32
+    11
+
+    :pointer rom-3d-vipr-maze
+    :include "../roms/3d-vipr-maze.png" no-labels
+
+    :pointer rom-blobo
+    :include "../roms/blobo.png" no-labels
+
+    :pointer rom-cave-explorer
+    :include "../roms/cave-explorer.png" no-labels
+
+    :pointer rom-test-suite
+    :include "../roms/chip8-test-suite.png" no-labels
+
+    :pointer rom-labyrinthine
+    :include "../roms/labyrinthine.png" no-labels
+
+    :pointer rom-pong
+    :include "../roms/pong.png" no-labels
+
+    :pointer rom-sierpinski
+    :include "../roms/sierpinski.png" no-labels
+
+    :pointer rom-space-invaders
+    :include "../roms/space-invaders.png" no-labels
+
+    :pointer rom-rockto
+    :include "../roms/rockto.png" no-labels
+
+    :pointer rom-wdl
+    :include "../roms/wdl.png" no-labels
+
+    :pointer rom-yasn
+    :include "../roms/yasn.png" no-labels
+
+
+: rom-3d-vipr-maze
+    :byte SUPERCHIP     # Quirks
+    60                  # Cycles per frame
+    :include "../roms/3d-vipr-maze.ch8"
+
+: rom-pong
+    :byte VIP           # Quirks
+    15                  # Cycles per frame
+    :include "../roms/pong.ch8"
+
+: rom-space-invaders
+    :byte SUPERCHIP     # Quirks
+    30                  # Cycles per frame
+    :include "../roms/space-invaders.ch8"
+
+: rom-sierpinski
+    :byte CHIP8         # Quirks
+    30                  # Cycles per frame
+    :include "../roms/sierpinski.ch8"
+
+: rom-test-suite
+    :byte VIP           # Quirks
+    60                  # Cycles per frame
+    :include "../roms/chip8-test-suite.ch8"
+
+: rom-wdl
+    :byte CHIP8         # Quirks
+    30                  # Cycles per frame
+    :include "../roms/wdl.ch8"
+
+: rom-yasn
+    :byte CHIP8         # Quirks
+    30                  # Cycles per frame
+    :include "../roms/yasn.ch8"
+
+: rom-labyrinthine
+    :byte CHIP8         # Quirks
+    30                  # Cycles per frame
+    :include "../roms/labyrinthine.ch8"
+
+: rom-cave-explorer
+    :byte CHIP8         # Quirks
+    30                  # Cycles per frame
+    :include "../roms/cave-explorer.ch8"
+
+: rom-blobo
+    :byte SUPERCHIP
+    100
+    :include "../roms/blobo.ch8"
+
+: rom-rockto
+    :byte SUPERCHIP
+    100
+    :include "../roms/rockto.ch8"

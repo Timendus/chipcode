@@ -1,0 +1,365 @@
+:const display-height 64
+
+# Draw fancy UI window
+# Inputs:
+#   * v0, v1 = top left
+#   * v2 = width in pixels
+#   * v3 = height in pixels
+#   * vC = border colour (0x00 for blue, 0xFF for orange)
+: draw-window
+    # Draw a large black square. Because the display buffers of the interpreters
+    # don't have a plane two, and so we get window shadows.
+    v4 := 0x00
+    v0 -= 1
+    v1 -= 1
+    v2 += 2
+    v3 += 2
+    i := long display-buffer-plane1
+    draw-square
+    i := long display-buffer-plane2
+    draw-square
+    v0 += 1
+    v1 += 1
+    v2 -= 2
+    v3 -= 2
+
+    # Draw all four borders and highlights
+
+    # Top
+    # X1 - Window color line
+    v4 := vC
+    i := long display-buffer-plane1
+    draw-horizonal-line
+    v4 := 0xFF
+    i := long display-buffer-plane2
+    draw-horizonal-line
+
+    # Left
+    # X1 - Window color line
+    v4 := vC
+    i := long display-buffer-plane1
+    draw-vertical-line
+    v4 := 0xFF
+    i := long display-buffer-plane2
+    draw-vertical-line
+
+    # Right
+    # X1 - Window color line
+    v0 += v2
+    v0 -= 1
+    v4 := vC
+    i := long display-buffer-plane1
+    draw-vertical-line
+    v4 := 0xFF
+    i := long display-buffer-plane2
+    draw-vertical-line
+    v0 -= v2
+    v0 += 1
+
+    # Bottom
+    # X1 - Window color line
+    v1 += v3
+    v1 -= 1
+    v4 := vC
+    i := long display-buffer-plane1
+    draw-horizonal-line
+    v4 := 0xFF
+    i := long display-buffer-plane2
+    draw-horizonal-line
+    v1 -= v3
+    v1 += 2
+
+    # jump draw-header # Fall through
+
+# Draw UI box program header
+# Inputs:
+#   * v0, v1 = top left
+#   * v2 = width in pixels
+#   * vC = border colour (0x00 for blue, 0xFF for orange)
+: draw-header
+    v3 := 6
+    i := long display-buffer-plane1
+    v4 := vC
+    draw-square
+    i := long display-buffer-plane2
+    v4 := 0xFF
+    draw-square
+
+    v2 += v0
+    v2 -= 15
+    v3 := v1
+    :alias unpack-hi v0
+    :alias unpack-lo v1
+    :unpack long header-fade
+    :alias unpack-hi vA
+    :alias unpack-lo vB
+    :unpack long display-buffer-plane2
+    v6 := 5
+    v7 := 2
+    v9 := 128
+    if vC == 0x00 begin
+        vC := 64
+        blit-sprite
+        :alias unpack-hi v0
+        :alias unpack-lo v1
+        :unpack long header-fade
+        :alias unpack-hi vA
+        :alias unpack-lo vB
+        :unpack long display-buffer-plane1
+    end
+    vC := 64
+    jump blit-sprite
+
+:segment data
+
+: header-fade
+    0x25 0x7C
+    0x8B 0xDC
+    0x25 0x7C
+    0x8B 0xDC
+    0x25 0x7C
+
+:segment code
+
+# Draw horizonal line
+# Inputs:
+#   * i = buffer to draw to
+#   * v0, v1 = left start coordinate
+#   * v2 = length of line in pixels
+#   * v4 = colour (0xFF or 0x00)
+# Leaves v3 untouched
+: draw-horizonal-line
+    # Point i to the start byte
+    v5 := v0
+    v5 >>= v5
+    v5 >>= v5
+    v5 >>= v5
+    v6 := display-height
+    loop
+        while v5 != 0
+        i += v6
+        v5 -= 1
+    again
+    i += v1
+
+    # Create the right bitmasks for the pixel offset
+    v5 := v0
+    vF := 7
+    v5 &= vF
+    v6 := 0xFF
+    v7 := 0
+    loop
+        while v5 != 0
+        v6 >>= v6
+        v7 >>= v7
+        v7 += 128
+        v5 -= 1
+    again
+
+    # Draw start of line
+    load v5 - v5
+    v5 &= v7
+    if v4 != 0 then v5 |= v6
+    save v5 - v5
+
+    # Draw all the whole bytes of the line
+    v5 := v0
+    vF := 7
+    v5 &= vF
+    vF := 8
+    v5 =- vF
+    v7 := v2
+    v7 -= v5
+    v7 >>= v7
+    v7 >>= v7
+    v7 >>= v7
+    v5 := display-height
+    loop
+        while v7 != 0
+        i += v5
+        save v4 - v4
+        v7 -= 1
+    again
+    i += v5
+
+    # Create the right bitmasks for the end of the line
+    v5 := v0
+    v5 += v2
+    vF := 7
+    v5 &= vF
+    v6 := 0xFF
+    v7 := 0
+    loop
+        while v5 != 0
+        v6 >>= v6
+        v7 >>= v7
+        v7 += 128
+        v5 -= 1
+    again
+
+    # Draw end of line
+    load v5 - v5
+    v5 &= v6
+    if v4 != 0 then v5 |= v7
+    save v5 - v5
+
+    return
+
+# Draw vertical line
+# Inputs:
+#   * i = buffer to draw to
+#   * v0, v1 = top start coordinate
+#   * v3 = length of line in pixels
+#   * v4 = colour (0xFF or 0x00)
+# Leaves v2 untouched
+: draw-vertical-line
+    # Point i to the start byte
+    v5 := v0
+    v5 >>= v5
+    v5 >>= v5
+    v5 >>= v5
+    v6 := display-height
+    loop
+        while v5 != 0
+        i += v6
+        v5 -= 1
+    again
+    i += v1
+
+    # Create the right bitmask for the pixel offset
+    v5 := v0
+    vF := 7
+    v5 &= vF
+    v7 := 128
+    loop
+        while v5 != 0
+        v7 >>= v7
+        v5 -= 1
+    again
+    if v4 == 0 begin
+        vF := 0xFF
+        v7 ^= vF
+    end
+
+    # Draw the line
+    v6 := v3
+    v8 := 1
+    loop
+        while v6 != 0
+        load v5 - v5
+        if v4 == 0 then v5 &= v7
+        if v4 != 0 then v5 |= v7
+        save v5 - v5
+        i += v8
+        v6 -= 1
+    again
+
+    return
+
+# Draw square
+# Inputs:
+#   * i = buffer to draw to
+#   * v0, v1 = top left coordinate
+#   * v2 = width of square in pixels
+#   * v3 = height of square in pixels
+#   * v4 = colour (0xFF or 0x00)
+: draw-square
+    # Point i to the start byte
+    v5 := v0
+    v5 >>= v5
+    v5 >>= v5
+    v5 >>= v5
+    v6 := display-height
+    loop
+        while v5 != 0
+        i += v6
+        v5 -= 1
+    again
+    i += v1
+
+    # Create the right bitmasks for the pixel offset
+    v5 := v0
+    vF := 7
+    v5 &= vF
+    v6 := 0xFF
+    v7 := 0
+    loop
+        while v5 != 0
+        v6 >>= v6
+        v7 >>= v7
+        v7 += 128
+        v5 -= 1
+    again
+
+    # Draw leftmost column
+    v8 := v3
+    v9 := 1
+    loop
+        while v8 != 0
+        load v5 - v5
+        v5 &= v7
+        if v4 != 0 then v5 |= v6
+        save v5 - v5
+        i += v9
+        v8 -= 1
+    again
+
+    # Calculate height to add for next column
+    v9 := display-height
+    v9 -= v3
+
+    # Draw all the whole bytes of the square
+    v5 := v0
+    vF := 7
+    v5 &= vF
+    vF := 8
+    v5 =- vF
+    v7 := v2
+    v7 -= v5
+    v7 >>= v7
+    v7 >>= v7
+    v7 >>= v7
+    v5 := 1
+    loop
+        while v7 != 0
+        i += v9
+        v8 := v3
+        loop
+            while v8 != 0
+            save v4 - v4
+            i += v5
+            v8 -= 1
+        again
+        v7 -= 1
+    again
+    i += v9
+
+    # Create the right bitmasks for the rightmost column
+    v5 := v0
+    v5 += v2
+    vF := 7
+    v5 &= vF
+    v6 := 0xFF
+    v7 := 0
+    loop
+        while v5 != 0
+        v6 >>= v6
+        v7 >>= v7
+        v7 += 128
+        v5 -= 1
+    again
+
+    # Draw rightmost column
+    v8 := v3
+    v9 := 1
+    loop
+        while v8 != 0
+        load v5 - v5
+        v5 &= v6
+        if v4 != 0 then v5 |= v7
+        save v5 - v5
+        i += v9
+        v8 -= 1
+    again
+
+    return
