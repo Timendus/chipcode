@@ -225,7 +225,7 @@ binary data. If we nevertheless were to render it in black and white again, we
 would get a different image:
 
 ![Original pixelart of a clock](./images/clock.png)
-![The clock forced into black and gray](./images/block-bg.png)
+![The clock forced into black and gray](./images/clock-bg.png)
 
 In the next example, the colours in our clock image get rounded to black, white,
 red and brown, and converted to a two-plane, four colour XO-CHIP image.
