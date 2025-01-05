@@ -186,6 +186,7 @@ func octopussify(contents, filename string, options map[string]bool) (string, []
 func parseValue(value string) (int, error) {
 	var i int64
 	var err error
+	value = strings.TrimSpace(value)
 	if strings.HasPrefix(value, "0x") {
 		i, err = strconv.ParseInt(value[2:], 16, 64)
 	} else if strings.HasPrefix(value, "0b") {
