@@ -110,7 +110,7 @@ func octopussify(contents, filename string, options map[string]bool) (string, []
 
 		// Dump options if requested
 		if match, _ := find(line, ":dump-options"); match {
-			fmt.Printf("Options at line %d:\n", lineNr)
+			fmt.Printf("Options in '%s' at line %d:\n", filename, lineNr+1)
 			for name, value := range options {
 				fmt.Printf("   %s: %v\n", name, value)
 			}
@@ -121,13 +121,13 @@ func octopussify(contents, filename string, options map[string]bool) (string, []
 		if match, params := find(line, ":include"); match {
 			start := strings.Index(params, `"`)
 			end := strings.LastIndex(params, `"`)
-			if start == -1 || end == -1 {
-				errors = append(errors, fmt.Errorf("Missing quotes in include statement: '%s'", line))
+			if start == -1 || end == -1 || start == end {
+				errors = append(errors, fmt.Errorf("Missing quotes in include statement in '%s' at line %d: '%s'", filename, lineNr+1, line))
 				continue
 			}
 			subfilename := params[start+1 : end]
 			if len(subfilename) < 1 {
-				errors = append(errors, fmt.Errorf("Invalid filename in include: '%s'", line))
+				errors = append(errors, fmt.Errorf("Invalid filename in include in '%s' at line %d: '%s'", filename, lineNr+1, line))
 				continue
 			}
 			var file string
@@ -173,7 +173,7 @@ func octopussify(contents, filename string, options map[string]bool) (string, []
 			} else if param == "data" {
 				current = DATA
 			} else {
-				errors = append(errors, fmt.Errorf("Unknown segment in line %d: %s", lineNr, param))
+				errors = append(errors, fmt.Errorf("Unknown segment in '%s' at line %d: %s", filename, lineNr+1, param))
 			}
 		}
 
