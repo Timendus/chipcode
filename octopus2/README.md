@@ -184,7 +184,7 @@ Note that any alpha channels (transparency) will be ignored.
 
 The image loader tries to make an educated guess as to what resolution sprites
 you are trying to get out of the input image. Let's say you include, for
-example, a file called `clock.png` that is 24 pixels wide and 16 pixels high.
+example, a file called `horse.jpg` that is 24 pixels wide and 16 pixels high.
 Given the dimensions, Octopus will guess that you want to have six 8x8 sprites.
 But it may not always guess correctly.
 
@@ -195,7 +195,7 @@ needs to be a multiple of 8 to get useful results.
 For example:
 
 ```octo
-:include "table.bmp" 8x4
+:include "horse.jpg" 8x4
 ```
 
 #### Colours
@@ -258,22 +258,22 @@ prior to conversion.
 #### Labels
 
 Octopus will, by default, generate labels for the sprites included from an
-image. Assuming the horse image below is 24x16 pixels, the following labels will
-be generated, which relate to the X and Y position of the sprite within the
-image:
+image. Assuming the `horse.jpg` image is still 24x16 pixels, the following
+labels will be generated, which relate to the X and Y positions of the sprites
+within the image:
 
 ```octo
 :include "horse.jpg"
 ```
 
-- `clock-0-0`
-- `clock-1-0`
-- `clock-2-0`
-- `clock-0-1`
-- `clock-1-1`
-- `clock-2-1`
+- `horse-0-0`
+- `horse-1-0`
+- `horse-2-0`
+- `horse-0-1`
+- `horse-1-1`
+- `horse-2-1`
 
-So in this example, `clock-2-0` is the top-rightmost 8x8 sprite.
+So in this example, `horse-2-0` is the top-rightmost 8x8 sprite.
 
 Using more colours will predictably produce more planes and more data. Labels
 are provided for each plane.
@@ -285,29 +285,30 @@ are provided for each plane.
 The first digit in the label name will now indicate its plane, followed again by
 its X and Y position:
 
-- `clock-0-0-0`
-- `clock-1-0-0`
-- `clock-0-1-0`
-- `clock-1-1-0`
-- `clock-0-2-0`
-- `clock-1-2-0`
-- `clock-0-0-1`
-- `clock-1-0-1`
-- `clock-0-1-1`
-- `clock-1-1-1`
-- `clock-0-2-1`
-- `clock-1-2-1`
+- `horse-0-0-0`
+- `horse-1-0-0`
+- `horse-0-1-0`
+- `horse-1-1-0`
+- `horse-0-2-0`
+- `horse-1-2-0`
+- `horse-0-0-1`
+- `horse-1-0-1`
+- `horse-0-1-1`
+- `horse-1-1-1`
+- `horse-0-2-1`
+- `horse-1-2-1`
 
-The rightmost sprite now consists of clock-0-2-0 for the first plane and
-clock-1-2-0 for the second plane. They follow each other in the way the XO-CHIP
-`sprite` opcode expects them to.
+The rightmost sprite now consists of `horse-0-2-0` for the first plane and
+`horse-1-2-0` for the second plane. They follow each other in the order the
+XO-CHIP `sprite` opcode expects them to, provided you have specified your
+palette in the right order.
 
-If you don't want Octopus to generate these labels and define your own, provide
-the modifier `no-labels`:
+If you don't want Octopus to generate these labels and instead define your own,
+provide the modifier `no-labels`:
 
 ```octo
 : horse-image
-    :include "horse.png" no-labels
+    :include "horse.jpg" no-labels
 ```
 
 #### Debug
@@ -318,5 +319,5 @@ all the sprites that it has cut from the image. This quickly and easily lets you
 inspect if the conversion was a success, and if everything went as you expected.
 
 ```octo
-:include "horse.png" debug
+:include "horse.jpg" debug
 ```
