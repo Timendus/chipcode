@@ -1,0 +1,161 @@
+:const XOCHIP 1
+:include "macros.8o"
+
+:macro expect-8 register value error-message {
+  if register != value then
+    :breakpoint error-message
+    loop again  # Give breakpoint something to stop on and don't show "pass"
+}
+
+:macro expect-16 register-high register-low value error-message {
+  :calc high-byte { ( value >> 8 ) & 0xFF }
+  :calc low-byte { value & 0xFF }
+  if register-high != high-byte then
+    :breakpoint error-message
+    loop again  # Give breakpoint something to stop on and don't show "pass"
+  if register-low != low-byte then
+    :breakpoint error-message
+    loop again  # Same.
+}
+
+: main
+  # Test 50/3 = 16
+  v0 := 50
+  v1 := 3
+  div-8-8 v0 v1 v2 v3 v4
+  expect-8 v0 16 "Expected div-8-8 50/3 to result in 16"
+  expect-8 v2 2 "Expected div-8-8 50/3 to have remainder 2"
+
+  # Test 50/3 = 16
+  v0 := 0
+  v1 := 50
+  v2 := 3
+  div-16-8 v0 v1 v2 v3 v4 v5
+  expect-8 v1 16 "Expected div-16-8 50/3 to result in 16"
+  expect-8 v3 2 "Expected div-16-8 50/3 to have remainder 2"
+
+  # Test 3453 / 130 = 26
+  set16 v0 v1 3453
+  v2 := 130
+  div-16-8 v0 v1 v2 v3 v4 v5
+  expect-8 v1 26 "Expected div-16-8 3453/130 to result in 26"
+  expect-8 v3 73 "Expected div-16-8 3453/130 to have remainder 73"
+
+  # Test 10 * 17 = 170
+  v0 := 10
+  v1 := 17
+  mul-8-8 v0 v1 v2 v3 v4
+  expect-8 v2 0 "Expected mul-8-8 to not overflow 8 bits"
+  expect-8 v3 170 "Expected mul-8-8 to result in 170"
+
+  # Test 193 * 238 = 45934
+  v0 := 193
+  v1 := 238
+  mul-8-8 v0 v1 v2 v3 v4
+  expect-8 v2 0xB3 "Expected mul-8-8 to result in 45934"
+  expect-8 v3 0x6E "Expected mul-8-8 to result in 45934"
+
+  # Test 25763 + 34645 = 60408
+  set16 v0 v1 25763
+  set16 v2 v3 34645
+  add-16-16 v0 v1 v2 v3
+  expect-8 vF 0 "Expected no overflow for add-16-16"
+  expect-16 v0 v1 60408 "Expected add-16-16 to result in 60408"
+
+  # Test 62564 + 34645 = 31673 + overflow
+  set16 v0 v1 62564
+  set16 v2 v3 34645
+  add-16-16 v0 v1 v2 v3
+  expect-8 vF 1 "Expected overflow for add-16-16"
+  expect-16 v0 v1 31673 "Expected add-16-16 to result in 31673"
+
+  # Test 62564 - 34645 = 27919
+  set16 v0 v1 62564
+  set16 v2 v3 34645
+  sub-16-16 v0 v1 v2 v3
+  expect-8 vF 1 "Expected no carry for sub-16-16"
+  expect-16 v0 v1 27919 "Expected sub-16-16 to result in 27919"
+
+  # Test 34645 - 62564 = 37617 + carry
+  set16 v0 v1 34645
+  set16 v2 v3 62564
+  sub-16-16 v0 v1 v2 v3
+  expect-8 vF 0 "Expected no carry for sub-16-16"
+  expect-16 v0 v1 37617 "Expected sub-16-16 to result in 37617"
+
+  # Test i += 1468
+  i := long some-label
+  set16 v0 v1 1468
+  add-16-to-i v0 v1
+  load v0
+  expect-8 v0 0xAA "Expected add-16-to-i to point to the right value"
+
+  # Test sleep
+  vF := 20
+  delay := vF
+  sleep
+  vF := delay
+  expect-8 vF 0 "Expected sleep to wait for the delay timer to run out"
+
+  # Test memory copy for small values
+  :alias unpack-hi v0
+	:alias unpack-lo v1
+	:unpack long from-label
+	:alias unpack-hi v2
+	:alias unpack-lo v3
+	:unpack long to-label
+  v4 := 5
+	copy-8 v0 v1 v2 v3 v4 v5
+  i := long to-label
+  load v5
+  expect-8 v0 1 "Expected 8-bit memory copy to copy the first value"
+  expect-8 v1 2 "Expected 8-bit memory copy to copy the second value"
+  expect-8 v2 3 "Expected 8-bit memory copy to copy the third value"
+  expect-8 v3 4 "Expected 8-bit memory copy to copy the fourth value"
+  expect-8 v4 5 "Expected 8-bit memory copy to copy the fifth value"
+  expect-8 v5 0 "Expected 8-bit memory copy to not copy the sixth value"
+
+  # Test memory copy for large values
+  :alias unpack-hi v0
+	:alias unpack-lo v1
+	:unpack long from-label
+	:alias unpack-hi v2
+	:alias unpack-lo v3
+	:unpack long to-label
+  set16 v4 v5 0x4FF
+	copy-16 v0 v1 v2 v3 v4 v5 v0 v1
+  i := long dest-label
+  load v5
+  expect-8 v0 3 "Expected 16-bit memory copy to copy the 1275th value"
+  expect-8 v1 4 "Expected 16-bit memory copy to copy the 1276th value"
+  expect-8 v2 5 "Expected 16-bit memory copy to copy the 1277th value"
+  expect-8 v3 6 "Expected 16-bit memory copy to copy the 1278th value"
+  expect-8 v4 1 "Expected 16-bit memory copy to copy the 1279th value"
+  expect-8 v5 0 "Expected 16-bit memory copy to not copy the 1280th value"
+
+  # All tests passed!
+  v0 := 24
+  v1 := 8
+  i := pass
+  sprite v0 v1 0
+  loop again
+
+: pass
+  :include "../../pictures/pass.png" 16x16 no-labels
+
+# Memory region for copying tests
+:org 0xE000
+: from-label
+	1 2 3 4 5 6
+: to-label
+	0 0 0 0 0 0
+:org 0xE500
+: dest-label
+  0 0 0 0 0 0
+	
+# Memory region for add-16-to-i test
+:org 0xF500
+: some-label
+  0
+:org 0xFABC
+  0xAA

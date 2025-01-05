@@ -1,0 +1,220 @@
+# Divide 16-bit value by 8-bit value, resulting in 8-bit result
+# numerator-low = [numerator-high, numerator-low] / divisor
+# remainder = [numerator-high, numerator-low] % divisor
+# Destroys: numerator-high, temp1, temp2, vF
+:macro div-16-8 numerator-high numerator-low divisor remainder temp1 temp2 {
+  # Aliases for easy debugging:
+  # :alias num-high numerator-high
+  # :alias num-low numerator-low
+  # :alias result numerator-low
+  # :alias div divisor
+  # :alias rem remainder
+  :alias counter temp1
+  :alias flag temp2
+	counter := 16
+	flag := 0
+	remainder := 0
+	loop
+		while counter != 0
+		counter -= 1
+		remainder <<= remainder
+		numerator-high <<= numerator-high
+		remainder |= vF
+		numerator-low <<= numerator-low
+		numerator-high |= vF
+		numerator-low |= flag
+		flag := 0
+		if remainder >= divisor begin
+			remainder -= divisor
+			flag := 1
+		end
+	again
+  numerator-low <<= numerator-low
+  numerator-low |= flag
+}
+
+# Divide 8-bit value by 8-bit value, resulting in 8-bit result
+# numerator = numerator / divisor
+# remainder = numerator % divisor
+# Destroys: temp1, temp2, vF
+:macro div-8-8 numerator divisor remainder temp1 temp2 {
+  # Aliases for easy debugging:
+  # :alias num numerator
+  # :alias result numerator
+  # :alias div divisor
+  # :alias rem remainder
+  :alias counter temp1
+  :alias flag temp2
+	counter := 8
+	flag := 0
+	remainder := 0
+	loop
+		while counter != 0
+		counter -= 1
+		remainder <<= remainder
+		numerator <<= numerator
+    remainder |= vF
+		numerator |= flag
+		flag := 0
+		if remainder >= divisor begin
+			remainder -= divisor
+			flag := 1
+		end
+	again
+  numerator <<= numerator
+  numerator |= flag
+}
+
+# Multiply two 8-bit values, resulting in 16-bit result
+# [result-high, result-low] = multiplicand * multiplier
+# Destroys: multiplicand, multiplier, temp, vF
+:macro mul-8-8 multiplicand multiplier result-high result-low temp {
+  # Aliases for easy debugging:
+  # :alias multcand multiplicand
+  # :alias multier multiplier
+  # :alias res-high result-high
+  # :alias res-low result-low
+  # :alias tmp temp
+  result-high := 0
+  result-low := 0
+  temp := 0
+  if multiplicand != 0 begin
+    loop
+      while multiplier != 0
+      multiplier >>= multiplier
+      if vF == 1 begin
+        result-high += temp
+        result-low += multiplicand
+        result-high += vF
+      end
+      temp <<= temp
+      multiplicand <<= multiplicand
+      temp |= vF
+    again
+  end
+}
+
+# Add two 16-bit values, resulting in 16-bit result + vF = 1 if overflow
+# [value1-high, value1-low] += [value2-high, value2-low]
+# Destroys: value1-high, value1-low, vF
+:macro add-16-16 value1-high value1-low value2-high value2-low {
+  value1-low += value2-low
+  value1-high += vF
+  value1-high += value2-high
+}
+
+
+# Subtract two 16-bit values, resulting in 16-bit result + vF = 0 if carry
+# [value1-high, value1-low] -= [value2-high, value2-low]
+# Destroys: value1-high, value1-low, vF
+:macro sub-16-16 value1-high value1-low value2-high value2-low {
+  value1-low -= value2-low
+  if vF == 0 then value1-high -= 1
+  value1-high -= value2-high
+}
+
+# Add 16-bit value to index register
+# i += [value-high, value-low]
+# Destroys: value-high, vF
+:macro add-16-to-i value-high value-low {
+  loop
+    while value-high != 0
+    # Do i += 0x100 in two parts
+    vF := 0x80
+    i += vF
+    i += vF
+    value-high -= 1
+  again
+  i += value-low
+}
+
+# Set two registers to a single 16-bit value
+# [high, low] = value
+:macro set16 high low value {
+  :calc high-byte { ( value >> 8 ) & 0xFF }
+  :calc low-byte { value & 0xFF }
+  high := high-byte
+  low := low-byte
+}
+
+# Wait for the delay timer to run out
+# Destroys: vF
+:macro sleep {
+  loop
+    vF := delay
+    if vF != 0 then
+  again
+}
+
+:if XOCHIP
+  # "Hack" to do self-modifying code in macros (without having to use labels,
+  # which we can't repeat)
+  :macro set-i-to-here-plus n {
+    :calc address { ( HERE + n ) & 0xFFF }
+    :byte { ( ( address >> 8 ) & 0x0F ) | 0xA0 }
+    :byte { address & 0xFF }
+  }
+
+  # Copy `size` bytes from memory address [from-high, from-low] to memory
+  # address [to-high, to-low]. 16-bit address egisters need to be consecutive.
+  # Destroys: temp, vF, i
+  :macro copy-8 from-high from-low to-high to-low size temp {
+    set-i-to-here-plus 12
+    save from-high - from-low
+    set-i-to-here-plus 16
+    save to-high - to-low
+    temp := 0
+    loop
+      0xF0 0x00  # i := long...
+      0x00 0x00  # from-address
+      i += temp
+      load vF - vF
+      0xF0 0x00  # i := long...
+      0x00 0x00  # from-address
+      i += temp
+      save vF - vF
+      temp += 1
+      if temp != size then
+    again
+  }
+
+  # Copy `size` bytes from memory address [from-high, from-low] to memory
+  # address [to-high, to-low]. 16-bit address registers need to be consecutive.
+  # The `temp` registers in this macro can be the same as `from` or `to` if you
+  # don't mind one of those getting destroyed.
+  # Destroys: size-high, size-low, temp-high, temp-low, vF, i
+  :macro copy-16 from-high from-low to-high to-low size-high size-low temp-high temp-low {
+    set-i-to-here-plus 10
+    save from-high - from-low
+    set-i-to-here-plus 12
+    save to-high - to-low
+    loop
+      0xF0 0x00  # i := long...
+      0x00 0x00  # from-address
+      load vF - vF
+      0xF0 0x00  # i := long...
+      0x00 0x00  # from-address
+      save vF - vF
+      set-i-to-here-plus -10
+      load temp-high - temp-low
+      vF := 1
+      temp-low += vF
+      temp-high += vF
+      save temp-high - temp-low
+      set-i-to-here-plus -16
+      load temp-high - temp-low
+      vF := 1
+      temp-low += vF
+      temp-high += vF
+      save temp-high - temp-low
+			vF := 1
+      size-low -= vF
+      if vF == 0 then size-high -= 1
+			temp-high := size-low
+			temp-high |= size-high
+			if temp-high != 0 then
+    again
+  }
+:end
+
+# Idea: add something like :assert "Don't use this too much" { CALLS < 3 } to each macro?
