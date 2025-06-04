@@ -15,6 +15,8 @@
 
   # ...
 
+: pointer
+
 # When writing programs for XO-CHIP, you want your data to end up at the end of
 # memory and your code at the beginning. Because only the first 3.5K of memory
 # is executable. But we don't always want our source files to be structured in

@@ -7,5 +7,5 @@ build:
 test:
 	@go test ./...
 
-regression-test:
+regression-test: build
 	@cd tests && go run regression-tests.go
