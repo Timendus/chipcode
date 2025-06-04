@@ -7,9 +7,23 @@ import (
 	"strings"
 )
 
+var testsDirectory = "./"
+
 func main() {
-	testsDirectory := "./"
-	octopus := "../dist/linux/octopus"
+	/* If the user has specified a specific test to run */
+
+	if len(os.Args) > 1 {
+		success := runTest(os.Args[1])
+		if success {
+			fmt.Println("\033[92;1m ✔️ All good!\033[0m")
+			os.Exit(0)
+		} else {
+			fmt.Println("\033[91;1m ❌ Did not result in the expected output\033[0m")
+			os.Exit(1)
+		}
+	}
+
+	/* Otherwise, run all tests */
 
 	dir, err := os.ReadDir(testsDirectory)
 	if err != nil {
@@ -19,44 +33,8 @@ func main() {
 	allGood := true
 	for _, file := range dir {
 		if file.IsDir() {
-			inputFile := testsDirectory + file.Name() + "/src/index.8o"
-
-			/* Test Octopussification */
-
-			outputFile := testsDirectory + file.Name() + "/output.8o"
-			expectedFile := testsDirectory + file.Name() + "/expected.8o"
-
-			if !runCommand(octopus + " " + inputFile + " " + outputFile) {
-				fmt.Println("Could not Octopussify " + inputFile)
+			if !runTest(file.Name()) {
 				allGood = false
-				continue
-			}
-
-			if !runCommand("git diff --no-index --color " + expectedFile + " " + outputFile) {
-				fmt.Println("No match for output " + expectedFile + " and " + outputFile)
-				allGood = false
-				continue
-			}
-
-			/* Test Octopussification + assembly */
-
-			outputBinary := testsDirectory + file.Name() + "/output.ch8"
-			expectedBinary := testsDirectory + file.Name() + "/expected.ch8"
-			outputHex := testsDirectory + file.Name() + "/output.hex"
-			expectedHex := testsDirectory + file.Name() + "/expected.hex"
-
-			if !runCommand(octopus + " " + inputFile + " " + outputBinary) {
-				fmt.Println("Could not assemble " + inputFile)
-				allGood = false
-				continue
-			}
-
-			hexDump(expectedBinary, expectedHex)
-			hexDump(outputBinary, outputHex)
-			if !runCommand("git diff --no-index --color " + expectedHex + " " + outputHex) {
-				fmt.Println("No match for binaries " + expectedBinary + " and " + outputBinary)
-				allGood = false
-				continue
 			}
 		}
 	}
@@ -68,6 +46,48 @@ func main() {
 		fmt.Println("\033[91;1m ❌ One or more projects did not result in the expected output\033[0m")
 		os.Exit(1)
 	}
+}
+
+func runTest(test string) bool {
+	octopus := "../dist/linux/octopus"
+	inputFile := testsDirectory + test + "/src/index.8o"
+	result := true
+
+	/* Test Octopussification */
+
+	outputFile := testsDirectory + test + "/output.8o"
+	expectedFile := testsDirectory + test + "/expected.8o"
+
+	if !runCommand(octopus + " " + inputFile + " " + outputFile) {
+		fmt.Println("Could not Octopussify " + inputFile)
+		return false
+	}
+
+	if !runCommand("git diff --no-index --color " + expectedFile + " " + outputFile) {
+		fmt.Println("No match for output " + expectedFile + " and " + outputFile)
+		result = false
+	}
+
+	/* Test Octopussification + assembly */
+
+	outputBinary := testsDirectory + test + "/output.ch8"
+	expectedBinary := testsDirectory + test + "/expected.ch8"
+	outputHex := testsDirectory + test + "/output.hex"
+	expectedHex := testsDirectory + test + "/expected.hex"
+
+	if !runCommand(octopus + " " + inputFile + " " + outputBinary) {
+		fmt.Println("Could not assemble " + inputFile)
+		return false
+	}
+
+	hexDump(expectedBinary, expectedHex)
+	hexDump(outputBinary, outputHex)
+	if !runCommand("git diff --no-index --color " + expectedHex + " " + outputHex) {
+		fmt.Println("No match for binaries " + expectedBinary + " and " + outputBinary)
+		result = false
+	}
+
+	return result
 }
 
 func runCommand(command string) bool {
