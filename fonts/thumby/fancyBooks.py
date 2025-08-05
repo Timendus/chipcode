@@ -156,3 +156,110 @@ while True:
     
     # Sleep a bit in an attempt to be more battery efficient..?
     sleep_ms(50)
+
+import thumby
+from os import listdir
+
+MAINMENU = const(0)
+FILESMENU = const(1)
+FONTSMENU = const(2)
+
+currentMenu = MAINMENU
+
+def openMenu():
+    global currentMenu
+    selected = 0
+    animateUp(selected)
+        
+    # Navigate menu
+    while True:
+        renderCurrentMenu(0, 0, selected)
+        thumby.display.update()
+        while not thumby.inputPressed():
+            pass
+        if thumby.buttonB.pressed():
+            break
+        if thumby.buttonA.pressed():
+            animateRight(selected, currentMenu ^ 1, 0)
+            currentMenu ^= 1
+            selected = 0
+        if thumby.buttonU.pressed() and selected > 0:
+            selected -= 1
+        if thumby.buttonD.pressed() and selected < 2:
+            selected += 1
+        while thumby.inputPressed():
+            pass
+    
+    animateDown(selected)
+
+def animateUp(selected):
+    currentMenu = MAINMENU
+    thumby.display.setFPS(120)
+    for y in range(thumby.display.height, 0, -3):
+        renderCurrentMenu(0, y, selected)
+        thumby.display.update()
+    thumby.display.setFPS(0)
+    
+def animateDown(selected):
+    thumby.display.setFPS(120)
+    for y in range(0, thumby.display.height, 3):
+        renderDocument()
+        renderCurrentMenu(0, y, selected)
+        thumby.display.update()
+    thumby.display.setFPS(0)
+
+def animateRight(selected, newMenu, newSelected):
+    global currentMenu
+    thumby.display.setFPS(120)
+    for x in range(0, thumby.display.width, 3):
+        renderCurrentMenu(x, 0, selected)
+        oldMenu = currentMenu
+        currentMenu = newMenu
+        renderCurrentMenu(-1 * thumby.display.width + x, 0, selected)
+        currentMenu = oldMenu
+        thumby.display.update()
+    thumby.display.setFPS(0)
+
+def renderCurrentMenu(x, y, selected):
+    if currentMenu == MAINMENU:
+        renderMain(x, y, selected)
+    elif currentMenu == FILESMENU:
+        renderFiles(x, y, selected)
+    
+def renderMain(x, y, selected):
+    entries = [
+        "Open file",
+        "Change font",
+        "Toggle Dark Mode"
+    ]
+    renderMenu(entries, x, y, selected)
+    
+def renderFiles(x, y, selected):
+    entries = listdir('/')
+    renderMenu(entries, x, y, selected)
+
+def renderMenu(entries, x, y, selected):
+    lineHeight = 9
+    thumby.display.drawFilledRectangle(x, y, thumby.display.width + x, thumby.display.height - y, 0)
+    thumby.display.drawLine(x, y + 1, x, thumby.display.height, 1)
+    thumby.display.drawLine(thumby.display.width - 1 - x, y + 1, thumby.display.width - 1 - x, thumby.display.height, 1)
+    thumby.display.drawLine(x + 1, y, thumby.display.width - 2 - x, y, 1)
+    for i in range(len(entries)):
+        entry = entries[i]
+        if i == selected:
+            thumby.display.drawFilledRectangle(x, y + 1, thumby.display.width - x, lineHeight, 1)
+            thumby.display.drawText(entry, x + 2, y + 2, 0)
+        else:
+            thumby.display.drawText(entry, x + 2, y + 2, 1)
+        y += lineHeight
+
+def renderDocument():
+    thumby.display.fill(0) # Fill canvas to black
+    thumby.display.drawText("Hello there", 10, 10, 1)
+
+while(1):
+    thumby.display.setFPS(0)
+    renderDocument()
+    thumby.display.update()
+    if thumby.buttonB.justPressed():
+        openMenu()
