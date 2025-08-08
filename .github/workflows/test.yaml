@@ -33,8 +33,7 @@ jobs:
     - run: npm test
       working-directory: ${{ matrix.directory }}
 
-  octopus2:
-
+  octopus2-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -52,10 +51,33 @@ jobs:
         run: make test
       - name: Build binaries
         working-directory: ./octopus2
-        run: make build
+        run: make linux
       - name: Run regression tests
         working-directory: ./octopus2
         run: make regression-test
+
+  octopus2-build-linux-windows:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [ '1.21.x' ]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: '0.14.1'
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache-dependency-path: octopus2/go.sum
+      - name: Build binaries
+        working-directory: ./octopus2
+        run: |
+          make linux
+          make windows
       - name: Upload Linux binary
         uses: actions/upload-artifact@v4
         with:
@@ -66,6 +88,23 @@ jobs:
         with:
           name: octopus-windows-amd64
           path: ./octopus2/dist/windows/*
+
+  octopus2-build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        go-version: [ '1.21.x' ]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache-dependency-path: octopus2/go.sum
+      - name: Build binaries
+        working-directory: ./octopus2
+        run: make macos
       - name: Upload MacOS Intel binary
         uses: actions/upload-artifact@v4
         with:
