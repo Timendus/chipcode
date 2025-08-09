@@ -58,7 +58,7 @@ func runTest(test string) bool {
 	outputFile := testsDirectory + test + "/output.8o"
 	expectedFile := testsDirectory + test + "/expected.8o"
 
-	if !runCommand(octopus + " " + inputFile + " " + outputFile) {
+	if !runCommand(octopus + " -i " + inputFile + " -o " + outputFile) {
 		fmt.Println("Could not Octopussify " + inputFile)
 		return false
 	}
@@ -75,7 +75,7 @@ func runTest(test string) bool {
 	outputHex := testsDirectory + test + "/output.hex"
 	expectedHex := testsDirectory + test + "/expected.hex"
 
-	if !runCommand(octopus + " " + inputFile + " " + outputBinary) {
+	if !runCommand(octopus + " -i " + inputFile + " -o " + outputBinary) {
 		fmt.Println("Could not assemble " + inputFile)
 		return false
 	}
@@ -93,9 +93,14 @@ func runTest(test string) bool {
 func runCommand(command string) bool {
 	parts := strings.Split(command, " ")
 	cmd := exec.Command(parts[0], parts[1:]...)
-	output, err := cmd.Output()
+	var stout strings.Builder
+	var sterr strings.Builder
+	cmd.Stdout = &stout
+	cmd.Stderr = &sterr
+	err := cmd.Run()
 	if err != nil {
-		fmt.Println(string(output))
+		fmt.Println(string(stout.String()))
+		fmt.Println(string(sterr.String()))
 		return false
 	}
 	return true
