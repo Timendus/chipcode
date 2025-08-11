@@ -1,6 +1,6 @@
-The code in octo_compiler.h was released under an MIT license by John Earnest.
-I've included the original license below. For more information and the rest of
-his project, see:
+The code that comprises the assembler in Octopus 2 (octo_compiler.h) comes from
+c-octo and was released under an MIT license by John Earnest. I've included the
+original license below. For more information and the rest of his project, see:
 
 https://github.com/JohnEarnest/c-octo
 
