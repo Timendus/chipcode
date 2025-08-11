@@ -1,7 +1,8 @@
 # Octopus 2
 
 This command line tool is a pre-processor and assembler for Octo-flavoured
-CHIP-8 assembly language.
+CHIP-8 assembly language. You (should) have obtained this software from
+https://github.com/Timendus/chipcode/tree/main/octopus2.
 
 Octopus 2 is a rewrite in Go of my original [JavaScript implementation of the
 Octopus pre-processor](../octopus). I have compiled in [John Earnest's
