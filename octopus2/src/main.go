@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/timendus/chipcode/octopus2/src/c_octo"
+	"github.com/timendus/chipcode/octopus2/src/assembler"
 	"github.com/timendus/chipcode/octopus2/src/preprocessor"
 )
 
@@ -86,7 +86,7 @@ func main() {
 		}
 
 		// Assemble the octopussified code
-		binary, err := c_octo.Assemble(octopussified)
+		binary, err := assembler.Assemble(octopussified)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, bad("Could not complete assembly due to the following error:"))
 			fmt.Fprintln(os.Stderr, err)
