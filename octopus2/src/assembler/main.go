@@ -1,4 +1,4 @@
-package c_octo
+package assembler
 
 // This package is a very thin Go wrapper for the assembler in
 // [c-octo](https://github.com/JohnEarnest/c-octo), an implementation of Octo in

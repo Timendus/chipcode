@@ -1,14 +1,21 @@
 # Octopus 2
 
-This command line tool can do pre-processing on text based input files. It is
-intended for use with Octo-flavoured CHIP-8 assembly code, but it can be used
-with any text file.
+This command line tool is a pre-processor and assembler for Octo-flavoured
+CHIP-8 assembly language.
 
-Octopus 2 is a rewrite in Go of my original [JavaScript implementation of
-Octopus](../octopus). They are functionally nearly identical, except that this
-implementation runs quite a bit faster and has image support built-in. No need
-to install an additional plugin. It also has beta support for color images with
-multiple planes for XO-CHIP and dithering, which the original does not.
+Octopus 2 is a rewrite in Go of my original [JavaScript implementation of the
+Octopus pre-processor](../octopus). I have compiled in [John Earnest's
+c-octo](https://github.com/JohnEarnest/c-octo) so this new version can be used
+as an assembler too.
+
+As a pre-processor versions one and two are functionally nearly identical,
+except that this implementation runs quite a bit faster and has image support
+built-in. No need to install an additional plugin. It also has beta support for
+color images with multiple planes for XO-CHIP and dithering, which the original
+does not.
+
+All in all this version is much more a one-stop shop for writing CHIP-8 ROMs
+than the original Octopus.
 
 # Installing and running
 
@@ -18,25 +25,45 @@ tab](https://github.com/Timendus/chipcode/actions?query=branch%3Amain+is%3Asucce
 and select the top succesful workflow on the `main` branch. Scroll down a bit to
 where it says "Artifacts", and download Octopus 2 for your system.
 
-Alternatively, clone this repository and build the binary youself:
+Once you have obtained a working copy of Octopus, put it somewhere in your PATH
+so you can then run it on the command line using this syntax:
+
+```bash
+octopus -i <input file> -o <output file> <option 1> <option 2>
+```
+
+Input file should be an assembly language file in Octo syntax with the extension
+`.8o`. Output file can have the extensions `.8o` or `.ch8` to output either the
+Octopussified intermediate assembly language or the resulting binary. If you do
+not specify an output file, it will dump the Octopussified intermediate assembly
+to standard output.
+
+Valid parameters:
+
+- `-color` - Use ANSI codes for color output to the terminal (default behaviour
+  on Linux and MacOS)
+- `-i string` - Alias for `-input`
+- `-input string` - The path of the input file
+- `-no-color` - Do not use ANSI codes for color output to the terminal (default
+  behaviour on Windows)
+- `-o string` - Alias for `-output` (default "STDOUT")
+- `-output string` - The path of the output file (default "STDOUT")
+
+## Building
+
+Alternatively, you can clone this repository and build the binary youself:
 
 ```bash
 git clone git@github.com:Timendus/chipcode.git
 cd chipcode/octopus2
-make build
+make linux # or make windows, or make macos
 ```
 
-This requires that you [have Go installed](https://go.dev/doc/install). It will
-build all versions of the program to a folder called `dist`.
+This requires that you [have Go installed](https://go.dev/doc/install) as well
+as a functional C compiler. The Linux and MacOS builds use GCC, the Windows
+build uses Zig. It will build the program to a folder called `dist`.
 
-Either way, once you have obtained a working copy of Octopus, you can then run
-it on the command line using this syntax:
-
-```bash
-octopus <input file> <output file> <option 1> <option 2>
-```
-
-# Features
+# Pre-processor features
 
 ## Options
 
@@ -45,7 +72,7 @@ Options are boolean values that Octopus understands. You can set options to
 line. For example:
 
 ```bash
-octopus input.8o output.8o DEBUG
+octopus -i input.8o DEBUG
 ```
 
 An option named `DEBUG` will now be `true`. Options you do not provide will
@@ -68,7 +95,7 @@ options and their values at that point in the program:
 ```
 
 ```bash
-octopus input.8o output.8o OPTION_3
+octopus -i input.8o OPTION_3
 ```
 
 This will output:
