@@ -9,11 +9,11 @@ Octopus pre-processor](../octopus). I have compiled in [John Earnest's
 c-octo](https://github.com/JohnEarnest/c-octo) so this new version can be used
 as an assembler too.
 
-As a pre-processor versions one and two are functionally nearly identical,
+Versions one and two are functionally nearly identical as a pre-processor,
 except that this implementation runs quite a bit faster and has image support
 built-in. No need to install an additional plugin. It also has beta support for
-color images with multiple planes for XO-CHIP and dithering, which the original
-does not.
+[color images](#colours) with multiple planes for XO-CHIP and dithering, which
+the original does not.
 
 All in all this version is much more a one-stop shop for writing CHIP-8 ROMs
 than the original Octopus.
@@ -35,9 +35,9 @@ octopus -i <input file> -o <output file> <option 1> <option 2>
 
 Input file should be an assembly language file in Octo syntax with the extension
 `.8o`. Output file can have the extensions `.8o` or `.ch8` to output either the
-Octopussified intermediate assembly language or the resulting binary. If you do
-not specify an output file, it will dump the Octopussified intermediate assembly
-to standard output.
+pre-processed intermediate assembly language or the resulting binary. If you do
+not specify an output file, it will dump the pre-processed assembly to standard
+output.
 
 Valid parameters:
 
@@ -61,8 +61,10 @@ make linux # or make windows, or make macos
 ```
 
 This requires that you [have Go installed](https://go.dev/doc/install) as well
-as a functional C compiler. The Linux and MacOS builds use GCC, the Windows
-build uses Zig. It will build the program to a folder called `dist`.
+as a functional C compiler. I believe the Linux and MacOS builds use GCC, the
+Windows build uses Zig. This should not be hard to change by specifying a
+different `CC` in the [Makefile](./Makefile). It will build the program to a
+folder called `dist`.
 
 # Pre-processor features
 

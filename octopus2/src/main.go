@@ -134,9 +134,9 @@ func print_usage() {
 
 Input file should be an assembly language file in Octo syntax with the extension
 ".8o". Output file can have the extensions ".8o" or ".ch8" to output either the
-Octopussified intermediate assembly language or the resulting binary. If you do
-not specify an output file, it will dump the Octopussified intermediate assembly
-to standard output.
+pre-processed intermediate assembly language or the resulting binary. If you do
+not specify an output file, it will dump the pre-processed assembly to standard
+output.
 
 The options you provide as additional parameters will be "true" for the
 Octopussification.
