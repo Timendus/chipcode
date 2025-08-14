@@ -42,7 +42,7 @@ func Emulate(rom []byte, sequence string) error {
 			if err != nil {
 				return err
 			}
-			fmt.Println(emu.display)
+			fmt.Println(emu.displayToString())
 
 		case isNumeric(step):
 			err := emu.init()
@@ -68,7 +68,7 @@ func Emulate(rom []byte, sequence string) error {
 
 			key := strings.TrimSpace(parts[0])
 			value := strings.TrimSpace(parts[1])
-			var params string
+			params := ""
 			if len(parts) > 2 {
 				params = strings.TrimSpace(parts[2])
 			}
@@ -82,6 +82,27 @@ func Emulate(rom []byte, sequence string) error {
 			}
 
 			switch key {
+
+			// "screenshot: output.jpg: 5x"
+			case "screenshot":
+				var scale int64
+				if params == "" {
+					if emu.displayWidth == 64 {
+						scale = 12
+					} else {
+						scale = 6
+					}
+				} else {
+					var err error
+					scale, err = strconv.ParseInt(strings.TrimSuffix(params, "x"), 0, 64)
+					if err != nil {
+						return fmt.Errorf("could not parse screenshot scale in emulation step: '%s'", step)
+					}
+				}
+				err := emu.saveScreenshot(value, int(scale))
+				if err != nil {
+					return fmt.Errorf("could not create screenshot: %v", err)
+				}
 
 			// "press: 5"
 			case "press":
@@ -182,7 +203,7 @@ func Emulate(rom []byte, sequence string) error {
 				}
 
 			default:
-				return fmt.Errorf("unknown statement: '%s' in emulation step '%s'. Should be one of 'press', 'release', 'save', 'load', 'mode' or 'cpf'", key, step)
+				return fmt.Errorf("unknown parameterized statement: '%s' in emulation step '%s'. Should be one of 'screenshot', 'press', 'release', 'save', 'load', 'mode' or 'cpf'", key, step)
 			}
 
 		default:
@@ -200,6 +221,6 @@ func isNumeric(s string) bool {
 }
 
 func isStatement(s string) bool {
-	re := regexp.MustCompile(`^[0-9a-zA-Z]+\s*:\s*[0-9a-zA-Z\-]+(:\s*[0-9a-zA-Z\- \[\]]+)?$`)
+	re := regexp.MustCompile(`^[0-9a-zA-Z]+\s*:\s*[0-9a-zA-Z\-\.\/]+(:\s*[0-9a-zA-Z\- \[\]]+)?$`)
 	return re.MatchString(s)
 }
