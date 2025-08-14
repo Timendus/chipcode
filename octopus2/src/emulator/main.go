@@ -20,8 +20,13 @@ func Emulate(rom []byte, sequence string) error {
 	sequence = strings.ReplaceAll(sequence, "\n", ",")
 	steps := strings.Split(sequence, ",")
 	for _, step := range steps {
+		parts := strings.Split(step, "#")
+		step = parts[0]
 		step = strings.ToLower(strings.TrimSpace(step))
 		switch {
+		case step == "":
+			// Ignore empty steps
+
 		case step == "interactive":
 			err := emu.init()
 			if err != nil {
