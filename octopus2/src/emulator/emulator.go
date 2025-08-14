@@ -158,7 +158,15 @@ func (emu *emulator) render(width int, height int, buffer []uint8) {
 			r := buffer[index+0]
 			g := buffer[index+1]
 			b := buffer[index+2]
-			display += fmt.Sprintf("\033[48;2;%v;%v;%vm  ", r, g, b)
+			if r == 0 && g == 0 && b == 0 {
+				// Use a black background and two spaces for black instead. That
+				// way, we can copy-paste or pipe the terminal output, ignore
+				// the ansi characters and get a somewhat usable image out of
+				// it, at least for monochrome roms.
+				display += "\033[48;2;0;0;0m  "
+			} else {
+				display += fmt.Sprintf("\033[38;2;%v;%v;%vm██", r, g, b)
+			}
 		}
 		display += "\033[0m\r\n"
 	}
