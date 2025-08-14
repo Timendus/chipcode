@@ -1,15 +1,15 @@
 # Octopus 2
 
-This command line tool is a pre-processor and assembler for Octo-flavoured
-CHIP-8 assembly language. You (should) have obtained this software from
-https://github.com/Timendus/chipcode/tree/main/octopus2.
+This command line tool is a pre-processor, assembler and scriptable emulator for
+Octo-flavoured CHIP-8 assembly language. You (should) have obtained this
+software from https://github.com/Timendus/chipcode/tree/main/octopus2.
 
 Octopus 2 is a rewrite in Go of my original [JavaScript implementation of the
-Octopus pre-processor](../octopus). I have compiled in [John Earnest's
-c-octo](https://github.com/JohnEarnest/c-octo) so this new version can be used
-as an assembler too.
+Octopus pre-processor](../octopus). In this new version I have compiled in the
+assembler from [John Earnest's c-octo](https://github.com/JohnEarnest/c-octo)
+and my [Silicon8 emulator](https://github.com/Timendus/silicon8).
 
-Versions one and two are functionally nearly identical as a pre-processor,
+The pre-processors in versions one and two are functionally nearly identical,
 except that this implementation runs quite a bit faster and has image support
 built-in. No need to install an additional plugin. It also has beta support for
 [color images](#colours) with multiple planes for XO-CHIP and dithering, which
@@ -17,6 +17,12 @@ the original does not.
 
 All in all this version is much more a one-stop shop for writing CHIP-8 ROMs
 than the original Octopus.
+
+# Index
+
+- [Installing and running](#installing-and-running)
+- [Pre-processor features](#pre-processor-features)
+- [Emulator features](#emulator-features)
 
 # Installing and running
 
@@ -49,6 +55,8 @@ Valid parameters:
   behaviour on Windows)
 - `-o string` - Alias for `-output` (default "STDOUT")
 - `-output string` - The path of the output file (default "STDOUT")
+- `-run string` - Run the given code or binary in the [embedded
+  emulator](#emulator-features) instead (default "disabled")
 
 ## Building
 
@@ -350,4 +358,171 @@ inspect if the conversion was a success, and if everything went as you expected.
 
 ```octo
 :include "horse.jpg" debug
+```
+
+# Emulator features
+
+Octopus 2 also comes with a terminal version of
+[Silicon8](https://github.com/Timendus/silicon8/) built in, which is a CHIP-8,
+SCHIP and XO-CHIP emulator (or virtual machine if you want to be precise). This
+version runs in the terminal and can be scripted to go through a sequence of
+steps. Ideal for automating tests or automatically generating screenshots.
+
+To use the emulator, add `-run` with a sequence of comma separated commands to
+your Octopus invocation:
+
+```bash
+octopus -i input.8o -run "100, press: 1, 10, release: 1, 100, display"
+```
+
+The emulator can also accept a binary ROM file (`.ch8`) as an input file.
+
+As a bonus feature, newline (`\n`) is also accepted as a separator between
+commands, which makes it really easy to write a little script in a file and
+`cat` it in:
+
+```bash
+$ cat steps
+100             # comments are allowed
+                # as are empty lines
+press: 1
+10
+release: 1
+
+100
+display
+$ octopus -i input.8o -run "`cat steps`"
+```
+
+## Interactive mode
+
+Due to the limitations of a terminal, it's not amazing at being an interactive
+emulator, but you can use it as such nevertheless. Use the command
+`interactive`:
+
+```bash
+octopus -i input.8o -run "interactive"
+```
+
+Press Escape or Ctrl+C to leave interactive mode.
+
+The QWERTY keys are mapped to CHIP-8 keys as follows:
+
+|           |           |           |           |
+| --------- | --------- | --------- | --------- |
+| `1` = `1` | `2` = `2` | `3` = `3` | `4` = `C` |
+| `q` = `4` | `w` = `5` | `e` = `6` | `r` = `D` |
+| `a` = `7` | `s` = `8` | `d` = `9` | `f` = `E` |
+| `z` = `A` | `x` = `0` | `c` = `B` | `v` = `F` |
+
+|               |              |               |
+| ------------- | ------------ | ------------- |
+| `Enter` = `4` | `Up` = `5`   | `Space` = `6` |
+| `Left` = `7`  | `Down` = `8` | `Right` = `9` |
+
+Also, the keys 5 - 9 and 0 map to the CHIP-8 keys 5 - 9 and 0.
+
+You can combine interactive with other commands, and have an interactive part in
+an otherwise automated sequence. Maybe you script your way to the part of your
+program that you're working on, so you don't have to go through the motions
+every time, and then give control to the user for manual testing?
+
+## Run N cycles
+
+To just let the ROM run for a number of clock cycles, give it a number.
+
+```bash
+octopus -i input.8o -run "100"
+```
+
+This will run your program for 100 cycles and then terminate. You will not see
+any real output...
+
+## Display
+
+...which is where `display` comes in. If you run this sequence:
+
+```bash
+octopus -i input.8o -run "100, display"
+```
+
+Your program will run for 100 cycles and then it will show the display on the
+terminal.
+
+## Key input
+
+You can also send `press` and `release` events to the emulator. These commands
+require a numeric parameter, separated by a colon, that specifies which key you
+want to press or release. Don't forget to give the program a few cycles in
+between press and release to actually register the keypress:
+
+```bash
+octopus -i input.8o -run "100, press: 1, 10, release: 1, 100, display"
+```
+
+## Memory
+
+Commands can also be used to manipulate and read memory. For this we have the
+commands `save` and `load`. Both take two parameters, separated by colons.
+`save` expects a memory address followed by a list of numbers to write to memory
+(separated by whitespace, brackets optional). `load` expects a memory address
+and the number of bytes you wish to read. For example:
+
+```bash
+octopus -i input.8o -run "save: 0x200: [1 2 3 4 5], load: 0x200: 5"
+```
+
+This will output:
+
+```bash
+Octopussifying 'input.8o'...
+Assembling 'input.8o'...
+Finished processing in 3.770906ms
+Running emulation sequence...
+0200: 01
+0201: 02
+0202: 03
+0203: 04
+0204: 05
+Done
+```
+
+This is especially useful for writing tests, so you don't have to rely on visual
+output. Just feed your ROM some numbers, run the thing, read the output.
+
+To further aid in this, Octopus send all its regular output to stderr, and only
+output generated by emulation sequence steps to stdout. This means you can
+easily capture just the output you care about, either by caputuring or piping
+stdout, or by sending stderr to `/dev/null`:
+
+```bash
+$ octopus -i input.8o -run "save: 0x200: [1 2 3 4 5], load: 0x200: 5" 2> /dev/null
+0200: 01
+0201: 02
+0202: 03
+0203: 04
+0204: 05
+$
+```
+
+## Settings
+
+Finally, you can change the behaviour of the emulator itself. For this we have
+the commands `cpf` and `mode`.
+
+CPF stands for Clock cycles Per Frame and its parameter defines how many cycles
+you want the virtual CPU to run for 60 times per second. The default is set to
+30, which results in a "real" clock frequency of 30 x 60 = 1.8 kHz.
+
+The mode defines the type of emulation you want, which can be one of these:
+
+- `vip` - Original CHIP-8 behaviour as implemented on the Cosmac VIP
+- `blindvip` - The same as VIP, but without the display wait quirk enabled
+- `schip` - Super-chip behaviour (the "modern" version, not the "legacy" version)
+- `xochip` - XO-CHIP behaviour as defined by Octo
+
+Here's an example of both settings in use:
+
+```bash
+octopus -i input.8o -run "mode: schip, cpf: 100, interactive"
 ```
