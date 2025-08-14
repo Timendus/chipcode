@@ -12,7 +12,7 @@ and my [Silicon8 emulator](https://github.com/Timendus/silicon8).
 The pre-processors in versions one and two are functionally nearly identical,
 except that this implementation runs quite a bit faster and has image support
 built-in. No need to install an additional plugin. It also has beta support for
-[color images](#colours) with multiple planes for XO-CHIP and dithering, which
+[colour images](#colours) with multiple planes for XO-CHIP and dithering, which
 the original does not.
 
 All in all this version is much more a one-stop shop for writing CHIP-8 ROMs
@@ -362,11 +362,14 @@ inspect if the conversion was a success, and if everything went as you expected.
 
 # Emulator features
 
-Octopus 2 also comes with a terminal version of
+Octopus 2 also comes with a version of
 [Silicon8](https://github.com/Timendus/silicon8/) built in, which is a CHIP-8,
 SCHIP and XO-CHIP emulator (or virtual machine if you want to be precise). This
 version runs in the terminal and can be scripted to go through a sequence of
 steps. Ideal for automating tests or automatically generating screenshots.
+
+Note that it does require a terminal that supports 24-bit ANSI colours if you
+wish to show the emulator's screen in the terminal.
 
 To use the emulator, add `-run` with a sequence of comma separated commands to
 your Octopus invocation:
@@ -379,7 +382,7 @@ The emulator can also accept a binary ROM file (`.ch8`) as an input file.
 
 As a bonus feature, newline (`\n`) is also accepted as a separator between
 commands, which makes it really easy to write a little script in a file and
-`cat` it in:
+`cat` it in. The below is functionally equivalent to the one-liner above.
 
 ```bash
 $ cat steps
@@ -448,6 +451,26 @@ octopus -i input.8o -run "100, display"
 
 Your program will run for 100 cycles and then it will show the display on the
 terminal.
+
+## Screenshots
+
+The other option is to save the contents of the display to an image. Which is
+very useful if your terminal does not support ANSI colours, or for generating
+screenshots of your game.
+
+The `screenshot` command takes a parameter, separated by a colon, with the name
+of a file to save the image to. The currently supported image types are JPEG,
+PNG, BMP, GIF.
+
+An optional third parameter can specify the magnification of the image. CHIP-8
+screenshots at 100% zoom on a modern display are usually microscopic and
+unreadable. By applying some magnification we get more useful screenshots.
+Defaults to 6x for `hires` and 12x for `lores` ROMs.
+
+```bash
+octopus -i input.8o -run "100, screenshot: image.png"      # default scale
+octopus -i input.8o -run "100, screenshot: image.png: 10x" # explicit scale
+```
 
 ## Key input
 
