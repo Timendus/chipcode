@@ -21,7 +21,7 @@ regression-test: linux
 	@cd tests && go run regression-tests.go
 
 copy-docs:
-	cp README.md ${TARGET}
-	cp LICENSE ${TARGET}
-	cp src/assembler/LICENSE "${TARGET}/LICENSE for c-octo"
+	@cp README.md ${TARGET}
+	@cp LICENSE ${TARGET}
+	@cp src/assembler/LICENSE "${TARGET}/LICENSE for c-octo"
 
