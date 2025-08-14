@@ -10,19 +10,11 @@ import (
 )
 
 func Emulate(rom []byte, sequence string) error {
-	emu := emulator{
-		cpu:         silicon8.CPU{},
-		rom:         rom,
-		cpf:         30,
-		interacting: false,
-		display:     "",
-	}
-	emu.init()
-
-	err := emu.loadROM()
-	if err != nil {
-		return err
-	}
+	// We create the emulator here, but we initialize it lazily in the steps
+	// below, so we can select the right mode and the thing doesn't complain
+	// about the ROM size
+	emu := newEmulator()
+	emu.rom = rom
 
 	// This implements a little parser for the emulation sequence
 	sequence = strings.ReplaceAll(sequence, "\n", ",")
@@ -31,15 +23,27 @@ func Emulate(rom []byte, sequence string) error {
 		step = strings.ToLower(strings.TrimSpace(step))
 		switch {
 		case step == "interactive":
-			err := emu.interactive()
+			err := emu.init()
+			if err != nil {
+				return err
+			}
+			err = emu.interactive()
 			if err != nil {
 				return err
 			}
 
 		case step == "display":
+			err := emu.init()
+			if err != nil {
+				return err
+			}
 			fmt.Println(emu.display)
 
 		case isNumeric(step):
+			err := emu.init()
+			if err != nil {
+				return err
+			}
 			cycles, err := strconv.Atoi(step)
 			if err != nil {
 				return fmt.Errorf("could not parse number in emulation step: '%s'", step)
@@ -62,6 +66,14 @@ func Emulate(rom []byte, sequence string) error {
 			var params string
 			if len(parts) > 2 {
 				params = strings.TrimSpace(parts[2])
+			}
+
+			// Lazily initialize the emulator unless we're changing settings
+			if !(key == "cpf" || key == "mode") {
+				err := emu.init()
+				if err != nil {
+					return err
+				}
 			}
 
 			switch key {
@@ -134,15 +146,18 @@ func Emulate(rom []byte, sequence string) error {
 
 			// "mode: schip"
 			case "mode":
+				if emu.initialized {
+					return fmt.Errorf("can't change the mode on an emulator that's already running in step '%s'", step)
+				}
 				switch value {
 				case "vip":
-					emu.cpu.ForceSpecType(silicon8.VIP)
+					emu.mode = silicon8.VIP
 				case "blindvip":
-					emu.cpu.ForceSpecType(silicon8.BLINDVIP)
+					emu.mode = silicon8.BLINDVIP
 				case "schip":
-					emu.cpu.ForceSpecType(silicon8.SCHIP)
+					emu.mode = silicon8.SCHIP
 				case "xochip":
-					emu.cpu.ForceSpecType(silicon8.XOCHIP)
+					emu.mode = silicon8.XOCHIP
 				default:
 					return fmt.Errorf("invalid emulation mode requested: '%s'. Should be one of 'vip', 'blindvip', 'schip' or 'xochip'", value)
 				}
@@ -157,10 +172,12 @@ func Emulate(rom []byte, sequence string) error {
 					return fmt.Errorf("cycles per frame should be a positive number, not: '%v'", cycles)
 				}
 				emu.cpf = cycles
-				emu.cpu.SetCyclesPerFrame(cycles)
+				if emu.initialized {
+					emu.cpu.SetCyclesPerFrame(cycles)
+				}
 
 			default:
-				return fmt.Errorf("unknown statement: '%s' in emulation step '%s'. Should be one of 'press', 'release', 'mode' or 'cpf'", key, step)
+				return fmt.Errorf("unknown statement: '%s' in emulation step '%s'. Should be one of 'press', 'release', 'save', 'load', 'mode' or 'cpf'", key, step)
 			}
 
 		default:

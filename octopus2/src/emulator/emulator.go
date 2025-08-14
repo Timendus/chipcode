@@ -11,18 +11,40 @@ import (
 type emulator struct {
 	cpu         silicon8.CPU
 	rom         []byte
+	mode        int
 	cpf         int
+	initialized bool
 	interacting bool
 	display     string
 }
 
-func (emu *emulator) init() {
+func newEmulator() emulator {
+	return emulator{
+		cpu:         silicon8.CPU{},
+		mode:        silicon8.VIP,
+		cpf:         30,
+		initialized: false,
+		interacting: false,
+		display:     "",
+	}
+}
+
+func (emu *emulator) init() error {
+	if emu.initialized {
+		return nil
+	}
 	emu.cpu.RegisterSoundCallbacks(emu.playSound, emu.stopSound)
 	emu.cpu.RegisterRandomGenerator(emu.randomByte)
 	emu.cpu.RegisterDisplayCallback(emu.render)
-	emu.cpu.Reset(silicon8.VIP)
+	emu.cpu.Reset(emu.mode)
 	emu.cpu.SetCyclesPerFrame(emu.cpf)
+	err := emu.loadROM()
+	if err != nil {
+		return err
+	}
 	emu.cpu.Start()
+	emu.initialized = true
+	return nil
 }
 
 func (emu *emulator) loadROM() error {
