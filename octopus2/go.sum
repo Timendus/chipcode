@@ -1,3 +1,5 @@
+github.com/timendus/silicon8 v0.0.0-20250816201510-3b4cb86cf44d h1:iRu6d0YA41Q+p6MG3swn7uU99Cusypm5Md5NyZuMOpY=
+github.com/timendus/silicon8 v0.0.0-20250816201510-3b4cb86cf44d/go.mod h1:VFBNn6XVWlJWO3Aj7wHhirkWZj1zAf3hs/ZrAF8CEvY=
 golang.org/x/image v0.23.0 h1:HseQ7c2OpPKTPVzNjG5fwJsOTCiiwS4QdsYi5XU6H68=
 golang.org/x/image v0.23.0/go.mod h1:wJJBTdLfCCf3tiHa1fNxpZmUI4mmoZvwMCPP0ddoNKY=
 golang.org/x/sys v0.35.0 h1:vz1N37gP5bs89s7He8XuIYXpyY0+QlsKmzipCbUtyxI=

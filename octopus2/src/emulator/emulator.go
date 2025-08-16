@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/timendus/chipcode/octopus2/src/emulator/silicon8"
+	"github.com/timendus/silicon8/src/silicon8"
 	"golang.org/x/image/bmp"
 	"golang.org/x/image/draw"
 )
