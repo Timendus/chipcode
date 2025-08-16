@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/timendus/chipcode/octopus2/src/emulator/silicon8"
+	"github.com/timendus/silicon8/src/silicon8"
 )
 
 func Emulate(rom []byte, sequence string) error {
