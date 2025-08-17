@@ -22,6 +22,7 @@ than the original Octopus.
 
 - [Installing and running](#installing-and-running)
 - [Pre-processor features](#pre-processor-features)
+- [Assembler features](#assembler-features)
 - [Emulator features](#emulator-features)
 
 # Installing and running
@@ -359,6 +360,28 @@ inspect if the conversion was a success, and if everything went as you expected.
 ```octo
 :include "horse.jpg" debug
 ```
+
+# Assembler features
+
+The assembler is John Earnest's Octo assembler, which accepts Octo syntax. The
+[C-Octo version](https://github.com/JohnEarnest/c-octo) of it, to be precise.
+This syntax was popularized by his excellent [web based IDE and
+emulator](http://octo-ide.com/) and the CHIP-8 gamejams
+([Octojams](https://beyondloom.com/blog/octojam.html)) that he organized from
+2014 to 2023. It's relatively powerful for an assembler, with some higher level
+concepts like `if` / `else` statements and `while` loops. I believe he calls it
+a compiler himself, but since nearly every line in the source file gets
+converted one-to-one into one or two opcodes, I consider it to be a good
+assembler with macro support.
+
+Here are the necessary resources to get started:
+
+- [Octo syntax manual](https://github.com/JohnEarnest/Octo/blob/gh-pages/docs/Manual.md)
+- [Beginner's
+  guide](https://github.com/JohnEarnest/Octo/blob/gh-pages/docs/BeginnersGuide.md)
+- more documentation can be found [on Octo's
+  github](https://github.com/JohnEarnest/Octo/tree/gh-pages/docs) for those
+  wanting to get into the weeds with it
 
 # Emulator features
 
