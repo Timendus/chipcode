@@ -85,6 +85,10 @@ func main() {
 		}
 	}
 
+	if do_preprocessing || build_binary {
+		fmt.Fprintf(os.Stderr, good("Finished processing in %s\n"), time.Since(startTime))
+	}
+
 	if *OUTPUT_FILE != "STDOUT" {
 		var output []byte
 		if output_ext == ".ch8" {
@@ -97,10 +101,6 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-	}
-
-	if do_preprocessing || build_binary {
-		fmt.Fprintf(os.Stderr, good("Finished processing in %s\n"), time.Since(startTime))
 	}
 
 	if read_binary {
@@ -124,7 +124,7 @@ func main() {
 		fmt.Println(preprocessed)
 	}
 
-	fmt.Fprint(os.Stderr, good("Done\n"))
+	fmt.Fprintf(os.Stderr, good("Done in %s\n"), time.Since(startTime))
 }
 
 func good(input string) string {

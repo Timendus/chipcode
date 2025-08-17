@@ -155,8 +155,12 @@ func (emu *emulator) triggerKey(key int) {
 	}()
 }
 
-func (emu *emulator) playSound(playing bool, pattern *[16]uint8, pitch float64) {}
-func (emu *emulator) stopSound()                                                {}
+func (emu *emulator) playSound(playing bool, pattern *[16]uint8, pitch float64) {
+	// For future implementation
+}
+func (emu *emulator) stopSound() {
+	// For future implementation
+}
 
 func (emu *emulator) randomByte() uint8 {
 	return uint8(rand.UintN(256))
