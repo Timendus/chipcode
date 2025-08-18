@@ -12,10 +12,11 @@ depend on it through NPM.
 
 ## Octopus 2
 
-Preprocessor and assembler for Octo-flavoured CHIP-8 source files. This command
-line tool can make conditional code inclusion decisions, merge multiple source
-files, convert images and re-order your source to put the executable stuff
-first. It can then assemble the result to a binary.
+Preprocessor, assembler and scriptable emulator for Octo-flavoured CHIP-8 source
+files. This command line tool can make conditional code inclusion decisions,
+merge multiple source files, convert images and re-order your source to put the
+executable stuff first. It can then assemble the result to a binary and run the
+result in its embedded emulator if you want.
 
 - [Octopus on Github](./octopus2)
 
