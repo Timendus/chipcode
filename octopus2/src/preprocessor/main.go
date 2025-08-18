@@ -2,11 +2,14 @@ package preprocessor
 
 import (
 	"fmt"
+	"io/fs"
 
 	"os"
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/timendus/chipcode/octopus2/chiplib"
 )
 
 const (
@@ -34,6 +37,18 @@ func loadFile(filename string) (string, error) {
 	file, err := os.ReadFile(filename)
 	if err != nil {
 		return "", fmt.Errorf("error reading file '%s': %s", filename, err.Error())
+	}
+	return string(file), nil
+}
+
+func loadStdLibFile(filename string) (string, error) {
+	libpath := path.Join("lib", strings.TrimPrefix(filename, "std/")+".8o")
+	if _, err := fs.Stat(chiplib.FS, libpath); err != nil {
+		return "", fmt.Errorf("requested standard library '%s' not found: %v", filename, err)
+	}
+	file, err := fs.ReadFile(chiplib.FS, libpath)
+	if err != nil {
+		return "", fmt.Errorf("could not load standard library file '%s': %v", filename, err)
 	}
 	return string(file), nil
 }
@@ -145,7 +160,11 @@ func octopussify(contents, filename string, options map[string]bool) (string, []
 					errs = []error{err}
 				}
 			default:
-				file, err = loadFile(path.Join(path.Dir(filename), subfilename))
+				if strings.HasPrefix(subfilename, "std/") {
+					file, err = loadStdLibFile(subfilename)
+				} else {
+					file, err = loadFile(path.Join(path.Dir(filename), subfilename))
+				}
 				if err != nil {
 					errs = []error{err}
 				} else {

@@ -1,0 +1,241 @@
+:include "std/util"
+:include "std/math"
+:include "test-helper.8o"
+
+: main
+
+  ########################################
+  # Division
+  ########################################
+
+  # Test 50/3 = 16
+  v0 := 50
+  v1 := 3
+  div-8-8 v0 v1 v2 v3 v4
+  expect-8 v0 16 "Expected div-8-8 50/3 to result in 16"
+  expect-8 v2 2 "Expected div-8-8 50/3 to have remainder 2"
+
+  # Test 50/3 = 16
+  v0 := 0
+  v1 := 50
+  v2 := 3
+  div-16-8 v0 v1 v2 v3 v4 v5
+  expect-8 v1 16 "Expected div-16-8 50/3 to result in 16"
+  expect-8 v3 2 "Expected div-16-8 50/3 to have remainder 2"
+
+  # Test 3453 / 130 = 26
+  set-16 v0 v1 3453
+  v2 := 130
+  div-16-8 v0 v1 v2 v3 v4 v5
+  expect-8 v1 26 "Expected div-16-8 3453/130 to result in 26"
+  expect-8 v3 73 "Expected div-16-8 3453/130 to have remainder 73"
+
+
+  ########################################
+  # Multiplication
+  ########################################
+
+  # Test 10 * 17 = 170
+  v0 := 10
+  v1 := 17
+  mul-8-8 v0 v1 v2 v3 v4
+  expect-8 v2 0 "Expected mul-8-8 to not overflow 8 bits"
+  expect-8 v3 170 "Expected mul-8-8 to result in 170"
+
+  # Test 193 * 238 = 45934
+  v0 := 193
+  v1 := 238
+  mul-8-8 v0 v1 v2 v3 v4
+  expect-8 v2 0xB3 "Expected mul-8-8 to result in 45934"
+  expect-8 v3 0x6E "Expected mul-8-8 to result in 45934"
+
+
+  ########################################
+  # Addition
+  ########################################
+
+  # Test 1000 + 200 = 1200
+  set-16 v0 v1 1000
+  v2 := 200
+  add-16-8 v0 v1 v2
+  expect-8 vF 0 "Expected no overflow for add-16-8"
+  expect-16 v0 v1 1200 "Expected add-16-8 to result in 1200"
+
+  # Test 0xFFFA + 0xAA = 0x00A4 + overflow
+  set-16 v0 v1 0xFFFA
+  v2 := 0xAA
+  add-16-8 v0 v1 v2
+  expect-8 vF 1 "Expected overflow for add-16-8"
+  expect-16 v0 v1 0x00A4 "Expected add-16-8 to result in 0x00A4"
+
+  # Test 25763 + 34645 = 60408
+  set-16 v0 v1 25763
+  set-16 v2 v3 34645
+  add-16-16 v0 v1 v2 v3 v4
+  expect-8 v4 0 "Expected no overflow for add-16-16"
+  expect-16 v0 v1 60408 "Expected add-16-16 to result in 60408"
+
+  # Test 65530 + 100 = 94 + overflow
+  set-16 v0 v1 65530
+  set-16 v2 v3 100
+  add-16-16 v0 v1 v2 v3 v4
+  expect-8 v4 1 "Expected overflow for add-16-16"
+  expect-16 v0 v1 94 "Expected add-16-16 to result in 94"
+
+  # Test 62564 + 34645 = 31673 + overflow
+  set-16 v0 v1 62564
+  set-16 v2 v3 34645
+  add-16-16 v0 v1 v2 v3 v4
+  expect-8 v4 1 "Expected overflow for add-16-16"
+  expect-16 v0 v1 31673 "Expected add-16-16 to result in 31673"
+
+  # Test 0x12345678 + 0xAA = 0x12345722
+  set-32 v0 v1 v2 v3 0x12345678
+  v4 := 0xAA
+  add-32-8 v0 v1 v2 v3 v4
+  expect-8 vF 0 "Expected no overflow for add-32-8"
+  expect-32 v0 v1 v2 v3 0x12345722 "Expected add-32-8 to result in 0x12345722"
+
+  # Test 0xFFFFFFF0 + 0xAA = 0x9A + overflow
+  set-32 v0 v1 v2 v3 0xFFFFFFF0
+  v4 := 0xAA
+  add-32-8 v0 v1 v2 v3 v4
+  expect-8 vF 1 "Expected overflow for add-32-8"
+  expect-32 v0 v1 v2 v3 0x9A "Expected add-32-8 to result in 0x9A"
+
+  # Test 0x12345678 + 0xAAAA = 0x12350122
+  set-32 v0 v1 v2 v3 0x12345678
+  set-16 v4 v5 0xAAAA
+  add-32-16 v0 v1 v2 v3 v4 v5 v6
+  expect-8 v6 0 "Expected no overflow for add-32-16"
+  expect-32 v0 v1 v2 v3 0x12350122 "Expected add-32-16 to result in 0x12350122"
+
+  # Test 0xFFFFF000 + 0xAAAA = 0x9AAA + overflow
+  set-32 v0 v1 v2 v3 0xFFFFF000
+  set-16 v4 v5 0xAAAA
+  add-32-16 v0 v1 v2 v3 v4 v5 v6
+  expect-8 v6 1 "Expected no overflow for add-32-16"
+  expect-32 v0 v1 v2 v3 0x9AAA "Expected add-32-16 to result in 0x9AAA"
+
+  # Test 0x12345678 + 0x87654321 = 0x99999999
+  set-32 v0 v1 v2 v3 0x12345678
+  set-32 v4 v5 v6 v7 0x87654321
+  add-32-32 v0 v1 v2 v3 v4 v5 v6 v7 v8
+  expect-8 v8 0 "Expected no overflow for add-32-32"
+  expect-32 v0 v1 v2 v3 0x99999999 "Expected add-32-32 to result in 0x99999999"
+
+  # Test 0xAAAAAAAA + 0x87654321 = 0x1320FEDCB + overflow
+  set-32 v0 v1 v2 v3 0xAAAAAAAA
+  set-32 v4 v5 v6 v7 0x87654321
+  add-32-32 v0 v1 v2 v3 v4 v5 v6 v7 v8
+  expect-8 v8 1 "Expected overflow for add-32-32"
+  expect-32 v0 v1 v2 v3 0x1320FEDCB "Expected add-32-32 to result in 0x1320FEDCB"
+
+
+  ########################################
+  # Subtraction
+  ########################################
+
+  # Test 200 - 160 = 40
+  v0 := 200
+  set-16 v1 v2 160
+  sub-8-16 v0 v1 v2 v3
+  expect-8 v3 1 "Expected no carry for sub-8-16"
+  expect-8 v0 40 "Expected sub-8-16 to result in 40"
+
+  # Test 200 - 250 = -50 = 0xCE
+  v0 := 200
+  set-16 v1 v2 250
+  sub-8-16 v0 v1 v2 v3
+  expect-8 v3 0 "Expected carry for sub-8-16"
+  expect-8 v0 0xCE "Expected sub-8-16 to result in 0xCE"
+
+  # Test 200 - 520 = -320 = 0xC0
+  v0 := 200
+  set-16 v1 v2 520
+  sub-8-16 v0 v1 v2 v3
+  expect-8 v3 0 "Expected carry for sub-8-16"
+  expect-8 v0 0xC0 "Expected sub-8-16 to result in 0xC0"
+
+  # Test 200 - 160 = 40
+  v0 := 200
+  set-32 v1 v2 v3 v4 160
+  sub-8-32 v0 v1 v2 v3 v4 v5
+  expect-8 v5 1 "Expected no carry for sub-8-32"
+  expect-8 v0 40 "Expected sub-8-32 to result in 40"
+
+  # Test 200 - 250 = -50 = 0xCE
+  v0 := 200
+  set-32 v1 v2 v3 v4 250
+  sub-8-32 v0 v1 v2 v3 v4 v5
+  expect-8 v5 0 "Expected carry for sub-8-32"
+  expect-8 v0 0xCE "Expected sub-8-32 to result in 0xCE"
+
+  # Test 200 - 520 = -320 = 0xC0
+  v0 := 200
+  set-32 v1 v2 v3 v4 520
+  sub-8-32 v0 v1 v2 v3 v4 v5
+  expect-8 v5 0 "Expected carry for sub-8-32"
+  expect-8 v0 0xC0 "Expected sub-8-32 to result in 0xC0"
+
+  # Test 2400 - 160 = 2240
+  set-16 v0 v1 2400  # 0x0960
+  v2 := 160          #   0xA0
+  sub-16-8 v0 v1 v2
+  expect-8 vF 1 "Expected no carry for sub-16-8"
+  expect-16 v0 v1 2240 "Expected sub-16-8 to result in 40"
+
+  # Test 160 - 240 = -80 = 0xB0 + overflow
+  set-16 v0 v1 160
+  v2 := 240
+  sub-16-8 v0 v1 v2
+  expect-8 vF 0 "Expected carry for sub-16-8"
+  expect-16 v0 v1 0xFFB0 "Expected sub-16-8 to result in 0xFFB0"
+
+  # Test 62564 - 34645 = 27919
+  set-16 v0 v1 62564
+  set-16 v2 v3 34645
+  sub-16-16 v0 v1 v2 v3 v4
+  expect-8 v4 1 "Expected no carry for sub-16-16"
+  expect-16 v0 v1 27919 "Expected sub-16-16 to result in 27919"
+
+  # Test 0x0050 - 0x0080 = 0xFFD0 + carry
+  set-16 v0 v1 0x0050
+  set-16 v2 v3 0x0080
+  sub-16-16 v0 v1 v2 v3 v4
+  expect-8 v4 0 "Expected carry for sub-16-16"
+  expect-16 v0 v1 0xFFD0 "Expected sub-16-16 to result in 0xFFD0"
+
+  # Test 34645 - 62564 = 37617 + carry
+  set-16 v0 v1 34645
+  set-16 v2 v3 62564
+  sub-16-16 v0 v1 v2 v3 v4
+  expect-8 v4 0 "Expected carry for sub-16-16"
+  expect-16 v0 v1 37617 "Expected sub-16-16 to result in 37617"
+
+
+
+  # TODO: the rest of these :)
+
+
+
+  ########################################
+  # Other
+  ########################################
+
+  # Test i += 1468
+  i := long some-label
+  set-16 v0 v1 1468
+  add-16-to-i v0 v1
+  load v0
+  expect-8 v0 0xAA "Expected add-16-to-i to point to the right value"
+
+  # Done!
+  tests-passed
+
+# Memory region for add-16-to-i test
+:org 0xF500
+: some-label
+  0
+:org 0xFABC
+  0xAA
