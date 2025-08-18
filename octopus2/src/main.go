@@ -52,7 +52,7 @@ func main() {
 	do_preprocessing := input_ext == ".8o"
 	build_binary := input_ext == ".8o" && (output_ext == ".ch8" || *EMULATE != "disabled")
 	read_binary := input_ext == ".ch8" && *EMULATE != "disabled"
-	build_docs := input_ext == ".8o" && *TEMPLATE != ""
+	build_docs := input_ext == ".8o" && (*TEMPLATE != "" || output_ext == ".md")
 
 	// Do we have something to do?
 	if !(do_preprocessing || build_binary || read_binary) {
@@ -89,16 +89,24 @@ func main() {
 	}
 
 	if build_docs {
-		var err error
-		template, err := os.ReadFile(*TEMPLATE)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, bad("Could not read the template file:"), err)
-			os.Exit(1)
-		}
-		preprocessed, err = docparser.Parse(preprocessed, *INPUT_FILE, string(template))
-		if err != nil {
-			fmt.Fprintln(os.Stderr, bad("Could not build the documentation due to the following error:"), err)
-			os.Exit(1)
+		if output_ext == ".md" {
+			var err error
+			preprocessed, err = docparser.ParseToMarkdown(preprocessed, *INPUT_FILE)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, bad("Could not build the documentation due to the following error:"), err)
+				os.Exit(1)
+			}
+		} else {
+			template, err := os.ReadFile(*TEMPLATE)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, bad("Could not read the template file:"), err)
+				os.Exit(1)
+			}
+			preprocessed, err = docparser.Parse(preprocessed, *INPUT_FILE, string(template))
+			if err != nil {
+				fmt.Fprintln(os.Stderr, bad("Could not build the documentation due to the following error:"), err)
+				os.Exit(1)
+			}
 		}
 	}
 
