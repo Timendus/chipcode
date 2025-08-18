@@ -136,7 +136,7 @@ func parseModifiers(modifiers string, width int, height int) mods {
 		width:    width,
 		height:   height,
 		palette:  palette,
-		labels:   strings.Contains(modifiers, "no-labels"),
+		labels:   !strings.Contains(modifiers, "no-labels"),
 		debug:    strings.Contains(modifiers, "debug") || strings.Contains(modifiers, "debugging") || strings.Contains(modifiers, "verbose"),
 		dithered: strings.Contains(modifiers, "dithered") || strings.Contains(modifiers, "dither") || strings.Contains(modifiers, "dithering"),
 	}
