@@ -14,13 +14,16 @@
 {{end}}{{end}}{{if .Routines}}  - Routines
 {{range .Routines}}    - [{{.Name}}](#{{.Name}}){{end}}{{end}}{{end}}
 
-{{range .Sections}}{{if .Name}}# {{ .Name }}
+{{range .Sections -}}
 
-{{end -}}{{if .Consts -}}
-## Constants
+{{- if .Name}}# {{ .Name }}
+
 {{end -}}
 
-{{range .Consts}}
+{{- if .Consts -}}
+## Constants
+
+{{range .Consts -}}
 ### `{{ .Name }}`
 
 _{{ $path }}:{{ .Line }}_
@@ -29,12 +32,12 @@ _{{ $path }}:{{ .Line }}_
 {{- end}}
 Value: `{{ .Value }}`
 {{end}}
-
-{{if .Macros -}}
-## Macros
 {{end -}}
 
-{{range .Macros}}
+{{- if .Macros -}}
+## Macros
+
+{{range .Macros -}}
 ### `{{ .Name }}`
 
 _{{ $path }}:{{ .Line }}_
@@ -46,12 +49,12 @@ _{{ $path }}:{{ .Line }}_
 {{range .Parameters}}- {{ . }}
 {{end -}}{{- end -}}
 {{- end}}
+{{end -}}
 
 {{if .Routines -}}
 ### Routines
-{{end -}}
 
-{{range .Routines}}
+{{range .Routines -}}
 ### `{{ .Name }}`
 
 _{{ $path }}:{{ .Line }}_
@@ -60,3 +63,4 @@ _{{ $path }}:{{ .Line }}_
 {{- end}}
 {{- end}}
 {{- end}}
+{{end -}}
