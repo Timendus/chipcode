@@ -2,7 +2,7 @@
 # Set two registers to a single 16-bit value
 #
 #  [high, low] = value
-:macro set-16 high low value {
+:macro util.set-16 high low value {
   :calc high-byte { ( value >> 8 ) & 0xFF }
   :calc low-byte { value & 0xFF }
   high := high-byte
@@ -13,7 +13,7 @@
 # Set four registers to a single 32-bit value
 #
 #  [high, mid1, mid2, low] = value
-:macro set-32 high mid1 mid2 low value {
+:macro util.set-32 high mid1 mid2 low value {
   :calc high-byte { ( value >> 24 ) & 0xFF }
   :calc mid1-byte { ( value >> 16 ) & 0xFF }
   :calc mid2-byte { ( value >> 8 ) & 0xFF }
@@ -28,15 +28,9 @@
 # Wait for the delay timer to run out
 #
 # Destroys: vF
-:macro sleep {
+:macro util.sleep {
   loop
     vF := delay
     if vF != 0 then
   again
-}
-
-###
-# Wut?
-:macro things hi {
-
 }
