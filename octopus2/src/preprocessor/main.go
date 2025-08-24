@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/timendus/chipcode/octopus2/chiplib"
+	library "github.com/timendus/chipcode/octopus2/library"
 )
 
 const (
@@ -43,10 +43,10 @@ func loadFile(filename string) (string, error) {
 
 func loadStdLibFile(filename string) (string, error) {
 	libpath := path.Join("lib", strings.TrimPrefix(filename, "std/")+".8o")
-	if _, err := fs.Stat(chiplib.FS, libpath); err != nil {
+	if _, err := fs.Stat(library.FS, libpath); err != nil {
 		return "", fmt.Errorf("requested standard library '%s' not found: %v", filename, err)
 	}
-	file, err := fs.ReadFile(chiplib.FS, libpath)
+	file, err := fs.ReadFile(library.FS, libpath)
 	if err != nil {
 		return "", fmt.Errorf("could not load standard library file '%s': %v", filename, err)
 	}

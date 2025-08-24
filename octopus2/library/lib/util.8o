@@ -34,3 +34,9 @@
     if vF != 0 then
   again
 }
+
+###
+# Wut?
+:macro things hi {
+
+}

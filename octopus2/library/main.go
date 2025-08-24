@@ -1,4 +1,4 @@
-package chiplib
+package library
 
 import "embed"
 
