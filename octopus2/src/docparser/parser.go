@@ -116,10 +116,10 @@ func findFileProperties(docBlocks []DocBlock) (*string, *string) {
 		if strings.TrimSpace(description) == "" {
 			return &title, nil
 		} else {
-			return &title, &description // Block split by an empty line on line 2 is considered a title and a description
+			return &title, toDescription(description) // Block split by an empty line on line 2 is considered a title and a description
 		}
 	}
-	return nil, &block.Content // Whole block is considered a description
+	return nil, toDescription(block.Content) // Whole block is considered a description
 }
 
 func findSections(source []string, docBlocks []DocBlock) []Section {
@@ -262,6 +262,39 @@ func strOrDefault(str *string, def string) string {
 }
 
 func toDescription(descr string) *string {
-	descr = strings.TrimPrefix(descr, "\n")
-	return &descr
+	for strings.HasPrefix(descr, "\n") {
+		descr = strings.TrimPrefix(descr, "\n")
+	}
+	for strings.HasSuffix(descr, "\n") {
+		descr = strings.TrimSuffix(descr, "\n")
+	}
+
+	// Parse code blocks in the description
+	result := ""
+	inCodeBlock := false
+	inIndentedBlock := false
+	for _, line := range strings.Split(descr, "\n") {
+		if strings.TrimSpace(line) == "```" {
+			inCodeBlock = !inCodeBlock
+		}
+		if !inCodeBlock {
+			if inIndentedBlock {
+				if !strings.HasPrefix(line, " ") {
+					result += "```\n"
+					inIndentedBlock = false
+				}
+			} else {
+				if strings.HasPrefix(line, " ") {
+					result += "```\n"
+					inIndentedBlock = true
+				}
+			}
+		}
+		result += line + "\n"
+	}
+	if inIndentedBlock {
+		result += "```\n"
+	}
+
+	return &result
 }

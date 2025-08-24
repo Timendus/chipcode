@@ -47,9 +47,8 @@ _{{ $path }}:{{ .Line }}_
 {{- if .Parameters}}
 #### Parameters
 {{range .Parameters}}- {{ . }}
-{{end -}}{{- end -}}
-{{- end}}
-{{end -}}
+{{end -}}{{- end}}
+{{end}}{{end -}}
 
 {{if .Routines -}}
 ### Routines
