@@ -34,6 +34,7 @@ jobs:
       working-directory: ${{ matrix.directory }}
 
   octopus2-tests:
+    name: Octopus 2 tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -48,15 +49,17 @@ jobs:
           cache-dependency-path: octopus2/go.sum
       - name: Run Go unit tests
         working-directory: ./octopus2
-        run: make test
-      - name: Build binaries
-        working-directory: ./octopus2
-        run: make linux
+        run: make go-tests
       - name: Run regression tests
         working-directory: ./octopus2
         run: make regression-test
+      - name: Run standard library tests
+        working-directory: ./octopus2
+        run: make stdlib-tests
 
   octopus2-build-linux-windows:
+    name: Octopus 2 build for Linux and Windows
+    needs: octopus2-tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -90,6 +93,8 @@ jobs:
           path: ./octopus2/dist/windows/*
 
   octopus2-build-macos:
+    name: Octopus 2 build for Intel and Apple Silicon MacOS
+    needs: octopus2-tests
     runs-on: macos-latest
     strategy:
       matrix:

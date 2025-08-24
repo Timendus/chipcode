@@ -1,0 +1,431 @@
+# Math library
+#
+# A set of macros to generate mathematical routines for addition, subtraction,
+# multiplication and division. Supports 8, 16, 24 and 32 bits (for some
+# operations for now; it's not 100% complete yet).
+#
+# Each macro accepts a list of registers as parameters, which the routine is
+# allowed to use. As inputs, as outputs or as temporary registers. Usage
+# example using [mul-8-8](#mul-8-8):
+#
+# ```
+# :include "std/math"
+#
+# # Multiplies v0 with v1, result in [v2, v3]. Destroys v0, v1, v4, vF.
+# : multiply
+#     math.mul-8-8 v0 v1 v2 v3 v4
+#     return
+# ```
+
+### Division ###
+
+###
+# Divide 16-bit value by 8-bit value, resulting in 8-bit result
+#
+#  numerator-low = [numerator-high, numerator-low] / divisor
+#  remainder = [numerator-high, numerator-low] % divisor
+#
+# Destroys: numerator-high, temp1, temp2, vF
+:macro math.div-16-8 numerator-high numerator-low divisor remainder temp1 temp2 {
+  # Aliases for easy debugging:
+  # :alias num-high numerator-high
+  # :alias num-low numerator-low
+  # :alias result numerator-low
+  # :alias div divisor
+  # :alias rem remainder
+  :alias counter temp1
+  :alias flag temp2
+	counter := 16
+	flag := 0
+	remainder := 0
+	loop
+		while counter != 0
+		counter -= 1
+		remainder <<= remainder
+		numerator-high <<= numerator-high
+		remainder |= vF
+		numerator-low <<= numerator-low
+		numerator-high |= vF
+		numerator-low |= flag
+		flag := 0
+		if remainder >= divisor begin
+			remainder -= divisor
+			flag := 1
+		end
+	again
+  numerator-low <<= numerator-low
+  numerator-low |= flag
+}
+
+###
+# Divide 8-bit value by 8-bit value, resulting in 8-bit result
+#
+#  numerator = numerator / divisor
+#  remainder = numerator % divisor
+#
+# Destroys: temp1, temp2, vF
+:macro math.div-8-8 numerator divisor remainder temp1 temp2 {
+  # Aliases for easy debugging:
+  # :alias num numerator
+  # :alias result numerator
+  # :alias div divisor
+  # :alias rem remainder
+  :alias counter temp1
+  :alias flag temp2
+	counter := 8
+	flag := 0
+	remainder := 0
+	loop
+		while counter != 0
+		counter -= 1
+		remainder <<= remainder
+		numerator <<= numerator
+    remainder |= vF
+		numerator |= flag
+		flag := 0
+		if remainder >= divisor begin
+			remainder -= divisor
+			flag := 1
+		end
+	again
+  numerator <<= numerator
+  numerator |= flag
+}
+
+### Multiplication ###
+
+###
+# Multiply two 8-bit values, resulting in 16-bit result
+#
+#  [result-high, result-low] = multiplicand * multiplier
+#
+# Destroys: multiplicand, multiplier, temp, vF
+:macro math.mul-8-8 multiplicand multiplier result-high result-low temp {
+  # Aliases for easy debugging:
+  # :alias multcand multiplicand
+  # :alias multier multiplier
+  # :alias res-high result-high
+  # :alias res-low result-low
+  # :alias tmp temp
+  result-high := 0
+  result-low := 0
+  temp := 0
+  if multiplicand != 0 begin
+    loop
+      while multiplier != 0
+      multiplier >>= multiplier
+      if vF == 1 begin
+        result-high += temp
+        result-low += multiplicand
+        result-high += vF
+      end
+      temp <<= temp
+      multiplicand <<= multiplicand
+      temp |= vF
+    again
+  end
+}
+
+# TODO
+# :macro math.mul-8-16 -> 24bit
+# :macro math.mul-16-16 -> 32bit
+
+# # Multiply one 8-bit and one 16-bit value, resulting in 24-bit result
+# # [result-high, result-mid, result-low] = multiplicand * [multiplier-high, multiplier-low]
+# # Destroys: multiplicand, multiplier-high, multiplier-low, temp, vF
+# :macro math.mul-8-16 multiplicand multiplier-high multiplier-low result-high result-mid result-low temp1 temp2 {
+#   # Aliases for easy debugging:
+#   # :alias multcand multiplicand
+#   # :alias multier-high multiplier-high
+#   # :alias multier-low multiplier-low
+#   # :alias res-high result-high
+#   # :alias res-mid result-mid
+#   # :alias res-low result-low
+#   # :alias tmp temp
+#   result-high := 0
+#   result-mid := 0
+#   result-low := 0
+#   temp1 := 0
+#   temp2 := 0
+#   if multiplicand != 0 begin
+#     loop
+#       while multiplier != 0
+#       multiplier-low >>= multiplier-low
+#       if vF == 1 begin
+#         result-high += temp1
+#         result-mid += temp2
+#         result-low += multiplicand
+#         result-mid += vF
+#         result-high += vF
+#       end
+#       multiplier-high >>= multiplier-high
+#       if vF == 1 begin
+#         vF := 0b10000000
+#         multiplier-low |= vF
+#       end
+#       temp <<= temp
+#       multiplicand <<= multiplicand
+#       temp |= vF
+#     again
+#   end
+# }
+
+### Addition ###
+
+###
+# Add an 8-bit and a 16-bit value, resulting in 16-bit result + vF = 1 if overflow
+#
+#  [value1-high, value1-low] += value2
+#
+# Destroys: value1-high, value1-low, vF
+:macro math.add-16-8 value1-high value1-low value2 {
+  value1-low += value2
+  value1-high += vF
+}
+
+###
+# Add two 16-bit values, resulting in 16-bit result + overflow = 1 if overflow
+#
+#  [value1-high, value1-low] += [value2-high, value2-low]
+#
+# Destroys: value1-high, value1-low, vF
+:macro math.add-16-16 value1-high value1-low value2-high value2-low overflow {
+  value1-low += value2-low
+  value1-high += vF
+  overflow := vF
+  value1-high += value2-high
+  overflow |= vF
+}
+
+###
+# Add an 8-bit and a 32-bit value, resulting in 32-bit result + vF = 1 if overflow
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] += value2
+#
+# Destroys: value1-high, value1-mid1, value1-mid2, value1-low, vF
+:macro math.add-32-8 value1-high value1-mid1 value1-mid2 value1-low value2 {
+  value1-low += value2
+  value1-mid2 += vF
+  value1-mid1 += vF
+  value1-high += vF
+}
+
+###
+# Add a 16-bit and a 32-bit value, resulting in 32-bit result + overflow = 1 if overflow
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] += value2
+#
+# Destroys: value1-high, value1-mid1, value1-mid2, value1-low, overflow, vF
+:macro math.add-32-16 value1-high value1-mid1 value1-mid2 value1-low value2-high value2-low overflow {
+  value1-low += value2-low    value1-mid2 += vF  value1-mid1 += vF  value1-high += vF  overflow := vF
+  value1-mid2 += value2-high  value1-mid1 += vF  value1-high += vF  overflow |= vF
+}
+
+###
+# Add two 32-bit values, resulting in 32-bit result + overflow = 1 if overflow
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] += [value2-high, value2-mid1, value2-mid2, value2-low]
+#
+# Destroys: value1-high, value1-mid1, value1-mid2, value1-low, overflow, vF
+:macro math.add-32-32 value1-high value1-mid1 value1-mid2 value1-low value2-high value2-mid1 value2-mid2 value2-low overflow {
+  value1-low += value2-low    value1-mid2 += vF  value1-mid1 += vF  value1-high += vF  overflow := vF
+  value1-mid2 += value2-mid2  value1-mid1 += vF  value1-high += vF  overflow |= vF
+  value1-mid1 += value2-mid1  value1-high += vF  overflow |= vF
+  value1-high += value2-high  overflow |= vF
+}
+
+###
+# Add 16-bit value to index register
+#
+#  i += [value-high, value-low]
+#
+# Destroys: value-high, vF
+:macro math.add-16-to-i value-high value-low {
+  loop
+    while value-high != 0
+    # Do i += 0x100 in two parts
+    vF := 0x80
+    i += vF
+    i += vF
+    value-high -= 1
+  again
+  i += value-low
+}
+
+### Subtraction ###
+
+###
+# Subtract a 16-bit value from an 8-bit value, resulting in 8-bit result + carry = 0 if carry
+#
+#  value1 -= [value2-high, value2-low]
+#
+# Destroys: value1, vF
+:macro math.sub-8-16 value1 value2-high value2-low carry {
+  value1 -= value2-low
+  carry := vF
+  if value2-high != 0 then carry := 0
+}
+
+###
+# Subtract a 32-bit value from an 8-bit value, resulting in 8-bit result + carry = 0 if carry
+#
+#  value1 -= [value2-high, value2-mid1, value2-mid2, value2-low]
+#
+# Destroys: value1, vF
+:macro math.sub-8-32 value1 value2-high value2-mid1 value2-mid2 value2-low carry {
+  value1 -= value2-low
+  carry := vF
+  if value2-mid2 != 0 then carry := 0
+  if value2-mid1 != 0 then carry := 0
+  if value2-high != 0 then carry := 0
+}
+
+###
+# Subtract an 8-bit value from a 16-bit value, resulting in 16-bit result + vF = 0 if carry
+#
+#  [value1-high, value1-low] -= value2
+#
+# Destroys: value1-high, value1-low, vF
+:macro math.sub-16-8 value1-high value1-low value2 {
+  value1-low -= value2
+  if vF == 0 begin
+    vF := 1
+    value1-high -= vF
+  end
+}
+
+###
+# Subtract two 16-bit values, resulting in 16-bit result + carry = 0 if carry
+#
+#  [value1-high, value1-low] -= [value2-high, value2-low]
+#
+# Destroys: value1-high, value1-low, carry, vF
+:macro math.sub-16-16 value1-high value1-low value2-high value2-low carry {
+  carry := 1
+  value1-low -= value2-low
+  if vF == 0 begin
+    vF := 1
+    value1-high -= vF
+    carry := vF
+  end
+  value1-high -= value2-high
+  carry &= vF
+}
+
+###
+# Subtract a 32-bit value from a 16-bit value, resulting in 16-bit result + carry = 0 if carry
+#
+#  [value1-high, value1-low] -= [value2-high, value2-mid1, value2-mid2, value2-low]
+#
+# Destroys: value1-high, value1-low, carry, vF
+:macro math.sub-16-32 value1-high value1-low value2-high value2-mid1 value2-mid2 value2-low carry {
+  carry := 1
+  value1-low -= value2-low
+  if vF == 0 begin
+    vF := 1
+    value1-high -= vF
+    carry := vF
+  end
+  value1-high -= value2-mid2
+  carry &= vF
+  if value2-mid1 != 0 then carry := 0
+  if value2-high != 0 then carry := 0
+}
+
+###
+# Subtract an 8-bit value from a 32-bit value, resulting in 32-bit result + vF = 0 if carry
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] -= value2
+#
+# Destroys: value1-high, value1-mid1, value1-mid2, value1-low, vF
+:macro math.sub-32-8 value1-high value1-mid1 value1-mid2 value1-low value2 {
+  value1-low -= value2
+  if vF == 0 begin
+    vF := 1
+    value1-mid2 -= vF
+    if vF == 0 begin
+      vF := 1
+      value1-mid1 -= vF
+      if vF == 0 begin
+        vF := 1
+        value1-high -= vF
+      end
+    end
+  end
+}
+
+###
+# Subtract a 16-bit value from a 32-bit value, resulting in 32-bit result + carry = 0 if carry
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] -= [value2-high, value2-low]
+#
+# Destroys: value1-high, value1-mid1, value1-mid2, value1-low, carry, vF
+:macro math.sub-32-16 value1-high value1-mid1 value1-mid2 value1-low value2-high value2-low carry {
+  carry := 1
+  value1-low -= value2-low
+  if vF == 0 begin
+    vF := 1
+    value1-mid2 -= vF
+    if vF == 0 begin
+      vF := 1
+      value1-mid1 -= vF
+      if vF == 0 begin
+        vF := 1
+        value1-high -= vF
+        carry &= vF
+      end
+    end
+  end
+  value1-mid2 -= value2-high
+  if vF == 0 begin
+    vF := 1
+    value1-mid1 -= vF
+    if vF == 0 begin
+      vF := 1
+      value1-high -= vF
+      carry &= vF
+    end
+  end
+}
+
+###
+# Subtract a 32-bit value from a 32-bit value, resulting in 32-bit result + carry = 0 if carry
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] -= [value2-high, value2-mid1, value2-mid2, value2-low]
+#
+# Destroys: value1-high, value1-mid1, value1-mid2, value1-low, carry, vF
+:macro math.sub-32-32 value1-high value1-mid1 value1-mid2 value1-low value2-high value2-mid1 value2-mid2 value2-low carry {
+  carry := 1
+  value1-low -= value2-low
+  if vF == 0 begin
+    vF := 1
+    value1-mid2 -= vF
+    if vF == 0 begin
+      vF := 1
+      value1-mid1 -= vF
+      if vF == 0 begin
+        vF := 1
+        value1-high -= vF
+        carry &= vF
+      end
+    end
+  end
+  value1-mid2 -= value2-mid2
+  if vF == 0 begin
+    vF := 1
+    value1-mid1 -= vF
+    if vF == 0 begin
+      vF := 1
+      value1-high -= vF
+      carry &= vF
+    end
+  end
+  value1-mid1 -= value2-mid1
+  if vF == 0 begin
+    vF := 1
+    value1-high -= vF
+    carry &= vF
+  end
+  value1-high -= value2-high
+  carry &= vF
+}

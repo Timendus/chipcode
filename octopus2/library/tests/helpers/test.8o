@@ -1,0 +1,68 @@
+:macro test.expect-8 register value error-message {
+  if register != value then
+    :breakpoint error-message
+    loop again  # Give breakpoint something to stop on and don't show "pass"
+}
+
+:macro test.expect-16 register-high register-low value error-message {
+  :calc high-byte { ( value >> 8 ) & 0xFF }
+  :calc low-byte { value & 0xFF }
+  if register-high != high-byte then
+    :breakpoint error-message
+    loop again  # Give breakpoint something to stop on and don't show "pass"
+  if register-low != low-byte then
+    :breakpoint error-message
+    loop again  # Same.
+}
+
+:macro test.expect-32 high mid1 mid2 low value error-message {
+  :calc high-byte { ( value >> 24 ) & 0xFF }
+  :calc mid1-byte { ( value >> 16 ) & 0xFF }
+  :calc mid2-byte { ( value >> 8 ) & 0xFF }
+  :calc low-byte { value & 0xFF }
+  if high != high-byte then
+    :breakpoint error-message
+    loop again  # Give breakpoint something to stop on and don't show "pass"
+  if mid1 != mid1-byte then
+    :breakpoint error-message
+    loop again
+  if mid2 != mid2-byte then
+    :breakpoint error-message
+    loop again
+  if low != low-byte then
+    :breakpoint error-message
+    loop again
+}
+
+:macro test.expect-memory-to-match labelA labelB length error-message {
+  v1 := 0
+  loop
+    while v1 != length
+    i := labelA
+    i += v1
+    load v0
+    i := labelB
+    i += v1
+    vF := v0
+    load v0
+    if v0 != vF then
+      :breakpoint error-message
+      loop again
+    v1 += 1
+  again
+}
+
+:macro test.passed {
+  v0 := 24
+  v1 := 8
+  i := tests-passed-sprite
+  sprite v0 v1 0
+
+  i := 0x200
+  v0 := 0x42
+  save v0
+  loop again
+
+: tests-passed-sprite
+  :include "../../pass.png" 16x16 no-labels
+}

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/timendus/chipcode/octopus2/src/assembler"
+	"github.com/timendus/chipcode/octopus2/src/docparser"
 	"github.com/timendus/chipcode/octopus2/src/emulator"
 	"github.com/timendus/chipcode/octopus2/src/preprocessor"
 )
@@ -20,6 +21,7 @@ var (
 	INPUT_FILE     = flag.String("input", "", "The path of the input file")
 	OUTPUT_FILE    = flag.String("output", "STDOUT", "The path of the output file")
 	EMULATE        = flag.String("run", "disabled", "Run the given code or binary in the embedded emulator instead")
+	TEMPLATE       = flag.String("template", "", "The path to a documentation generation template")
 	USING_COLOR    = runtime.GOOS != "windows" // Disable ANSI colors by default on Windows
 )
 
@@ -50,6 +52,7 @@ func main() {
 	do_preprocessing := input_ext == ".8o"
 	build_binary := input_ext == ".8o" && (output_ext == ".ch8" || *EMULATE != "disabled")
 	read_binary := input_ext == ".ch8" && *EMULATE != "disabled"
+	build_docs := input_ext == ".8o" && (*TEMPLATE != "" || output_ext == ".md")
 
 	// Do we have something to do?
 	if !(do_preprocessing || build_binary || read_binary) {
@@ -85,7 +88,29 @@ func main() {
 		}
 	}
 
-	if do_preprocessing || build_binary {
+	if build_docs {
+		if output_ext == ".md" {
+			var err error
+			preprocessed, err = docparser.ParseToMarkdown(preprocessed, *INPUT_FILE)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, bad("Could not build the documentation due to the following error:"), err)
+				os.Exit(1)
+			}
+		} else {
+			template, err := os.ReadFile(*TEMPLATE)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, bad("Could not read the template file:"), err)
+				os.Exit(1)
+			}
+			preprocessed, err = docparser.Parse(preprocessed, *INPUT_FILE, string(template))
+			if err != nil {
+				fmt.Fprintln(os.Stderr, bad("Could not build the documentation due to the following error:"), err)
+				os.Exit(1)
+			}
+		}
+	}
+
+	if do_preprocessing || build_binary || build_docs {
 		fmt.Fprintf(os.Stderr, good("Finished processing in %s\n"), time.Since(startTime))
 	}
 

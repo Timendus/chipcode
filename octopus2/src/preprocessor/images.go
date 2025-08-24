@@ -20,21 +20,21 @@ import (
 
 func loadImageFile(filename string, modifiers string) (string, error) {
 	if _, err := os.Stat(filename); err != nil {
-		return "", fmt.Errorf("Requested file '%s' not found", filename)
+		return "", fmt.Errorf("requested file '%s' not found", filename)
 	}
 	file, err := os.Open(filename)
 	if err != nil {
-		return "", fmt.Errorf("Error reading file '%s': %s", filename, err.Error())
+		return "", fmt.Errorf("error reading file '%s': %s", filename, err.Error())
 	}
 	defer file.Close()
 
 	img, _, err := image.Decode(file)
 	if err != nil {
-		return "", fmt.Errorf("Error decoding image '%s': %s", filename, err.Error())
+		return "", fmt.Errorf("error decoding image '%s': %s", filename, err.Error())
 	}
 	bounds := img.Bounds()
 	if bounds.Size().X%8 != 0 {
-		return "", fmt.Errorf("Image width of '%s' is not a multiple of 8 pixels", filename)
+		return "", fmt.Errorf("image width of '%s' is not a multiple of 8 pixels", filename)
 	}
 	rgbaImg, ok := img.(*image.RGBA)
 	if !ok {
@@ -106,7 +106,7 @@ func parseModifiers(modifiers string, width int, height int) mods {
 	// Is a specific sprite size requested?
 	parts := strings.Split(modifiers, " ")
 	for _, part := range parts {
-		if strings.Index(part, "x") != -1 {
+		if strings.Contains(part, "x") {
 			split := strings.Split(part, "x")
 			setWidth, err1 := strconv.Atoi(split[0])
 			setHeight, err2 := strconv.Atoi(split[1])
@@ -121,7 +121,7 @@ func parseModifiers(modifiers string, width int, height int) mods {
 
 	// Are we overriding the color palette?
 	palette := []color{{0, 0, 0}, {255, 255, 255}}
-	if strings.Index(modifiers, "[") != -1 {
+	if strings.Contains(modifiers, "[") {
 		start := strings.Index(modifiers, "[")
 		end := strings.Index(modifiers, "]")
 		paletteText := modifiers[start+1 : end]
@@ -136,9 +136,9 @@ func parseModifiers(modifiers string, width int, height int) mods {
 		width:    width,
 		height:   height,
 		palette:  palette,
-		labels:   strings.Index(modifiers, "no-labels") == -1,
-		debug:    strings.Index(modifiers, "debug") != -1 || strings.Index(modifiers, "debugging") != -1 || strings.Index(modifiers, "verbose") != -1,
-		dithered: strings.Index(modifiers, "dithered") != -1 || strings.Index(modifiers, "dither") != -1 || strings.Index(modifiers, "dithering") != -1,
+		labels:   !strings.Contains(modifiers, "no-labels"),
+		debug:    strings.Contains(modifiers, "debug") || strings.Contains(modifiers, "debugging") || strings.Contains(modifiers, "verbose"),
+		dithered: strings.Contains(modifiers, "dithered") || strings.Contains(modifiers, "dither") || strings.Contains(modifiers, "dithering"),
 	}
 }
 
@@ -178,7 +178,7 @@ func imageToPlanes(image *image.RGBA, label string, mods mods) planes {
 	if image.Bounds().Size().X%8 != 0 {
 		panic("Image width must be a multiple of 8 pixels")
 	}
-	if mods.palette == nil || len(mods.palette) == 0 {
+	if len(mods.palette) == 0 {
 		panic("Must have a palette")
 	}
 

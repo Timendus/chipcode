@@ -2,11 +2,14 @@ package preprocessor
 
 import (
 	"fmt"
+	"io/fs"
 
 	"os"
 	"path"
 	"strconv"
 	"strings"
+
+	library "github.com/timendus/chipcode/octopus2/library"
 )
 
 const (
@@ -29,11 +32,23 @@ func Octopussify(filename string, options map[string]bool) (string, []error) {
 
 func loadFile(filename string) (string, error) {
 	if _, err := os.Stat(filename); err != nil {
-		return "", fmt.Errorf("Requested file '%s' not found", filename)
+		return "", fmt.Errorf("requested file '%s' not found", filename)
 	}
 	file, err := os.ReadFile(filename)
 	if err != nil {
-		return "", fmt.Errorf("Error reading file '%s': %s", filename, err.Error())
+		return "", fmt.Errorf("error reading file '%s': %s", filename, err.Error())
+	}
+	return string(file), nil
+}
+
+func loadStdLibFile(filename string) (string, error) {
+	libpath := path.Join("lib", strings.TrimPrefix(filename, "std/")+".8o")
+	if _, err := fs.Stat(library.FS, libpath); err != nil {
+		return "", fmt.Errorf("requested standard library '%s' not found: %v", filename, err)
+	}
+	file, err := fs.ReadFile(library.FS, libpath)
+	if err != nil {
+		return "", fmt.Errorf("could not load standard library file '%s': %v", filename, err)
 	}
 	return string(file), nil
 }
@@ -122,12 +137,12 @@ func octopussify(contents, filename string, options map[string]bool) (string, []
 			start := strings.Index(params, `"`)
 			end := strings.LastIndex(params, `"`)
 			if start == -1 || end == -1 || start == end {
-				errors = append(errors, fmt.Errorf("Missing quotes in include statement in '%s' at line %d: '%s'", filename, lineNr+1, line))
+				errors = append(errors, fmt.Errorf("missing quotes in include statement in '%s' at line %d: '%s'", filename, lineNr+1, line))
 				continue
 			}
 			subfilename := params[start+1 : end]
 			if len(subfilename) < 1 {
-				errors = append(errors, fmt.Errorf("Invalid filename in include in '%s' at line %d: '%s'", filename, lineNr+1, line))
+				errors = append(errors, fmt.Errorf("invalid filename in include in '%s' at line %d: '%s'", filename, lineNr+1, line))
 				continue
 			}
 			var file string
@@ -145,7 +160,11 @@ func octopussify(contents, filename string, options map[string]bool) (string, []
 					errs = []error{err}
 				}
 			default:
-				file, err = loadFile(path.Join(path.Dir(filename), subfilename))
+				if strings.HasPrefix(subfilename, "std/") {
+					file, err = loadStdLibFile(subfilename)
+				} else {
+					file, err = loadFile(path.Join(path.Dir(filename), subfilename))
+				}
 				if err != nil {
 					errs = []error{err}
 				} else {
@@ -168,12 +187,13 @@ func octopussify(contents, filename string, options map[string]bool) (string, []
 
 		// Keep track of segments for includes
 		if match, param := find(line, ":segment"); match {
-			if param == "code" {
+			switch param {
+			case "code":
 				current = CODE
-			} else if param == "data" {
+			case "data":
 				current = DATA
-			} else {
-				errors = append(errors, fmt.Errorf("Unknown segment in '%s' at line %d: %s", filename, lineNr+1, param))
+			default:
+				errors = append(errors, fmt.Errorf("unknown segment in '%s' at line %d: %s", filename, lineNr+1, param))
 			}
 		}
 
@@ -215,11 +235,11 @@ func find(line string, pattern string) (bool, string) {
 
 func loadBinaryFile(filename string) (string, error) {
 	if _, err := os.Stat(filename); err != nil {
-		return "", fmt.Errorf("Requested file '%s' not found", filename)
+		return "", fmt.Errorf("requested file '%s' not found", filename)
 	}
 	file, err := os.ReadFile(filename)
 	if err != nil {
-		return "", fmt.Errorf("Error reading file '%s': %s", filename, err.Error())
+		return "", fmt.Errorf("error reading file '%s': %s", filename, err.Error())
 	}
 	return dataToOctoText(file), nil
 }
