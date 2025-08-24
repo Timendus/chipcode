@@ -57,6 +57,10 @@
   v1 := 8
   i := tests-passed-sprite
   sprite v0 v1 0
+
+  i := 0x200
+  v0 := 0x42
+  save v0
   loop again
 
 : tests-passed-sprite
