@@ -8,11 +8,11 @@
 
 {{range .Sections}}{{if .Name}}- {{ .Name }}
 {{end}}{{if .Consts}}  - Constants
-{{range .Consts}}    - [{{.Name}}](#{{.Name}})
+{{range .Consts}}    - [{{.Name}}](#{{replaceAll .Name "." "" | toLower }})
 {{end}}{{end}}{{if .Macros}}  - Macros
-{{range .Macros}}    - [{{.Name}}](#{{.Name}})
+{{range .Macros}}    - [{{.Name}}](#{{replaceAll .Name "." "" | toLower }})
 {{end}}{{end}}{{if .Routines}}  - Routines
-{{range .Routines}}    - [{{.Name}}](#{{.Name}}){{end}}{{end}}{{end}}
+{{range .Routines}}    - [{{.Name}}](#{{replaceAll .Name "." "" | toLower }}){{end}}{{end}}{{end}}
 
 {{range .Sections -}}
 
