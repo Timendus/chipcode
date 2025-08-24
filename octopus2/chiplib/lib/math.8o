@@ -1,6 +1,28 @@
+# Math library
+#
+# A set of macros to generate mathematical routines for addition, subtraction,
+# multiplication and division. Supports 8, 16, 24 and 32 bits (for some
+# operations for now; it's not 100% complete yet).
+#
+# Each macro accepts a list of registers as parameters, which the routine is
+# allowed to use. As inputs, as outputs or as temporary registers. Usage
+# example using [mul-8-8](#mul-8-8):
+#
+# ```
+# # Multiplies v0 with v1, result in [v2, v3]. Destroys v0, v1, v4, vF.
+# : multiply
+#     mul-8-8 v0 v1 v2 v3 v4
+#     return
+# ```
+
+### Division ###
+
+###
 # Divide 16-bit value by 8-bit value, resulting in 8-bit result
-# numerator-low = [numerator-high, numerator-low] / divisor
-# remainder = [numerator-high, numerator-low] % divisor
+#
+#  numerator-low = [numerator-high, numerator-low] / divisor
+#  remainder = [numerator-high, numerator-low] % divisor
+#
 # Destroys: numerator-high, temp1, temp2, vF
 :macro div-16-8 numerator-high numerator-low divisor remainder temp1 temp2 {
   # Aliases for easy debugging:
@@ -33,9 +55,12 @@
   numerator-low |= flag
 }
 
+###
 # Divide 8-bit value by 8-bit value, resulting in 8-bit result
-# numerator = numerator / divisor
-# remainder = numerator % divisor
+#
+#  numerator = numerator / divisor
+#  remainder = numerator % divisor
+#
 # Destroys: temp1, temp2, vF
 :macro div-8-8 numerator divisor remainder temp1 temp2 {
   # Aliases for easy debugging:
@@ -65,8 +90,13 @@
   numerator |= flag
 }
 
+### Multiplication ###
+
+###
 # Multiply two 8-bit values, resulting in 16-bit result
-# [result-high, result-low] = multiplicand * multiplier
+#
+#  [result-high, result-low] = multiplicand * multiplier
+#
 # Destroys: multiplicand, multiplier, temp, vF
 :macro mul-8-8 multiplicand multiplier result-high result-low temp {
   # Aliases for easy debugging:
@@ -138,17 +168,24 @@
 #   end
 # }
 
+### Addition ###
 
+###
 # Add an 8-bit and a 16-bit value, resulting in 16-bit result + vF = 1 if overflow
-# [value1-high, value1-low] += value2
+#
+#  [value1-high, value1-low] += value2
+#
 # Destroys: value1-high, value1-low, vF
 :macro add-16-8 value1-high value1-low value2 {
   value1-low += value2
   value1-high += vF
 }
 
+###
 # Add two 16-bit values, resulting in 16-bit result + overflow = 1 if overflow
-# [value1-high, value1-low] += [value2-high, value2-low]
+#
+#  [value1-high, value1-low] += [value2-high, value2-low]
+#
 # Destroys: value1-high, value1-low, vF
 :macro add-16-16 value1-high value1-low value2-high value2-low overflow {
   value1-low += value2-low
@@ -158,8 +195,11 @@
   overflow |= vF
 }
 
+###
 # Add an 8-bit and a 32-bit value, resulting in 32-bit result + vF = 1 if overflow
-# [value1-high, value1-mid1, value1-mid2, value1-low] += value2
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] += value2
+#
 # Destroys: value1-high, value1-mid1, value1-mid2, value1-low, vF
 :macro add-32-8 value1-high value1-mid1 value1-mid2 value1-low value2 {
   value1-low += value2
@@ -168,16 +208,22 @@
   value1-high += vF
 }
 
+###
 # Add a 16-bit and a 32-bit value, resulting in 32-bit result + overflow = 1 if overflow
-# [value1-high, value1-mid1, value1-mid2, value1-low] += value2
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] += value2
+#
 # Destroys: value1-high, value1-mid1, value1-mid2, value1-low, overflow, vF
 :macro add-32-16 value1-high value1-mid1 value1-mid2 value1-low value2-high value2-low overflow {
   value1-low += value2-low    value1-mid2 += vF  value1-mid1 += vF  value1-high += vF  overflow := vF
   value1-mid2 += value2-high  value1-mid1 += vF  value1-high += vF  overflow |= vF
 }
 
+###
 # Add two 32-bit values, resulting in 32-bit result + overflow = 1 if overflow
-# [value1-high, value1-mid1, value1-mid2, value1-low] += [value2-high, value2-mid1, value2-mid2, value2-low]
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] += [value2-high, value2-mid1, value2-mid2, value2-low]
+#
 # Destroys: value1-high, value1-mid1, value1-mid2, value1-low, overflow, vF
 :macro add-32-32 value1-high value1-mid1 value1-mid2 value1-low value2-high value2-mid1 value2-mid2 value2-low overflow {
   value1-low += value2-low    value1-mid2 += vF  value1-mid1 += vF  value1-high += vF  overflow := vF
@@ -186,9 +232,31 @@
   value1-high += value2-high  overflow |= vF
 }
 
+###
+# Add 16-bit value to index register
+#
+#  i += [value-high, value-low]
+#
+# Destroys: value-high, vF
+:macro add-16-to-i value-high value-low {
+  loop
+    while value-high != 0
+    # Do i += 0x100 in two parts
+    vF := 0x80
+    i += vF
+    i += vF
+    value-high -= 1
+  again
+  i += value-low
+}
 
+### Subtraction ###
+
+###
 # Subtract a 16-bit value from an 8-bit value, resulting in 8-bit result + carry = 0 if carry
-# value1 -= [value2-high, value2-low]
+#
+#  value1 -= [value2-high, value2-low]
+#
 # Destroys: value1, vF
 :macro sub-8-16 value1 value2-high value2-low carry {
   value1 -= value2-low
@@ -196,8 +264,11 @@
   if value2-high != 0 then carry := 0
 }
 
+###
 # Subtract a 32-bit value from an 8-bit value, resulting in 8-bit result + carry = 0 if carry
-# value1 -= [value2-high, value2-mid1, value2-mid2, value2-low]
+#
+#  value1 -= [value2-high, value2-mid1, value2-mid2, value2-low]
+#
 # Destroys: value1, vF
 :macro sub-8-32 value1 value2-high value2-mid1 value2-mid2 value2-low carry {
   value1 -= value2-low
@@ -207,8 +278,11 @@
   if value2-high != 0 then carry := 0
 }
 
+###
 # Subtract an 8-bit value from a 16-bit value, resulting in 16-bit result + vF = 0 if carry
-# [value1-high, value1-low] -= value2
+#
+#  [value1-high, value1-low] -= value2
+#
 # Destroys: value1-high, value1-low, vF
 :macro sub-16-8 value1-high value1-low value2 {
   value1-low -= value2
@@ -218,8 +292,11 @@
   end
 }
 
+###
 # Subtract two 16-bit values, resulting in 16-bit result + carry = 0 if carry
-# [value1-high, value1-low] -= [value2-high, value2-low]
+#
+#  [value1-high, value1-low] -= [value2-high, value2-low]
+#
 # Destroys: value1-high, value1-low, carry, vF
 :macro sub-16-16 value1-high value1-low value2-high value2-low carry {
   carry := 1
@@ -233,8 +310,11 @@
   carry &= vF
 }
 
+###
 # Subtract a 32-bit value from a 16-bit value, resulting in 16-bit result + carry = 0 if carry
-# [value1-high, value1-low] -= [value2-high, value2-mid1, value2-mid2, value2-low]
+#
+#  [value1-high, value1-low] -= [value2-high, value2-mid1, value2-mid2, value2-low]
+#
 # Destroys: value1-high, value1-low, carry, vF
 :macro sub-16-32 value1-high value1-low value2-high value2-mid1 value2-mid2 value2-low carry {
   carry := 1
@@ -250,8 +330,11 @@
   if value2-high != 0 then carry := 0
 }
 
+###
 # Subtract an 8-bit value from a 32-bit value, resulting in 32-bit result + vF = 0 if carry
-# [value1-high, value1-mid1, value1-mid2, value1-low] -= value2
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] -= value2
+#
 # Destroys: value1-high, value1-mid1, value1-mid2, value1-low, vF
 :macro sub-32-8 value1-high value1-mid1 value1-mid2 value1-low value2 {
   value1-low -= value2
@@ -269,8 +352,11 @@
   end
 }
 
+###
 # Subtract a 16-bit value from a 32-bit value, resulting in 32-bit result + carry = 0 if carry
-# [value1-high, value1-mid1, value1-mid2, value1-low] -= [value2-high, value2-low]
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] -= [value2-high, value2-low]
+#
 # Destroys: value1-high, value1-mid1, value1-mid2, value1-low, carry, vF
 :macro sub-32-16 value1-high value1-mid1 value1-mid2 value1-low value2-high value2-low carry {
   carry := 1
@@ -300,8 +386,11 @@
   end
 }
 
+###
 # Subtract a 32-bit value from a 32-bit value, resulting in 32-bit result + carry = 0 if carry
-# [value1-high, value1-mid1, value1-mid2, value1-low] -= [value2-high, value2-mid1, value2-mid2, value2-low]
+#
+#  [value1-high, value1-mid1, value1-mid2, value1-low] -= [value2-high, value2-mid1, value2-mid2, value2-low]
+#
 # Destroys: value1-high, value1-mid1, value1-mid2, value1-low, carry, vF
 :macro sub-32-32 value1-high value1-mid1 value1-mid2 value1-low value2-high value2-mid1 value2-mid2 value2-low carry {
   carry := 1
@@ -337,20 +426,4 @@
   end
   value1-high -= value2-high
   carry &= vF
-}
-
-
-# Add 16-bit value to index register
-# i += [value-high, value-low]
-# Destroys: value-high, vF
-:macro add-16-to-i value-high value-low {
-  loop
-    while value-high != 0
-    # Do i += 0x100 in two parts
-    vF := 0x80
-    i += vF
-    i += vF
-    value-high -= 1
-  again
-  i += value-low
 }
