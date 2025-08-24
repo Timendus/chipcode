@@ -239,17 +239,14 @@ func findRoutines(source []string, start, end int, docBlocks []DocBlock) []Routi
 }
 
 func findRelatedDocBlock(source []string, line int, docBlocks []DocBlock) *DocBlock {
-	var prevBlock DocBlock
 	for _, block := range docBlocks {
+		endPos := block.Line + block.Lines
+		if endPos == line || (endPos+1 == line && strings.TrimSpace(source[endPos]) == "") {
+			return &block
+		}
 		if block.Line > line {
-			// We passed the requested line, is the last one relevant?
-			endPos := prevBlock.Line + prevBlock.Lines
-			if endPos == line || (endPos+1 == line && strings.TrimSpace(source[endPos]) == "") {
-				return &prevBlock
-			}
 			return nil
 		}
-		prevBlock = block
 	}
 	return nil
 }
