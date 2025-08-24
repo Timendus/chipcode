@@ -6,7 +6,7 @@ operations for now; it's not 100% complete yet).
 
 Each macro accepts a list of registers as parameters, which the routine is
 allowed to use. As inputs, as outputs or as temporary registers. Usage
-example using [mul-8-8](#mul-8-8):
+example using [mul-8-8](#mathmul-8-8):
 
 ```
 :include "std/math"
@@ -21,29 +21,29 @@ example using [mul-8-8](#mul-8-8):
 
 - Division
   - Macros
-    - [math.div-16-8](#math.div-16-8)
-    - [math.div-8-8](#math.div-8-8)
+    - [math.div-16-8](#mathdiv-16-8)
+    - [math.div-8-8](#mathdiv-8-8)
 - Multiplication
   - Macros
-    - [math.mul-8-8](#math.mul-8-8)
+    - [math.mul-8-8](#mathmul-8-8)
 - Addition
   - Macros
-    - [math.add-16-8](#math.add-16-8)
-    - [math.add-16-16](#math.add-16-16)
-    - [math.add-32-8](#math.add-32-8)
-    - [math.add-32-16](#math.add-32-16)
-    - [math.add-32-32](#math.add-32-32)
-    - [math.add-16-to-i](#math.add-16-to-i)
+    - [math.add-16-8](#mathadd-16-8)
+    - [math.add-16-16](#mathadd-16-16)
+    - [math.add-32-8](#mathadd-32-8)
+    - [math.add-32-16](#mathadd-32-16)
+    - [math.add-32-32](#mathadd-32-32)
+    - [math.add-16-to-i](#mathadd-16-to-i)
 - Subtraction
   - Macros
-    - [math.sub-8-16](#math.sub-8-16)
-    - [math.sub-8-32](#math.sub-8-32)
-    - [math.sub-16-8](#math.sub-16-8)
-    - [math.sub-16-16](#math.sub-16-16)
-    - [math.sub-16-32](#math.sub-16-32)
-    - [math.sub-32-8](#math.sub-32-8)
-    - [math.sub-32-16](#math.sub-32-16)
-    - [math.sub-32-32](#math.sub-32-32)
+    - [math.sub-8-16](#mathsub-8-16)
+    - [math.sub-8-32](#mathsub-8-32)
+    - [math.sub-16-8](#mathsub-16-8)
+    - [math.sub-16-16](#mathsub-16-16)
+    - [math.sub-16-32](#mathsub-16-32)
+    - [math.sub-32-8](#mathsub-32-8)
+    - [math.sub-32-16](#mathsub-32-16)
+    - [math.sub-32-32](#mathsub-32-32)
 
 
 # Division
