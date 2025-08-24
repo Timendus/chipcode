@@ -48,13 +48,13 @@ jobs:
           cache-dependency-path: octopus2/go.sum
       - name: Run Go unit tests
         working-directory: ./octopus2
-        run: make test
-      - name: Build binaries
-        working-directory: ./octopus2
-        run: make linux
+        run: make go-tests
       - name: Run regression tests
         working-directory: ./octopus2
         run: make regression-test
+      - name: Run standard library tests
+        working-directory: ./octopus2
+        run: make stdlib-tests
 
   octopus2-build-linux-windows:
     runs-on: ubuntu-latest
