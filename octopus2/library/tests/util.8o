@@ -2,29 +2,29 @@
 :include "test-helper.8o"
 
 : main
-  # Test set-16
-  set-16 v0 v1 23536
-  expect-16 v0 v1 23536 "Expected set-16 to properly set v0 and v1"
-  expect-8 v0 0x5B "Expected set-16 to properly set v0"
-  expect-8 v1 0xF0 "Expected set-16 to properly set v1"
+  # Test util.set-16
+  util.set-16 v0 v1 23536
+  expect-16 v0 v1 23536 "Expected util.set-16 to properly set v0 and v1"
+  expect-8 v0 0x5B "Expected util.set-16 to properly set v0"
+  expect-8 v1 0xF0 "Expected util.set-16 to properly set v1"
 
-  set-16 v4 v5 23536
-  expect-16 v4 v5 23536 "Expected set-16 to properly set v4 and v5"
-  expect-8 v4 0x5B "Expected set-16 to properly set v4"
-  expect-8 v5 0xF0 "Expected set-16 to properly set v5"
+  util.set-16 v4 v5 23536
+  expect-16 v4 v5 23536 "Expected util.set-16 to properly set v4 and v5"
+  expect-8 v4 0x5B "Expected util.set-16 to properly set v4"
+  expect-8 v5 0xF0 "Expected util.set-16 to properly set v5"
 
-  # Test set-32
-  set-32 v0 v1 v2 v3 0x12345678
-  expect-32 v0 v1 v2 v3 0x12345678 "Expected set-32 to properly set v0 - v3"
-  expect-8 v0 0x12 "Expected set-32 to properly set v0"
-  expect-8 v1 0x34 "Expected set-32 to properly set v1"
-  expect-8 v2 0x56 "Expected set-32 to properly set v2"
-  expect-8 v3 0x78 "Expected set-32 to properly set v3"
+  # Test util.set-32
+  util.set-32 v0 v1 v2 v3 0x12345678
+  expect-32 v0 v1 v2 v3 0x12345678 "Expected util.set-32 to properly set v0 - v3"
+  expect-8 v0 0x12 "Expected util.set-32 to properly set v0"
+  expect-8 v1 0x34 "Expected util.set-32 to properly set v1"
+  expect-8 v2 0x56 "Expected util.set-32 to properly set v2"
+  expect-8 v3 0x78 "Expected util.set-32 to properly set v3"
 
   # Test sleep
   vF := 20
   delay := vF
-  sleep
+  util.sleep
   vF := delay
   expect-8 vF 0 "Expected sleep to wait for the delay timer to run out"
 
