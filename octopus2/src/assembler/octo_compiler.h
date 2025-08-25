@@ -658,12 +658,12 @@ double octo_calc_expr(octo_program*p,char*name){
   if(octo_match(p,"+"     )) return r+octo_calc_expr(p,name);
   if(octo_match(p,"*"     )) return r*octo_calc_expr(p,name);
   if(octo_match(p,"/"     )) return r/octo_calc_expr(p,name);
-  if(octo_match(p,"%"     )) return ((int)r)%((int)octo_calc_expr(p,name));
-  if(octo_match(p,"&"     )) return ((int)r)&((int)octo_calc_expr(p,name));
-  if(octo_match(p,"|"     )) return ((int)r)|((int)octo_calc_expr(p,name));
-  if(octo_match(p,"^"     )) return ((int)r)^((int)octo_calc_expr(p,name));
-  if(octo_match(p,"<<"    )) return ((int)r)<<((int)octo_calc_expr(p,name));
-  if(octo_match(p,">>"    )) return ((int)r)>>((int)octo_calc_expr(p,name));
+  if(octo_match(p,"%"     )) return ((uint)r)%((uint)octo_calc_expr(p,name));
+  if(octo_match(p,"&"     )) return ((uint)r)&((uint)octo_calc_expr(p,name));
+  if(octo_match(p,"|"     )) return ((uint)r)|((uint)octo_calc_expr(p,name));
+  if(octo_match(p,"^"     )) return ((uint)r)^((uint)octo_calc_expr(p,name));
+  if(octo_match(p,"<<"    )) return ((uint)r)<<((uint)octo_calc_expr(p,name));
+  if(octo_match(p,">>"    )) return ((uint)r)>>((uint)octo_calc_expr(p,name));
   if(octo_match(p,"pow"   )) return pow(r,octo_calc_expr(p,name));
   if(octo_match(p,"min"   )) return octo_min(r,octo_calc_expr(p,name));
   if(octo_match(p,"max"   )) return octo_max(r,octo_calc_expr(p,name));
