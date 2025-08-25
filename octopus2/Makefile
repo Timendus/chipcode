@@ -48,7 +48,7 @@ $(LIB_RESULTS):
 	@mkdir -p "$@"
 
 # One stamp per input file; only created if it passes
-$(LIB_RESULTS)/%.ok: $(LIB_TESTS)/%.8o | $(LIB_RESULTS)
+$(LIB_RESULTS)/%.ok: $(LIB_TESTS)/%.8o $(LIB_DIR)/%.8o | $(LIB_RESULTS)
 	@out=`"$(OCTOPUS)" -i "$<" -run "mode: xochip, 1000000, load: 0x200: 1" 2> /dev/null`; \
 	if [ "$$out" == "0200: 42" ]; then \
 	  printf 'PASS %s -> %s\n' "$<" "$$out"; \
