@@ -6,7 +6,7 @@
 #
 # Each macro accepts a list of registers as parameters, which the routine is
 # allowed to use. As inputs, as outputs or as temporary registers. Usage
-# example using [mul-8-8](#mul-8-8):
+# example using [mul-8-8](#mathmul-8-8):
 #
 # ```
 # :include "std/math"
