@@ -1,7 +1,7 @@
 :macro test.expect-8 register value error-message {
   if register != value then
     :breakpoint error-message
-    loop again  # Give breakpoint something to stop on and don't show "pass"
+    jump test-failed
 }
 
 :macro test.expect-16 register-high register-low value error-message {
@@ -9,10 +9,10 @@
   :calc low-byte { value & 0xFF }
   if register-high != high-byte then
     :breakpoint error-message
-    loop again  # Give breakpoint something to stop on and don't show "pass"
+    jump test-failed
   if register-low != low-byte then
     :breakpoint error-message
-    loop again  # Same.
+    jump test-failed
 }
 
 :macro test.expect-32 high mid1 mid2 low value error-message {
@@ -22,16 +22,16 @@
   :calc low-byte { value & 0xFF }
   if high != high-byte then
     :breakpoint error-message
-    loop again  # Give breakpoint something to stop on and don't show "pass"
+    jump test-failed
   if mid1 != mid1-byte then
     :breakpoint error-message
-    loop again
+    jump test-failed
   if mid2 != mid2-byte then
     :breakpoint error-message
-    loop again
+    jump test-failed
   if low != low-byte then
     :breakpoint error-message
-    loop again
+    jump test-failed
 }
 
 :macro test.expect-memory-to-match labelA labelB length error-message {
@@ -47,7 +47,7 @@
     load v0
     if v0 != vF then
       :breakpoint error-message
-      loop again
+      jump test-failed
     v1 += 1
   again
 }
@@ -58,11 +58,19 @@
   i := tests-passed-sprite
   sprite v0 v1 0
 
-  i := 0x200
+  # Flag as passed
   v0 := 0x42
+  i := 0x200
+  save v0
+  loop again
+}
+
+: test-failed
+  # Flag as failed
+  v0 := 0
+  i := 0x200
   save v0
   loop again
 
 : tests-passed-sprite
   :include "../../pass.png" 16x16 no-labels
-}
