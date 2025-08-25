@@ -9,7 +9,7 @@ import (
 	"github.com/timendus/silicon8/src/silicon8"
 )
 
-func Emulate(rom []byte, sequence string) error {
+func Emulate(rom []byte, breakpoints map[int]string, sequence string) error {
 	// We create the emulator here, but we initialize it lazily in the steps
 	// below, so we can select the right mode and the thing doesn't complain
 	// about the ROM size
@@ -28,7 +28,7 @@ func Emulate(rom []byte, sequence string) error {
 			// Ignore empty steps
 
 		case step == "interactive":
-			err := emu.init()
+			err := emu.init(breakpoints)
 			if err != nil {
 				return err
 			}
@@ -38,14 +38,14 @@ func Emulate(rom []byte, sequence string) error {
 			}
 
 		case step == "display":
-			err := emu.init()
+			err := emu.init(breakpoints)
 			if err != nil {
 				return err
 			}
 			fmt.Println(emu.displayToString())
 
 		case isNumeric(step):
-			err := emu.init()
+			err := emu.init(breakpoints)
 			if err != nil {
 				return err
 			}
@@ -55,11 +55,19 @@ func Emulate(rom []byte, sequence string) error {
 			}
 			frames := cycles / emu.cpf
 			for i := 0; i < frames; i++ {
-				emu.cpu.ClockTick()
+				breakpoint := emu.cpu.ClockTick()
+				if breakpoint != nil {
+					emu.cpu.DumpStatus()
+					return breakpoint
+				}
 			}
 			leftOver := cycles - frames*emu.cpf
 			emu.cpu.SetCyclesPerFrame(leftOver)
-			emu.cpu.ClockTick()
+			breakpoint := emu.cpu.ClockTick()
+			if breakpoint != nil {
+				emu.cpu.DumpStatus()
+				return breakpoint
+			}
 			emu.cpu.SetCyclesPerFrame(emu.cpf)
 
 		case isStatement(step):
@@ -75,7 +83,7 @@ func Emulate(rom []byte, sequence string) error {
 
 			// Lazily initialize the emulator unless we're changing settings
 			if !(key == "cpf" || key == "mode") {
-				err := emu.init()
+				err := emu.init(breakpoints)
 				if err != nil {
 					return err
 				}
