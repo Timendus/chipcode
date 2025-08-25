@@ -41,7 +41,7 @@ func newEmulator() emulator {
 	}
 }
 
-func (emu *emulator) init() error {
+func (emu *emulator) init(breakpoints map[int]string) error {
 	if emu.initialized {
 		return nil
 	}
@@ -49,6 +49,7 @@ func (emu *emulator) init() error {
 	emu.cpu.RegisterRandomGenerator(emu.randomByte)
 	emu.cpu.RegisterDisplayCallback(emu.render)
 	emu.cpu.Reset(emu.mode)
+	emu.cpu.SetBreakpoints(breakpoints)
 	emu.cpu.SetCyclesPerFrame(emu.cpf)
 	err := emu.loadROM()
 	if err != nil {

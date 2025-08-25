@@ -15,7 +15,7 @@ import (
 	"unsafe"
 )
 
-func Assemble(input string) ([]byte, error) {
+func Assemble(input string) ([]byte, map[int]string, error) {
 	C_input := C.CString(input)
 	defer C.free(unsafe.Pointer(C_input))
 
@@ -23,7 +23,7 @@ func Assemble(input string) ([]byte, error) {
 	defer C.free(unsafe.Pointer(program))
 
 	if program.is_error != 0 {
-		return nil, fmt.Errorf(
+		return nil, nil, fmt.Errorf(
 			"c-octo encountered an error on line %v, column %v: %s",
 			program.error_line+1,
 			program.error_pos+1,
@@ -31,6 +31,14 @@ func Assemble(input string) ([]byte, error) {
 		)
 	}
 
+	breakpoints := make(map[int]string, 0)
+	for i, str := range program.breakpoints {
+		text := C.GoString(str)
+		if text != "" {
+			breakpoints[i] = text
+		}
+	}
+
 	rom := C.GoBytes(unsafe.Pointer(&program.rom[0]), program.length)
-	return rom[0x200:], nil
+	return rom[0x200:], breakpoints, nil
 }

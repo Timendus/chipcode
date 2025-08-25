@@ -77,10 +77,11 @@ func main() {
 
 	// Build a binary from it if we're transforming a .8o file into a .ch8 file or we're emulating the thing
 	var binary []byte
+	var breakpoints map[int]string
 	if build_binary {
 		fmt.Fprintf(os.Stderr, "Assembling '%s'...\n", *INPUT_FILE)
 		var err error
-		binary, err = assembler.Assemble(preprocessed)
+		binary, breakpoints, err = assembler.Assemble(preprocessed)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, bad("Could not complete assembly due to the following error:"))
 			fmt.Fprintln(os.Stderr, err)
@@ -140,7 +141,7 @@ func main() {
 
 	if *EMULATE != "disabled" {
 		fmt.Fprintf(os.Stderr, "Running emulation sequence...\n")
-		err := emulator.Emulate(binary, *EMULATE)
+		err := emulator.Emulate(binary, breakpoints, *EMULATE)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Error:", err)
 			os.Exit(1)
