@@ -35,6 +35,7 @@ type Macro struct {
 	Name        string
 	Parameters  []string
 	Description string
+	Destroys    []string
 }
 
 type Routine struct {
@@ -197,18 +198,24 @@ func findMacros(source []string, start, end int, docBlocks []DocBlock) []Macro {
 		if parts[0] == ":macro" {
 			block := findRelatedDocBlock(source, i+1, docBlocks)
 			if block != nil && block.IsPrimary {
-				parameters := make([]string, 0)
-				for _, part := range parts[2:] {
-					if part != "{" {
-						parameters = append(parameters, part)
-					}
-				}
-				result = append(result, Macro{
+				macro := Macro{
 					Line:        i + 1,
 					Name:        parts[1],
 					Description: toDescription(block.Content),
-					Parameters:  parameters,
-				})
+					Parameters:  make([]string, 0),
+				}
+				for _, part := range parts[2:] {
+					if part != "{" {
+						macro.Parameters = append(macro.Parameters, part)
+					}
+				}
+				for j := i + 1; j < end; j++ {
+					if strings.TrimSpace(source[j]) == "}" {
+						macro.Destroys = findTargetRegisters(source[i+1 : j])
+						break
+					}
+				}
+				result = append(result, macro)
 			}
 		}
 	}

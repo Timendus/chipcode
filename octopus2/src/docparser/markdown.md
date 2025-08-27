@@ -48,6 +48,10 @@ _{{ $path }}:{{ .Line }}_
 #### Parameters
 {{range .Parameters}}- {{ . }}
 {{end -}}{{- end}}
+{{- if .Destroys}}
+#### Destroys
+{{range .Destroys}}- {{ . }}
+{{end -}}{{- end}}
 {{end}}{{end -}}
 
 {{if .Routines -}}
