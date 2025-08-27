@@ -13,7 +13,7 @@ func Emulate(rom []byte, breakpoints map[int]string, sequence string) error {
 	// We create the emulator here, but we initialize it lazily in the steps
 	// below, so we can select the right mode and the thing doesn't complain
 	// about the ROM size
-	emu := newEmulator()
+	emu := newEmulator(breakpoints)
 	emu.rom = rom
 
 	// This implements a little parser for the emulation sequence
@@ -28,7 +28,7 @@ func Emulate(rom []byte, breakpoints map[int]string, sequence string) error {
 			// Ignore empty steps
 
 		case step == "interactive":
-			err := emu.init(breakpoints)
+			err := emu.init()
 			if err != nil {
 				return err
 			}
@@ -38,14 +38,14 @@ func Emulate(rom []byte, breakpoints map[int]string, sequence string) error {
 			}
 
 		case step == "display":
-			err := emu.init(breakpoints)
+			err := emu.init()
 			if err != nil {
 				return err
 			}
 			fmt.Println(emu.displayToString())
 
 		case isNumeric(step):
-			err := emu.init(breakpoints)
+			err := emu.init()
 			if err != nil {
 				return err
 			}
@@ -83,7 +83,7 @@ func Emulate(rom []byte, breakpoints map[int]string, sequence string) error {
 
 			// Lazily initialize the emulator unless we're changing settings
 			if !(key == "cpf" || key == "mode") {
-				err := emu.init(breakpoints)
+				err := emu.init()
 				if err != nil {
 					return err
 				}
