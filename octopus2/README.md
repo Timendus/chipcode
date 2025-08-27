@@ -714,11 +714,11 @@ The generator is not restricted to markdown files, you could use this to
 generate all kinds of formats. If you prefer to generate HTML files or JSON or
 plain text, that's all fine. Just write the template for it.
 
-The default markdown template [can be found here](./src/docparser/markdown.md),
-and can be a good starting point for writing your own templates. Octopus uses
-the [Golang templating system](https://pkg.go.dev/text/template), which is not
-very hard to read and understand, but it can be a bit confusing when it comes to
-whitespace.
+The default markdown template [can be found
+here](./src/docparser/markdown.md?plain=1), and can be a good starting point for
+writing your own templates. Octopus uses the [Golang templating
+system](https://pkg.go.dev/text/template), which is not very hard to read and
+understand, but it can be a bit confusing when it comes to whitespace.
 
 The template gets fed a data structure that can be found at the top of [this
 file](./src/docparser/parser.go). It starts with a `Doc`, which has some
