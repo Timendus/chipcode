@@ -1,6 +1,6 @@
 {
   "name": "@chipcode/octo-assembler",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "A packaged version of the Octo assembler",
   "scripts": {
     "update": "rm -rf ./octo && git clone --depth 1 --branch gh-pages --single-branch https://github.com/JohnEarnest/Octo octo"
@@ -16,11 +16,11 @@
     "/octo/standalone.html"
   ],
   "bin": {
-    "octo": "./octo/octo"
+    "octo": "octo/octo"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Timendus/octo-assembler"
+    "url": "git+https://github.com/Timendus/chipcode/tree/main/octo-assembler"
   },
   "keywords": [
     "octo",
