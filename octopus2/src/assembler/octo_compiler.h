@@ -651,7 +651,7 @@ double octo_calc_expr(octo_program*p,char*name){
   if(octo_match(p,"sign"  )) return octo_sign(octo_calc_expr(p,name));
   if(octo_match(p,"ceil"  )) return ceil(octo_calc_expr(p,name));
   if(octo_match(p,"floor" )) return floor(octo_calc_expr(p,name));
-  if(octo_match(p,"@"     )) return 0xFF&(p->rom[0xFFFF&((int)octo_calc_expr(p,name))]);
+  if(octo_match(p,"@"     )) return 0xFF&(p->rom[0xFFFF&((uint_least32_t)octo_calc_expr(p,name))]);
 
   // expression BINARY expression
   double r=octo_calc_terminal(p,name);
