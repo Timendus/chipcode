@@ -8,7 +8,7 @@ import (
 
 type Doc struct {
 	Title       string
-	Description *string
+	Description string
 	Filename    string
 	Filepath    string
 	Sections    []Section
@@ -27,20 +27,20 @@ type Constant struct {
 	Line        int
 	Name        string
 	Value       string
-	Description *string
+	Description string
 }
 
 type Macro struct {
 	Line        int
 	Name        string
 	Parameters  []string
-	Description *string
+	Description string
 }
 
 type Routine struct {
 	Line        int
 	Name        string
-	Description *string
+	Description string
 }
 
 type DocBlock struct {
@@ -93,33 +93,33 @@ func findDocBlocks(source []string) []DocBlock {
 	return result
 }
 
-func findFileProperties(docBlocks []DocBlock) (*string, *string) {
+func findFileProperties(docBlocks []DocBlock) (string, string) {
 	// We want the first comment in the file, that is not a "primary" comment
 	// (`###`) and is in the first five lines.
 	if len(docBlocks) == 0 {
-		return nil, nil
+		return "", ""
 	}
 	block := docBlocks[0]
 	if block.IsPrimary || block.Line > 5 {
-		return nil, nil
+		return "", ""
 	}
 
 	// We have a valid comment, now see if we can parse it into a title and a
 	// description
 	if block.Lines == 1 {
-		return &block.Content, nil // Single line comment is considered a title
+		return block.Content, "" // Single line comment is considered a title
 	}
 	lines := strings.Split(block.Content, "\n")
 	if len(lines) > 2 && strings.TrimSpace(lines[1]) == "" {
 		title := lines[0]
 		description := strings.Join(lines[2:], "\n")
 		if strings.TrimSpace(description) == "" {
-			return &title, nil
+			return title, ""
 		} else {
-			return &title, toDescription(description) // Block split by an empty line on line 2 is considered a title and a description
+			return title, toDescription(description) // Block split by an empty line on line 2 is considered a title and a description
 		}
 	}
-	return nil, toDescription(block.Content) // Whole block is considered a description
+	return "", toDescription(block.Content) // Whole block is considered a description
 }
 
 func findSections(source []string, docBlocks []DocBlock) []Section {
@@ -251,14 +251,14 @@ func findRelatedDocBlock(source []string, line int, docBlocks []DocBlock) *DocBl
 	return nil
 }
 
-func strOrDefault(str *string, def string) string {
-	if str == nil {
+func strOrDefault(str string, def string) string {
+	if str == "" {
 		return def
 	}
-	return *str
+	return str
 }
 
-func toDescription(descr string) *string {
+func toDescription(descr string) string {
 	for strings.HasPrefix(descr, "\n") {
 		descr = strings.TrimPrefix(descr, "\n")
 	}
@@ -293,5 +293,5 @@ func toDescription(descr string) *string {
 		result += "```\n"
 	}
 
-	return &result
+	return result
 }
