@@ -31,17 +31,19 @@ type emulator struct {
 	displayBuffer *[]byte
 }
 
-func newEmulator() emulator {
-	return emulator{
+func newEmulator(breakpoints map[int]string) emulator {
+	emu := emulator{
 		cpu:         silicon8.CPU{},
 		mode:        silicon8.VIP,
 		cpf:         30,
 		initialized: false,
 		interacting: false,
 	}
+	emu.cpu.SetBreakpoints(breakpoints)
+	return emu
 }
 
-func (emu *emulator) init(breakpoints map[int]string) error {
+func (emu *emulator) init() error {
 	if emu.initialized {
 		return nil
 	}
@@ -49,7 +51,6 @@ func (emu *emulator) init(breakpoints map[int]string) error {
 	emu.cpu.RegisterRandomGenerator(emu.randomByte)
 	emu.cpu.RegisterDisplayCallback(emu.render)
 	emu.cpu.Reset(emu.mode)
-	emu.cpu.SetBreakpoints(breakpoints)
 	emu.cpu.SetCyclesPerFrame(emu.cpf)
 	err := emu.loadROM()
 	if err != nil {
