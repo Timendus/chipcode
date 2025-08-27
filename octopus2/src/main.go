@@ -90,7 +90,7 @@ func main() {
 	}
 
 	if build_docs {
-		if output_ext == ".md" {
+		if *TEMPLATE == "" && output_ext == ".md" {
 			var err error
 			preprocessed, err = docparser.ParseToMarkdown(preprocessed, *INPUT_FILE)
 			if err != nil {
