@@ -13,7 +13,8 @@ The pre-processors in versions one and two are functionally nearly identical,
 except that this implementation runs quite a bit faster and has image support
 built-in. No need to install an additional plugin. It also has beta support for
 [colour images](#colours) with multiple planes for XO-CHIP and dithering, which
-the original does not.
+the original does not, and a rudimentary "standard library" of CHIP-8 routines
+at your disposal.
 
 All in all this version is much more a one-stop shop for writing CHIP-8 ROMs
 than the original Octopus.
@@ -24,6 +25,7 @@ than the original Octopus.
 - [Pre-processor features](#pre-processor-features)
 - [Assembler features](#assembler-features)
 - [Emulator features](#emulator-features)
+- [Documentation generator features](#documentation-generator-features)
 
 # Installing and running
 
@@ -42,9 +44,11 @@ octopus -i <input file> -o <output file> <option 1> <option 2>
 
 Input file should be an assembly language file in Octo syntax with the extension
 `.8o`. Output file can have the extensions `.8o` or `.ch8` to output either the
-pre-processed intermediate assembly language or the resulting binary. If you do
-not specify an output file, it will dump the pre-processed assembly to standard
-output.
+pre-processed intermediate assembly language or the resulting binary. Or `.md`
+to generate documentation from the input file. If you do not specify an output
+file, it will dump the pre-processed assembly to standard output. Unless you
+specify a `-template`, in which case it will dump the generated documentation to
+standard output.
 
 Valid parameters:
 
@@ -58,6 +62,7 @@ Valid parameters:
 - `-output string` - The path of the output file (default "STDOUT")
 - `-run string` - Run the given code or binary in the [embedded
   emulator](#emulator-features) instead (default "disabled")
+- `-template string` - The path to a documentation generation template
 
 ## Building
 
@@ -206,6 +211,10 @@ you to include another file into the current source file.
 If a file ends in `.bin` or `.ch8`, it will be included as a binary. Other file
 extensions will be interpreted and included as text files. Except for some image
 formats, see below.
+
+Note that paths that start with `std/` are reserved. Those will be interpreted
+as an attempt to use the [standard library](#standard-library) instead, and will
+not include your local files.
 
 ### Image files
 
@@ -360,6 +369,20 @@ inspect if the conversion was a success, and if everything went as you expected.
 ```octo
 :include "horse.jpg" debug
 ```
+
+## "Standard library"
+
+This is a beta feature that I'm not 100% sure should live inside Octopus, but
+we'll see how it goes 😄
+
+The pre-processor now also comes with a library of helper files. When you
+`:include` a path that starts with `std/`, Octopus will instead look into its
+internal library to load the path you requested.
+
+The files that are currently available in the library and their usage are
+documented here:
+
+[library/docs](./library/docs/)
 
 # Assembler features
 
@@ -573,3 +596,132 @@ Here's an example of both settings in use:
 ```bash
 octopus -i input.8o -run "mode: schip, cpf: 100, interactive"
 ```
+
+# Documentation generator features
+
+To aid in the documentation of the [standard library](#standard-library), I've
+added a parser to Octopus that can generate documentation from CHIP-8 assembly
+source files. It takes a template and a source file, and generates an output
+file based on your provided template. If you request a `.md` file as the output
+file, a default built-in markdown template will be used:
+
+```bash
+octopus -i input.8o -o output.md
+```
+
+## Writing documentation
+
+The generator understands three kinds of comment blocks:
+
+1. a block at the top of your file that defines a title and a description for
+   the whole file
+2. a comment that defines a section in your file
+3. a comment that describes a routine, a macro or a constant
+
+We'll go through them one by one.
+
+### 1. File level comment
+
+At the top of the source file, in the first five lines, there may be a comment.
+This comment can be one of:
+
+- A single line, which gets interpreted as the file's title
+- A single paragraph, which gets interpreted as the file's description
+- Or a single line, followed by a paragraph, which gets interpreted as a title
+  and description
+
+So for example, having this comment close to the top of your source file:
+
+```
+# Tile renderer
+#
+# This is the tile rendering subsytem, which renders the world around the
+# player. Everything that moves or is animated is not a tile, and is not part
+# of this subsystem.
+```
+
+will result in documentation that has the title `Tile renderer` and the
+description that follows it.
+
+### 2. Section level comments
+
+Sections are an optional way to organize your documentation. You start a new
+section by using a comment that starts and ends with at least three hash
+symbols:
+
+```
+### Animations ###
+```
+
+All the routines, macros and constants following this section header will be
+considered part of this section, until a new section header is encountered.
+
+### 3. Entity level comments
+
+You can add comments for the documentation generator to routines, macros and
+constants by putting them directly above the thing they pertain to (a single
+empty line in between is allowed) and starting them with at least three hash
+symbols:
+
+```
+###
+# Render the given sprite to the display buffer.
+#
+# Inputs:
+#  - `v0` - number in the tilemap
+#  - `v1` - X coordinate
+#  - `v2` - Y coordinate
+#  - `v3` - `1` if tile should animate
+#
+# Destroys: `v0`, `v4`, `vF`, `i`
+
+: render-sprite
+   # Your code here
+   return
+```
+
+Since I know I'm rendering to Markdown, I can use Markdown in my comments to
+give them some structure for the reader. All of this text will be part of the
+description of this routine in the output documentation.
+
+In the case of constants, the value of the constant will also be shown. In the
+case of macros, the documentation will show the names of the parameters to the
+macro, so you don't have to add those manually.
+
+Note that not all routines, macros and constants will be shown in the
+documentation, not even all the ones that have comments. Only those that have a
+valid comment above them that starts with the three hash symbols. This is by
+design, so you can document some things internally that don't need to end up in
+the generated documentation.
+
+Also note that this works the other way around for the file level comment; this
+comment _should not_ start with three hash symbols for it to show up in the
+generated documentation. Otherwise it is interpreted as the documentation for
+some entity level thing, not as a file level comment.
+
+## Using custom templates
+
+You can specify your own template to generate documentation with:
+
+```bash
+octopus -i input.8o -o output.md -template template.md
+```
+
+In this case, if you omit the output file it will send the resulting
+documentation to standard output.
+
+The generator is not restricted to markdown files, you could use this to
+generate all kinds of formats. If you prefer to generate HTML files or JSON or
+plain text, that's all fine. Just write the template for it.
+
+The default markdown template [can be found here](./src/docparser/markdown.md),
+and can be a good starting point for writing your own templates. Octopus uses
+the [Golang templating system](https://pkg.go.dev/text/template), which is not
+very hard to read and understand, but it can be a bit confusing when it comes to
+whitespace.
+
+The template gets fed a data structure that can be found at the top of [this
+file](./src/docparser/parser.go). It starts with a `Doc`, which has some
+properties, like a filename and a title, and contains `Sections` that each can
+hold `Macros`, `Routines` and `Constants`. Each of these will have a line
+number, a name, a description and other properties.
