@@ -46,11 +46,15 @@ _{{ $path }}:{{ .Line }}_
 {{- end}}
 {{- if .Parameters}}
 #### Parameters
-{{range .Parameters}}- {{ . }}
+{{range .Parameters}}- {{index . 0}}{{ if index . 1}} - {{index . 1}}{{end}}
 {{end -}}{{- end}}
 {{- if .Destroys}}
 #### Destroys
 {{range .Destroys}}- {{ . }}
+{{end -}}{{- end}}
+{{- if .DependsOn}}
+#### Depends on
+{{range .DependsOn}}- {{ . }}
 {{end -}}{{- end}}
 {{end}}{{end -}}
 

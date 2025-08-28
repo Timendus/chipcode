@@ -31,11 +31,13 @@ type Constant struct {
 }
 
 type Macro struct {
-	Line        int
-	Name        string
-	Parameters  []string
-	Description string
-	Destroys    []string
+	Line         int
+	Name         string
+	Description  string
+	Parameters   [][2]string
+	ReturnValues [][2]string
+	DependsOn    []string
+	Destroys     []string
 }
 
 type Routine struct {
@@ -194,16 +196,18 @@ func findEntities(source []string, start, end int, docBlocks []DocBlock) ([]Cons
 				Line:        i + 1,
 				Name:        parts[1],
 				Description: toDescription(block.Content),
-				Parameters:  make([]string, 0),
+				Parameters:  make([][2]string, 0),
 			}
 			for _, part := range parts[2:] {
 				if part != "{" {
-					macro.Parameters = append(macro.Parameters, part)
+					macro.Parameters = append(macro.Parameters, [2]string{part, ""})
 				}
 			}
 			for j := i + 1; j < end; j++ {
 				if strings.TrimSpace(source[j]) == "}" {
-					macro.Destroys = findTargetRegisters(source[i+1 : j])
+					inputs, outputs := findInputsAndOutputs(source[i+1 : j])
+					macro.DependsOn = inputs
+					macro.Destroys = outputs
 					break
 				}
 			}

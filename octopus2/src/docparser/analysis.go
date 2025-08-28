@@ -8,60 +8,79 @@ import (
 	"strings"
 )
 
-func findTargetRegisters(source []string) []string {
-	tokens := sourceToTokens(source)
-	touched := make(map[string]bool, 0) // Use a map so we get "unique" for free
-	var prevToken, nextToken string
-	for i, token := range tokens {
-		prevToken = ""
-		nextToken = ""
-		if i > 0 {
-			prevToken = tokens[i-1]
-		}
-		if i+1 < len(tokens) {
-			nextToken = tokens[i+1]
-		}
+func findInputsAndOutputs(source []string) ([]string, []string) {
+	scanner := newScanner(source)
 
-		switch token {
+	touched := make(map[string]bool, 0) // Use a map so we get "unique" for free
+	read := make(map[string]bool, 0)
+
+	for !scanner.done() {
+		switch scanner.next() {
 		case ":=":
-			touched[prevToken] = true
+			switch scanner.peek() {
+			case "random", "delay", "key":
+				// Ignore
+			case "hex":
+				if !touched[scanner.peekN(2)] {
+					read[scanner.peekN(2)] = true
+				}
+			default:
+				if isNumeric(scanner.peek()) {
+					// Ignore
+					continue
+				}
+				if !touched[scanner.peek()] {
+					read[scanner.peek()] = true
+				}
+			}
+			touched[scanner.previous()] = true
+			scanner.next()
 		case "|=", "&=", "^=", "=-", "<<=", ">>=":
-			touched[prevToken] = true
+			if !touched[scanner.peek()] {
+				read[scanner.peek()] = true
+			}
+			touched[scanner.previous()] = true
 			touched["vF"] = true
+			scanner.next()
 		case "+=", "-=":
-			touched[prevToken] = true
-			if !isNumeric(nextToken) {
+			touched[scanner.previous()] = true
+			op := scanner.next()
+			if !isNumeric(op) {
 				// If the source of the operation is a register, mark vF as
 				// destroyed. Since registers can be aliased, use "not a number"
 				// as a stand-in.
 				touched["vF"] = true
+				if !touched[op] {
+					// If the register hasn't been written to yet, it's an input
+					read[op] = true
+				}
 			}
 		case "load", "loadflags":
-			if nextToken == "" {
+			if scanner.peek() == "" {
 				continue // operation missing an operand, bail
 			}
 
 			// Regular load behaviour
 			start := "v0"
-			end := nextToken
+			end := scanner.peek()
 
 			// Check if we have an XO-CHIP range
-			if i+3 < len(tokens) && tokens[i+2] == "-" {
-				start = nextToken
-				end = tokens[i+3]
+			if scanner.peekN(2) == "-" && scanner.peekN(3) != "" {
+				start = scanner.peek()
+				end = scanner.peekN(3)
 			}
 
-			startReg, startIsReg := register(start)
-			endReg, endIsReg := register(end)
+			startIndex, startOk := register(start)
+			endIndex, endOk := register(end)
 
-			if startIsReg == nil && endIsReg == nil {
+			if startOk && endOk {
 				// Add all registers in range individually
-				if endReg < startReg {
-					temp := endReg
-					endReg = startReg
-					startReg = temp
+				if endIndex < startIndex {
+					temp := endIndex
+					endIndex = startIndex
+					startIndex = temp
 				}
-				for reg := startReg; reg <= endReg; reg++ {
+				for reg := startIndex; reg <= endIndex; reg++ {
 					touched[fmt.Sprintf("v%X", reg)] = true
 				}
 			} else {
@@ -71,9 +90,88 @@ func findTargetRegisters(source []string) []string {
 
 			touched["i"] = true
 		case "save":
+			if scanner.peek() == "" {
+				continue // operation missing an operand, bail
+			}
+
+			// Regular save behaviour
+			start := "v0"
+			end := scanner.peek()
+
+			// Check if we have an XO-CHIP range
+			if scanner.peekN(2) == "-" && scanner.peekN(3) != "" {
+				start = scanner.peek()
+				end = scanner.peekN(3)
+			}
+
+			startIndex, startOk := register(start)
+			endIndex, endOk := register(end)
+
+			if startOk && endOk {
+				// Add all registers in range individually
+				if endIndex < startIndex {
+					temp := endIndex
+					endIndex = startIndex
+					startIndex = temp
+				}
+				for reg := startIndex; reg <= endIndex; reg++ {
+					regName := fmt.Sprintf("v%X", reg)
+					if !touched[regName] {
+						read[regName] = true
+					}
+				}
+			} else {
+				// Fallback for when using aliases or macro parameters
+				read[fmt.Sprintf("range %s - %s", start, end)] = true
+			}
+
+			if !touched["i"] {
+				read["i"] = true
+			}
 			touched["i"] = true
+		case "bcd":
+			op := scanner.next()
+			if !touched[op] {
+				read[op] = true
+			}
+		case "sprite":
+			op1 := scanner.next()
+			if !touched[op1] {
+				read[op1] = true
+			}
+			op2 := scanner.next()
+			if !touched[op2] {
+				read[op2] = true
+			}
+			scanner.next()
+		case "jump0":
+			if !touched["v0"] {
+				read["v0"] = true
+			}
+			scanner.next()
+		case "if", "while":
+			op1 := scanner.next()
+			if !isNumeric(op1) && !touched[op1] {
+				read[op1] = true
+			}
+			switch scanner.next() {
+			case "==", "!=":
+				op2 := scanner.next()
+				if !isNumeric(op2) && !touched[op2] {
+					read[op2] = true
+				}
+			case "key", "-key":
+				// Ignore
+			}
 		}
 
+	}
+
+	sourceRegisters := make([]string, 0)
+	for str := range read {
+		if str != "" {
+			sourceRegisters = append(sourceRegisters, str)
+		}
 	}
 
 	targetRegisters := make([]string, 0)
@@ -83,19 +181,10 @@ func findTargetRegisters(source []string) []string {
 		}
 	}
 
+	slices.Sort(sourceRegisters)
 	slices.Sort(targetRegisters)
-	return targetRegisters
-}
 
-func sourceToTokens(source []string) []string {
-	tokens := make([]string, 0)
-	for _, line := range source {
-		// Make sure we ignore comments
-		line = strings.Split(line, "#")[0]
-		// Split on whitespace
-		tokens = append(tokens, strings.Fields(line)...)
-	}
-	return tokens
+	return sourceRegisters, targetRegisters
 }
 
 func isNumeric(value string) bool {
@@ -114,12 +203,12 @@ func isNumeric(value string) bool {
 	return true
 }
 
-func register(value string) (int, error) {
+func register(value string) (int, bool) {
 	value = strings.ToLower(value)
 	re := regexp.MustCompile("v[0-9a-f]")
 	if !re.Match([]byte(value)) {
-		return -1, fmt.Errorf("input string is not a register")
+		return -1, false
 	}
 	val, _ := strconv.ParseInt(value[1:], 16, 64)
-	return int(val), nil
+	return int(val), true
 }
