@@ -25,11 +25,7 @@ func findInputsAndOutputs(source []string) ([]string, []string) {
 					read[scanner.peekN(2)] = true
 				}
 			default:
-				if isNumeric(scanner.peek()) {
-					// Ignore
-					continue
-				}
-				if !touched[scanner.peek()] {
+				if !isNumeric(scanner.peek()) && !touched[scanner.peek()] {
 					read[scanner.peek()] = true
 				}
 			}
