@@ -33,8 +33,12 @@ type Constant struct {
 type Macro struct {
 	Line        int
 	Name        string
-	Parameters  []string
 	Description string
+	Parameters  []string
+	Inputs      [][2]string
+	Outputs     [][2]string
+	DependsOn   []string
+	Destroys    []string
 }
 
 type Routine struct {
@@ -152,90 +156,72 @@ func findSections(source []string, docBlocks []DocBlock) []Section {
 	}
 	sections[len(sections)-1].end = len(source)
 	for i, s := range sections {
-		sections[i].Consts = findConstants(source, s.start, s.end, docBlocks)
-		sections[i].Macros = findMacros(source, s.start, s.end, docBlocks)
-		sections[i].Routines = findRoutines(source, s.start, s.end, docBlocks)
+		constants, macros, routines := findEntities(source, s.start, s.end, docBlocks)
+		sections[i].Consts = constants
+		sections[i].Macros = macros
+		sections[i].Routines = routines
 	}
 	return slices.DeleteFunc(sections, func(s Section) bool {
 		return len(s.Consts) == 0 && len(s.Macros) == 0 && len(s.Routines) == 0
 	})
 }
 
-func findConstants(source []string, start, end int, docBlocks []DocBlock) []Constant {
-	result := make([]Constant, 0)
+func findEntities(source []string, start, end int, docBlocks []DocBlock) ([]Constant, []Macro, []Routine) {
+	constants := make([]Constant, 0)
+	macros := make([]Macro, 0)
+	routines := make([]Routine, 0)
 	for i := start; i < end; i++ {
 		line := source[i]
 		line = strings.ToLower(strings.TrimSpace(line))
 		parts := strings.Fields(line)
-		if len(parts) < 3 {
+		if len(parts) < 2 || !(parts[0] == ":const" || parts[0] == ":macro" || parts[0] == ":") {
 			continue
 		}
-		if parts[0] == ":const" {
-			block := findRelatedDocBlock(source, i+1, docBlocks)
-			if block != nil && block.IsPrimary {
-				result = append(result, Constant{
-					Line:        i + 1,
-					Name:        parts[1],
-					Value:       parts[2],
-					Description: toDescription(block.Content),
-				})
+		block := findRelatedDocBlock(source, i+1, docBlocks)
+		if block == nil || !block.IsPrimary {
+			continue
+		}
+		switch parts[0] {
+		case ":const":
+			if len(parts) < 3 {
+				continue
 			}
-		}
-	}
-	return result
-}
-
-func findMacros(source []string, start, end int, docBlocks []DocBlock) []Macro {
-	result := make([]Macro, 0)
-	for i := start; i < end; i++ {
-		line := source[i]
-		line = strings.ToLower(strings.TrimSpace(line))
-		parts := strings.Fields(line)
-		if len(parts) < 2 {
-			continue
-		}
-		if parts[0] == ":macro" {
-			block := findRelatedDocBlock(source, i+1, docBlocks)
-			if block != nil && block.IsPrimary {
-				parameters := make([]string, 0)
-				for _, part := range parts[2:] {
-					if part != "{" {
-						parameters = append(parameters, part)
-					}
+			constants = append(constants, Constant{
+				Line:        i + 1,
+				Name:        parts[1],
+				Value:       parts[2],
+				Description: toDescription(block.Content),
+			})
+		case ":macro":
+			macro := Macro{
+				Line:        i + 1,
+				Name:        parts[1],
+				Description: toDescription(block.Content),
+				Parameters:  make([]string, 0),
+			}
+			for _, part := range parts[2:] {
+				if part != "{" {
+					macro.Parameters = append(macro.Parameters, part)
 				}
-				result = append(result, Macro{
-					Line:        i + 1,
-					Name:        parts[1],
-					Description: toDescription(block.Content),
-					Parameters:  parameters,
-				})
 			}
+			for j := i + 1; j < end; j++ {
+				if strings.TrimSpace(source[j]) == "}" {
+					inputs, outputs := findInputsAndOutputs(source[i+1 : j])
+					macro.DependsOn = inputs
+					macro.Destroys = outputs
+					break
+				}
+			}
+			macros = append(macros, macro)
+		case ":":
+			routines = append(routines, Routine{
+				Line:        i + 1,
+				Name:        parts[1],
+				Description: toDescription(block.Content),
+			})
 		}
 	}
-	return result
-}
-
-func findRoutines(source []string, start, end int, docBlocks []DocBlock) []Routine {
-	result := make([]Routine, 0)
-	for i := start; i < end; i++ {
-		line := source[i]
-		line = strings.ToLower(strings.TrimSpace(line))
-		parts := strings.Fields(line)
-		if len(parts) < 2 {
-			continue
-		}
-		if parts[0] == ":" {
-			block := findRelatedDocBlock(source, i+1, docBlocks)
-			if block != nil && block.IsPrimary {
-				result = append(result, Routine{
-					Line:        i + 1,
-					Name:        parts[1],
-					Description: toDescription(block.Content),
-				})
-			}
-		}
-	}
-	return result
+	return constants, macros, routines
 }
 
 func findRelatedDocBlock(source []string, line int, docBlocks []DocBlock) *DocBlock {

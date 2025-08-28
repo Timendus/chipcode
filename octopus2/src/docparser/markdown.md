@@ -12,7 +12,8 @@
 {{end}}{{end}}{{if .Macros}}  - Macros
 {{range .Macros}}    - [{{.Name}}](#{{replaceAll .Name "." "" | toLower }})
 {{end}}{{end}}{{if .Routines}}  - Routines
-{{range .Routines}}    - [{{.Name}}](#{{replaceAll .Name "." "" | toLower }}){{end}}{{end}}{{end}}
+{{range .Routines}}    - [{{.Name}}](#{{replaceAll .Name "." "" | toLower }})
+{{end}}{{end}}{{end}}
 
 {{range .Sections -}}
 
@@ -38,15 +39,27 @@ Value: `{{ .Value }}`
 ## Macros
 
 {{range .Macros -}}
-### `{{ .Name }}`
+### `{{ .Name }}`{{range .Parameters}} `{{ . }}`{{end}}
 
 _{{ $path }}:{{ .Line }}_
 {{if .Description}}
 {{ .Description }}
 {{- end}}
-{{- if .Parameters}}
-#### Parameters
-{{range .Parameters}}- {{ . }}
+{{- if .Inputs}}
+#### Inputs
+{{range .Inputs}}- {{index . 0}}{{ if index . 1}} - {{index . 1}}{{end}}
+{{end -}}{{- end}}
+{{- if .Outputs}}
+#### Outputs
+{{range .Outputs}}- {{index . 0}}{{ if index . 1}} - {{index . 1}}{{end}}
+{{end -}}{{- end}}
+{{- if .Destroys}}
+#### Destroys
+{{range .Destroys}}- {{ . }}
+{{end -}}{{- end}}
+{{- if .DependsOn}}
+#### Depends on
+{{range .DependsOn}}- {{ . }}
 {{end -}}{{- end}}
 {{end}}{{end -}}
 
